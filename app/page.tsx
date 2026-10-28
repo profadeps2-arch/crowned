@@ -1,30 +1,30 @@
-import Link from "next/link";
 import { Crown } from "lucide-react";
+import GoogleButton from "./components/GoogleButton";
 
 export default function Home() {
   return (
     <main className="flex min-h-screen flex-col justify-between px-6 py-16">
       <div className="flex items-center gap-2 text-[#B08D57]">
-        <Crown size={18} />
-        <p className="text-xs uppercase tracking-[0.3em]">Crowned</p>
+        <Crown size={20} />
+        <span className="text-sm tracking-[0.3em]">CROWNED</span>
       </div>
 
       <div className="flex flex-col gap-5">
-        <h1 className="text-5xl font-semibold leading-tight">
+        <h1 className="text-5xl leading-tight">
           Every man is a king. Dress like one.
         </h1>
-        <p className="text-[#5C5648]">
-          Your outfit, sorted in 1 minute. For owambe, office, church and every moment in between.
+        <p className="text-lg text-[#5C5648]">
+          Your outfit, sorted in 1 minute. For owambe, office, church and every
+          moment in between.
         </p>
       </div>
 
-      <Link
-        href="/wardrobe"
-        className="rounded-full bg-[#1F2A44] py-4 text-center font-medium text-[#F5F0E6]"
-      >
-        Start with my wardrobe
-      </Link>
+      <div className="flex flex-col gap-3">
+        <GoogleButton />
+        <p className="text-center text-sm text-[#8A8476]">
+          One quick screen, then we style you.
+        </p>
+      </div>
     </main>
   );
-
 }
