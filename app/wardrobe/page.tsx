@@ -35,7 +35,7 @@ const COLOUR_WORDS: Record<string, string> = {
   indigo: "Navy", midnight: "Navy", "dark blue": "Navy",
   "off white": "Cream", "off-white": "Cream", ivory: "Cream", champagne: "Cream", bone: "Cream",
   charcoal: "Grey", gray: "Grey", ash: "Grey", silver: "Grey", slate: "Grey",
-  "army green": "Olive", khaki_green: "Olive", sage: "Green", mint: "Green",
+  "army green": "Olive", sage: "Green", mint: "Green",
   emerald: "Green", lime: "Green", forest: "Green", bottle: "Green",
   camel: "Tan", cognac: "Brown", chocolate: "Brown", coffee: "Brown", rust: "Orange",
   coral: "Orange", peach: "Pink", mustard: "Yellow", lemon: "Yellow", bronze: "Gold",
@@ -1135,7 +1135,7 @@ export default function WardrobePage() {
       : sections.filter((s) => s.key === filter);
 
   return (
-    <main className="flex flex-col gap-6 px-6 py-12">
+    <main className="flex flex-col gap-6 px-6 pb-12 pt-6">
       <style>{`
         .shimmer {
           background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,0.45) 50%, transparent 70%);
@@ -1155,11 +1155,8 @@ export default function WardrobePage() {
         <Editor item={editing} onClose={() => setEditing(null)} onChanged={() => load()} />
       )}
 
-      <div className="flex items-end justify-between">
-        <div>
-          <p className="text-sm tracking-[0.3em] text-[#B08D57]">WARDROBE</p>
-          <h1 className="text-4xl">Your pieces.</h1>
-        </div>
+      <div className="flex items-baseline justify-between">
+        <h1 className="text-4xl">Wardrobe</h1>
         <span className="text-sm text-[#5C5648]">{total} {total === 1 ? "piece" : "pieces"}</span>
       </div>
 
