@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ChangeEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -23,11 +23,6 @@ const COLOUR_WORDS: Record<string, string> = {
   colourful: "Multicolour", colorful: "Multicolour",
 };
 
-const SHADE_ORDER = [
-  "Black", "Navy", "Wine", "Brown", "Olive", "Green", "Grey", "Blue", "Purple", "Red",
-  "Orange", "Tan", "Gold", "Yellow", "Pink", "Beige", "Cream", "White", "Multicolour",
-];
-
 const SECTIONS = [
   { key: "Native", label: "Native" },
   { key: "Tops", label: "Shirts and Tops" },
@@ -37,6 +32,8 @@ const SECTIONS = [
   { key: "Accessories", label: "Caps and Accessories" },
   { key: "Fragrance", label: "Perfumes" },
 ];
+
+const SIZED = ["Native", "Tops", "Bottoms", "Outerwear", "Shoes"];
 
 type Item = {
   id: string;
@@ -66,6 +63,7 @@ type Tags = {
   colour: string;
   looks: string[];
   tags?: string[];
+  size?: string;
   confident: boolean;
 };
 
@@ -89,13 +87,9 @@ function displayName(item: Pick<Item, "name" | "colour" | "type">): string {
   return built ? titleCase(built) : "New Piece";
 }
 
-function shadeRank(colour: string | null) {
-  const i = SHADE_ORDER.indexOf(colour ?? "");
-  return i === -1 ? 99 : i;
-}
-
-function byShade(a: Item, b: Item) {
-  return shadeRank(a.colour) - shadeRank(b.colour) || displayName(a).localeCompare(displayName(b));
+function readSize(raw?: string | null): string | null {
+  if (!raw) return null;
+  return sizeFromText(`size ${raw}`);
 }
 
 function listJoin(parts: string[]) {
@@ -182,12 +176,23 @@ async function askAI<T>(body: object): Promise<T | null> {
   }
 }
 
-function TagRow({ tags, max }: { tags: string[]; max?: number }) {
-  if (tags.length === 0) return null;
+function TagRow({
+  tags, max, askSize,
+}: {
+  tags: string[];
+  max?: number;
+  askSize?: boolean;
+}) {
+  if (tags.length === 0 && !askSize) return null;
   const shown = max ? tags.slice(0, max) : tags;
   const extra = tags.length - shown.length;
   return (
     <div className="flex flex-wrap gap-1">
+      {askSize && (
+        <span className="rounded-full border border-dashed border-[#B08D57] px-2 py-0.5 text-[11px] text-[#8A6A3A]">
+          + Size
+        </span>
+      )}
       {shown.map((t) => (
         <span
           key={t}
@@ -199,6 +204,10 @@ function TagRow({ tags, max }: { tags: string[]; max?: number }) {
       {extra > 0 && <span className="px-1 py-0.5 text-[11px] text-[#8A8476]">+{extra}</span>}
     </div>
   );
+}
+
+function needsSize(item: Item) {
+  return SIZED.includes(item.category ?? "") && !item.size;
 }
 
 function Editor({
@@ -371,7 +380,7 @@ function Editor({
         >
           <span className="text-xs tracking-[0.2em] text-[#8A8476]">IDENTIFIED AS</span>
           <span className="text-lg font-semibold">{displayName(current)}</span>
-          <TagRow tags={current.tags ?? []} />
+          <TagRow tags={current.tags ?? []} askSize={needsSize(current)} />
           {current.description && <span className="text-sm text-[#5C5648]">{current.description}</span>}
           {current.looks && current.looks.length > 0 && (
             <span className="text-sm text-[#5C5648]">Best for {current.looks.join(", ")}.</span>
@@ -403,7 +412,9 @@ function Editor({
         </button>
 
         <label className="flex flex-col gap-2">
-          <span className="text-lg font-semibold">Something not right?</span>
+          <span className="text-lg font-semibold">
+            {needsSize(current) ? "What size is it?" : "Something not right?"}
+          </span>
           <span className="text-sm text-[#5C5648]">
             Describe the piece in your own words. Size, colour, sleeves, fabric, anything.
           </span>
@@ -466,7 +477,7 @@ function PieceCard({ item, onOpen }: { item: Item; onOpen: () => void }) {
       <span className={`text-sm font-semibold ${item.at_washman ? "text-[#8A8476]" : ""}`}>
         {displayName(item)}
       </span>
-      <TagRow tags={item.tags ?? []} max={3} />
+      <TagRow tags={item.tags ?? []} max={3} askSize={needsSize(item)} />
     </button>
   );
 }
@@ -480,6 +491,7 @@ export default function WardrobePage() {
   const [notice, setNotice] = useState("");
   const [editing, setEditing] = useState<Item | null>(null);
   const [filter, setFilter] = useState<string>("all");
+  const tagging = useRef<Set<string>>(new Set());
 
   function openFilter(key: string) {
     setFilter(key);
@@ -518,6 +530,39 @@ export default function WardrobePage() {
     }
   }
 
+  async function backfillTags(list: Item[]) {
+    const supabase = createClient();
+    const missing = list.filter(
+      (i) => (!i.tags || i.tags.length === 0) && i.url && !tagging.current.has(i.id)
+    );
+    for (const item of missing) {
+      tagging.current.add(item.id);
+      try {
+        const blob = await (await fetch(item.url!)).blob();
+        const img = await createImageBitmap(blob);
+        const image = await toBase64(await toJpeg(img, 512, 0.7));
+        const read = await askAI<Tags>({ image });
+        if (!read) continue;
+
+        const size = item.size ?? readSize(read.size);
+        const tags = buildTags({
+          ai: read.tags,
+          words: `${item.name ?? ""} ${item.description ?? ""}`,
+          details: item.details,
+          size,
+        });
+        if (tags.length === 0) continue;
+
+        const { error } = await supabase.from("items").update({ tags, size }).eq("id", item.id);
+        if (!error) {
+          setItems((prev) => prev.map((p) => (p.id === item.id ? { ...p, tags, size } : p)));
+        }
+      } catch (err) {
+        console.error("Tag fill failed:", err);
+      }
+    }
+  }
+
   async function load() {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -552,6 +597,7 @@ export default function WardrobePage() {
     setItems(list);
     setLoading(false);
     backfillHashes(list);
+    backfillTags(list);
   }
 
   useEffect(() => {
@@ -592,6 +638,7 @@ export default function WardrobePage() {
     const style = tags
       ? normalizeStyle({ category: tags.category, type, name, details: [] })
       : { category: null, looks: [] };
+    const size = readSize(tags?.size);
 
     const { error } = await supabase.from("items").insert({
       photo_path: path,
@@ -601,7 +648,8 @@ export default function WardrobePage() {
       category: style.category,
       colour,
       looks: style.looks,
-      tags: buildTags({ ai: tags?.tags, words: name }),
+      size,
+      tags: buildTags({ ai: tags?.tags, words: name, size }),
       needs_check: !tags || !tags.confident,
     });
 
@@ -689,7 +737,7 @@ export default function WardrobePage() {
   const sections = [
     ...SECTIONS.map((s) => ({
       ...s,
-      pieces: items.filter((i) => i.category === s.key).sort(byShade),
+      pieces: items.filter((i) => i.category === s.key),
     })),
     {
       key: "unsorted",
