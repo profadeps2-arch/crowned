@@ -16,17 +16,30 @@ import {
   TAG_LABELS,
 } from "@/lib/tags";
 
-const COLOURS = [
-  "Black", "White", "Cream", "Beige", "Navy", "Blue", "Grey", "Brown", "Tan", "Wine",
-  "Red", "Orange", "Yellow", "Gold", "Green", "Olive", "Pink", "Purple", "Multicolour",
+const COLOUR_SWATCHES: [string, string][] = [
+  ["Black", "#151515"], ["White", "#FFFFFF"], ["Cream", "#F3E9D2"], ["Beige", "#D9C7A7"],
+  ["Navy", "#1F2A44"], ["Blue", "#2F6FB3"], ["Grey", "#8E8E8E"], ["Brown", "#6B4423"],
+  ["Tan", "#C19A6B"], ["Wine", "#6B1E2E"], ["Red", "#C0392B"], ["Orange", "#E67E22"],
+  ["Yellow", "#F1C40F"], ["Gold", "#C9A44C"], ["Green", "#2E7D32"], ["Olive", "#708238"],
+  ["Pink", "#E8A0B4"], ["Purple", "#6A1B9A"],
+  ["Multicolour", "conic-gradient(#C0392B, #F1C40F, #2E7D32, #2F6FB3, #6A1B9A, #C0392B)"],
 ];
 
+const COLOURS = COLOUR_SWATCHES.map(([c]) => c);
+
 const COLOUR_WORDS: Record<string, string> = {
-  maroon: "Wine", burgundy: "Wine", "wine red": "Wine",
-  khaki: "Beige", "sky blue": "Blue", "royal blue": "Blue", "baby blue": "Blue",
-  "off white": "Cream", "off-white": "Cream", ivory: "Cream",
-  charcoal: "Grey", gray: "Grey", ash: "Grey",
-  "army green": "Olive", camel: "Tan", mustard: "Yellow", lilac: "Purple",
+  maroon: "Wine", burgundy: "Wine", "wine red": "Wine", oxblood: "Wine", plum: "Wine",
+  khaki: "Beige", sand: "Beige", stone: "Beige", nude: "Beige", taupe: "Beige",
+  "sky blue": "Blue", "royal blue": "Blue", "baby blue": "Blue", teal: "Blue",
+  turquoise: "Blue", cobalt: "Blue", denim: "Blue", aqua: "Blue",
+  indigo: "Navy", midnight: "Navy", "dark blue": "Navy",
+  "off white": "Cream", "off-white": "Cream", ivory: "Cream", champagne: "Cream", bone: "Cream",
+  charcoal: "Grey", gray: "Grey", ash: "Grey", silver: "Grey", slate: "Grey",
+  "army green": "Olive", khaki_green: "Olive", sage: "Green", mint: "Green",
+  emerald: "Green", lime: "Green", forest: "Green", bottle: "Green",
+  camel: "Tan", cognac: "Brown", chocolate: "Brown", coffee: "Brown", rust: "Orange",
+  coral: "Orange", peach: "Pink", mustard: "Yellow", lemon: "Yellow", bronze: "Gold",
+  lilac: "Purple", lavender: "Purple", violet: "Purple", magenta: "Pink", fuchsia: "Pink",
   multi: "Multicolour", multicolor: "Multicolour", "multi-colour": "Multicolour",
   colourful: "Multicolour", colorful: "Multicolour",
 };
@@ -51,6 +64,7 @@ type Item = {
   category: string | null;
   type: string | null;
   colour: string | null;
+  colour_label: string | null;
   accent_colour: string | null;
   details: string[] | null;
   tags: string[] | null;
@@ -102,6 +116,10 @@ function readSize(raw?: string | null): string | null {
   return normalizeSize(raw) ?? sizeFromText(`size ${raw}`);
 }
 
+function swatchFor(colour: string | null) {
+  return COLOUR_SWATCHES.find(([c]) => c === colour)?.[1] ?? "#D9D1C3";
+}
+
 function listJoin(parts: string[]) {
   if (parts.length <= 1) return parts.join("");
   return `${parts.slice(0, -1).join(", ")} and ${parts[parts.length - 1]}`;
@@ -149,8 +167,8 @@ async function blobHash(blob: Blob): Promise<string> {
 function colourFromText(text: string): string | null {
   const lower = text.toLowerCase();
   const candidates: [string, string][] = [
-    ...COLOURS.map((c) => [c.toLowerCase(), c] as [string, string]),
     ...Object.entries(COLOUR_WORDS),
+    ...COLOURS.map((c) => [c.toLowerCase(), c] as [string, string]),
   ];
   const hits = candidates
     .map(([word, colour]) => ({
@@ -159,7 +177,7 @@ function colourFromText(text: string): string | null {
       i: lower.search(new RegExp(`(^|[^a-z])${word}([^a-z]|$)`)),
     }))
     .filter(({ word, i }) => i >= 0 && !new RegExp(`\\bnot\\s+${word}([^a-z]|$)`).test(lower))
-    .sort((a, b) => a.i - b.i);
+    .sort((a, b) => a.i - b.i || b.word.length - a.word.length);
   return hits[0]?.colour ?? null;
 }
 
@@ -192,6 +210,17 @@ function Pencil() {
       <path d="M12 20h9" />
       <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
     </svg>
+  );
+}
+
+function Dot({ colour }: { colour: string | null }) {
+  const bg = swatchFor(colour);
+  return (
+    <span
+      aria-hidden="true"
+      className="inline-block h-3 w-3 shrink-0 rounded-full border border-black/10"
+      style={{ background: bg }}
+    />
   );
 }
 
@@ -230,13 +259,15 @@ function needsSize(item: Item) {
 }
 
 function TagEditor({
-  item, onSave,
+  item, onSave, onSaveColour,
 }: {
   item: Item;
   onSave: (tags: string[], size: string | null) => Promise<void>;
+  onSaveColour: (text: string, family?: string) => Promise<boolean>;
 }) {
   const [open, setOpen] = useState<string | null>(null);
   const [sizeText, setSizeText] = useState("");
+  const [colourText, setColourText] = useState("");
   const [busy, setBusy] = useState(false);
   const [hint, setHint] = useState("");
 
@@ -246,7 +277,9 @@ function TagEditor({
   const usedGroups = tags.map((t) => groupOf(t));
   const addable = allowed.filter((g) => !usedGroups.includes(g));
   const count = tags.length + (item.size ? 1 : 0);
-  const preview = sizeText.trim() ? normalizeSize(sizeText) ?? sizeFromText(`size ${sizeText}`) : null;
+  const sizePreview = sizeText.trim() ? normalizeSize(sizeText) ?? sizeFromText(`size ${sizeText}`) : null;
+  const colourPreview = colourText.trim() ? colourFromText(colourText) : null;
+  const colourShown = item.colour_label ?? item.colour;
 
   async function commit(nextTags: string[], size: string | null) {
     setBusy(true);
@@ -255,6 +288,16 @@ function TagEditor({
     setOpen(null);
     setSizeText("");
     setHint("");
+  }
+
+  async function commitColour(text: string, family?: string) {
+    setBusy(true);
+    const ok = await onSaveColour(text, family);
+    setBusy(false);
+    if (ok) {
+      setOpen(null);
+      setColourText("");
+    }
   }
 
   function replace(oldTag: string | null, newTag: string) {
@@ -280,12 +323,12 @@ function TagEditor({
     toggle("add");
   }
 
-  const chip = (label: string, key: string, dashed = false) => (
+  const chip = (label: string, key: string, dashed = false, colour?: string | null) => (
     <button
       key={key}
       onClick={() => toggle(key)}
       disabled={busy}
-      className={`flex items-center gap-1 rounded-full border px-3 py-1 text-xs transition-colors ${
+      className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs transition-colors ${
         open === key
           ? "border-[#1F2A44] bg-[#1F2A44] text-[#F5F0E6]"
           : dashed
@@ -293,30 +336,34 @@ function TagEditor({
           : "border-[#E3DACB] bg-white text-[#1F2A44]"
       }`}
     >
+      {colour !== undefined && <Dot colour={colour} />}
       {label}
       {!dashed && <Pencil />}
     </button>
   );
 
-  const option = (label: string, active: boolean, onClick: () => void) => (
+  const option = (label: string, active: boolean, onClick: () => void, colour?: string) => (
     <button
       key={label}
       onClick={onClick}
       disabled={busy}
-      className={`rounded-full border px-3 py-1 text-xs ${
+      className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs ${
         active ? "border-[#1F2A44] bg-[#1F2A44] text-[#F5F0E6]" : "border-[#E3DACB] bg-white text-[#1F2A44]"
       }`}
     >
+      {colour && <Dot colour={colour} />}
       {label}
     </button>
   );
 
-  const openTag = open && !["size", "add"].includes(open) && !open.startsWith("group:") ? open : null;
+  const special = ["size", "add", "colour"];
+  const openTag = open && !special.includes(open) && !open.startsWith("group:") ? open : null;
   const openGroup = open?.startsWith("group:") ? open.slice(6) : null;
 
   return (
     <div className="flex flex-col gap-2">
       <div className="flex flex-wrap gap-2">
+        {chip(colourShown ?? "+ Colour", "colour", !colourShown, colourShown ? item.colour : undefined)}
         {sized && chip(item.size ?? "+ Size", "size", !item.size)}
         {tags.map((t) => chip(t, t))}
         {allowed.length > 0 && addable.length > 0 && (
@@ -334,6 +381,46 @@ function TagEditor({
 
       {hint && <p className="fade-in text-xs text-[#8A6A3A]">{hint}</p>}
 
+      {open === "colour" && (
+        <div className="fade-in flex flex-col gap-3 rounded-xl bg-white p-3">
+          <span className="text-xs text-[#8A8476]">Colour</span>
+          <div className="flex flex-wrap gap-2">
+            {COLOURS.map((c) =>
+              option(c, c === item.colour && !item.colour_label, () => commitColour(c, c), c)
+            )}
+          </div>
+          <div className="flex flex-col gap-2 border-t border-[#EFE8DC] pt-3">
+            <span className="text-xs text-[#5C5648]">Can&apos;t find it? Write it your way.</span>
+            <div className="flex gap-2">
+              <input
+                value={colourText}
+                onChange={(e) => setColourText(e.target.value)}
+                placeholder="Teal, cognac, wine red…"
+                className="min-w-0 flex-1 rounded-lg border border-[#E3DACB] px-3 py-2 text-sm"
+              />
+              <button
+                onClick={() => colourText.trim() && commitColour(colourText.trim())}
+                disabled={!colourText.trim() || busy}
+                className="rounded-full bg-[#1F2A44] px-4 text-sm font-semibold text-[#F5F0E6] disabled:opacity-40"
+              >
+                {busy ? "Saving…" : "Save"}
+              </button>
+            </div>
+            {colourText.trim() && (
+              <span className="flex items-center gap-1.5 text-xs text-[#8A8476]">
+                {colourPreview ? (
+                  <>
+                    <Dot colour={colourPreview} /> We&apos;ll style it as {colourPreview}.
+                  </>
+                ) : (
+                  "We'll work out the closest colour when you save."
+                )}
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+
       {open === "size" && (
         <div className="fade-in flex flex-col gap-2 rounded-xl bg-white p-3">
           <input
@@ -345,15 +432,15 @@ function TagEditor({
           />
           <span className="text-xs text-[#8A8476]">
             {sizeText.trim()
-              ? preview
-                ? `Will save as ${preview}`
+              ? sizePreview
+                ? `Will save as ${sizePreview}`
                 : "Try L, XL, XXL or a number like 42."
               : "Type it any way. Crowned will tidy it up."}
           </span>
           <div className="flex gap-2">
             <button
-              onClick={() => preview && commit(tags, preview)}
-              disabled={!preview || busy}
+              onClick={() => sizePreview && commit(tags, sizePreview)}
+              disabled={!sizePreview || busy}
               className="flex-1 rounded-full bg-[#1F2A44] py-2 text-sm font-semibold text-[#F5F0E6] disabled:opacity-40"
             >
               Save Size
@@ -440,6 +527,54 @@ function Editor({
     onChanged();
   }
 
+  async function saveColour(text: string, family?: string): Promise<boolean> {
+    setError("");
+    let fam = family ?? colourFromText(text);
+
+    if (!fam) {
+      const fix = await askAI<Fix>({
+        note: `The main colour is ${text}.`,
+        current: {
+          name: displayName(current),
+          category: current.category,
+          type: current.type,
+          colour: current.colour,
+        },
+      });
+      fam = fix?.colour ?? null;
+    }
+
+    if (!fam) {
+      setError("Couldn't recognise that colour. Try another word.");
+      return false;
+    }
+
+    const typed = family ? null : titleCase(text);
+    const label = typed && typed.toLowerCase() !== fam.toLowerCase() ? typed : null;
+    const shown = label ?? fam;
+
+    const name = buildName({
+      previousName: current.name,
+      colour: shown,
+      type: current.type,
+      details: current.details,
+    });
+
+    const changes = { colour: fam, colour_label: label, name, needs_check: false };
+    const { error } = await createClient().from("items").update(changes).eq("id", current.id);
+
+    if (error) {
+      console.error("Colour update failed:", error);
+      setError("Couldn't update. Try again.");
+      return false;
+    }
+
+    setCurrent((c) => ({ ...c, ...changes }));
+    setUpdated(true);
+    onChanged();
+    return true;
+  }
+
   async function toggleWashman() {
     const next = !current.at_washman;
     setCurrent((c) => ({ ...c, at_washman: next }));
@@ -487,14 +622,23 @@ function Editor({
       lower.includes(fix.type.toLowerCase());
 
     const type = typeChanged ? titleCase(fix.type!) : current.type ? titleCase(current.type) : null;
-    const colour = colourFromText(words) ?? fix.colour ?? current.colour;
+    const typedColour = colourFromText(words);
+    const colour = typedColour ?? fix.colour ?? current.colour;
+    const colourLabel = typedColour ? null : current.colour_label;
     const details = fix.details ?? current.details ?? [];
     const size = sizeFromText(words) ?? current.size;
 
-    const built = buildName({ words, previousName: current.name, colour, type, details });
+    const built = buildName({
+      words,
+      previousName: current.name,
+      colour: colourLabel ?? colour,
+      type,
+      details,
+    });
 
     const lastTypeWord = (type ?? "").toLowerCase().split(" ").pop() ?? "";
     const aiNameOk =
+      !colourLabel &&
       !!fix.name &&
       (!lastTypeWord || fix.name.toLowerCase().includes(lastTypeWord)) &&
       (!colour || fix.name.toLowerCase().includes(colour.toLowerCase())) &&
@@ -525,6 +669,7 @@ function Editor({
       name,
       type,
       colour,
+      colour_label: colourLabel,
       size,
       tags,
       category: style.category,
@@ -592,13 +737,10 @@ function Editor({
 
         <div className="flex flex-col gap-3 rounded-2xl border border-[#E3DACB] bg-[#FBF8F2] p-4">
           <span className="text-xs tracking-[0.2em] text-[#8A8476]">IDENTIFIED AS</span>
-          <span
-            key={`${current.name}-${current.colour}`}
-            className="fade-in text-lg font-semibold"
-          >
+          <span key={`${current.name}-${current.colour}`} className="fade-in text-lg font-semibold">
             {displayName(current)}
           </span>
-          <TagEditor item={current} onSave={saveTags} />
+          <TagEditor item={current} onSave={saveTags} onSaveColour={saveColour} />
           {current.description && <span className="text-sm text-[#5C5648]">{current.description}</span>}
           {current.looks && current.looks.length > 0 && (
             <span className="text-sm text-[#5C5648]">Best for {current.looks.join(", ")}.</span>
@@ -814,7 +956,7 @@ export default function WardrobePage() {
     const { data, error } = await supabase
       .from("items")
       .select(
-        "id, photo_path, photo_hash, name, category, type, colour, accent_colour, details, tags, size, description, looks, needs_check, at_washman"
+        "id, photo_path, photo_hash, name, category, type, colour, colour_label, accent_colour, details, tags, size, description, looks, needs_check, at_washman"
       )
       .order("created_at", { ascending: false });
 
