@@ -18,10 +18,12 @@ const detailOptions = [
 
 const nameRule = `name is a descriptive title of 3 to 4 words in Title Case: colour first, then the material, pattern or style, then the piece. Always include a material, pattern or style when you can see one. Examples: Black Leather Jacket, Blue Oxford Shirt, Blue Striped Shirt, Wine Embroidered Senator, White Low-Top Sneakers, Tan Suede Loafers.`;
 
-const tagRule = `tags are up to 4 specification tags chosen only from the allowed list: sleeve length, neckline, fit, material, pattern and finish. Pick at most one tag per kind.
-For tops, jackets and native wear, ALWAYS include the sleeve length (Short Sleeve, Long Sleeve, Sleeveless or Three-Quarter Sleeve).
+const tagRule = `tags are up to 4 specification tags chosen only from the allowed list. Pick at most one tag per kind.
+For tops, jackets and native wear, ALWAYS include the sleeve length (Short Sleeve, Long Sleeve, Sleeveless or Three-Quarter Sleeve), and add the neckline when visible.
 For trousers, ALWAYS include the fit.
-Add neckline, material and pattern when you can see them. Leave out anything you cannot see clearly.`;
+For shoes, ALWAYS include the shoe style (Low-Top, High-Top, Slip-On or Lace-Up), and add the material when visible.
+For watches, belts and jewellery, add the material or finish when visible (Leather, Gold-Tone, Silver-Tone).
+Add material and pattern when you can see them. Leave out anything you cannot see clearly.`;
 
 const sizeRule = `size: only if a size label or tag is clearly readable in the photo, return it exactly as printed, for example XL, XXL, M, 42 or 32. Otherwise leave size out. Never guess.`;
 
@@ -113,6 +115,7 @@ export async function POST(request: Request) {
     return NextResponse.json(JSON.parse(response.text ?? "{}"));
   } catch (err) {
     console.error("Tagging failed:", err);
-    return NextResponse.json({ error: "Tagging failed" }, { status: 502 });
+    const status = String(err).includes("429") ? 429 : 502;
+    return NextResponse.json({ error: "Tagging failed" }, { status });
   }
 }

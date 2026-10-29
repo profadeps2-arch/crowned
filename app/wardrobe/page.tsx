@@ -6,7 +6,15 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { normalizeStyle } from "@/lib/style-rules";
 import { buildName, titleCase, wordCount } from "@/lib/naming";
-import { buildTags, sizeFromText } from "@/lib/tags";
+import {
+  buildTags,
+  sizeFromText,
+  normalizeSize,
+  groupOf,
+  groupsFor,
+  TAG_GROUPS,
+  TAG_LABELS,
+} from "@/lib/tags";
 
 const COLOURS = [
   "Black", "White", "Cream", "Beige", "Navy", "Blue", "Grey", "Brown", "Tan", "Wine",
@@ -81,6 +89,8 @@ type Fix = {
 type Pending = { key: string; preview: string };
 type AddResult = "added" | "duplicate" | "failed" | "skipped" | "multiple";
 
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 function displayName(item: Pick<Item, "name" | "colour" | "type">): string {
   if (item.name) return titleCase(item.name);
   const built = [item.colour, item.type].filter(Boolean).join(" ");
@@ -89,7 +99,7 @@ function displayName(item: Pick<Item, "name" | "colour" | "type">): string {
 
 function readSize(raw?: string | null): string | null {
   if (!raw) return null;
-  return sizeFromText(`size ${raw}`);
+  return normalizeSize(raw) ?? sizeFromText(`size ${raw}`);
 }
 
 function listJoin(parts: string[]) {
@@ -176,6 +186,15 @@ async function askAI<T>(body: object): Promise<T | null> {
   }
 }
 
+function Pencil() {
+  return (
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 20h9" />
+      <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+    </svg>
+  );
+}
+
 function TagRow({
   tags, max, askSize,
 }: {
@@ -210,6 +229,187 @@ function needsSize(item: Item) {
   return SIZED.includes(item.category ?? "") && !item.size;
 }
 
+function TagEditor({
+  item, onSave,
+}: {
+  item: Item;
+  onSave: (tags: string[], size: string | null) => Promise<void>;
+}) {
+  const [open, setOpen] = useState<string | null>(null);
+  const [sizeText, setSizeText] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [hint, setHint] = useState("");
+
+  const tags = (item.tags ?? []).filter((t) => !t.startsWith("Size "));
+  const sized = SIZED.includes(item.category ?? "");
+  const allowed = groupsFor(item.category);
+  const usedGroups = tags.map((t) => groupOf(t));
+  const addable = allowed.filter((g) => !usedGroups.includes(g));
+  const count = tags.length + (item.size ? 1 : 0);
+  const preview = sizeText.trim() ? normalizeSize(sizeText) ?? sizeFromText(`size ${sizeText}`) : null;
+
+  async function commit(nextTags: string[], size: string | null) {
+    setBusy(true);
+    await onSave(buildTags({ previous: nextTags, size }), size);
+    setBusy(false);
+    setOpen(null);
+    setSizeText("");
+    setHint("");
+  }
+
+  function replace(oldTag: string | null, newTag: string) {
+    const group = groupOf(newTag);
+    const next = tags.filter((t) => t !== oldTag && groupOf(t) !== group);
+    return commit([...next, newTag], item.size);
+  }
+
+  function remove(tag: string) {
+    return commit(tags.filter((t) => t !== tag), item.size);
+  }
+
+  function toggle(key: string) {
+    setHint("");
+    setOpen((o) => (o === key ? null : key));
+  }
+
+  function startAdd() {
+    if (count >= 5) {
+      setHint("Remove a tag first. Each piece can have up to 5.");
+      return;
+    }
+    toggle("add");
+  }
+
+  const chip = (label: string, key: string, dashed = false) => (
+    <button
+      key={key}
+      onClick={() => toggle(key)}
+      disabled={busy}
+      className={`flex items-center gap-1 rounded-full border px-3 py-1 text-xs transition-colors ${
+        open === key
+          ? "border-[#1F2A44] bg-[#1F2A44] text-[#F5F0E6]"
+          : dashed
+          ? "border-dashed border-[#B08D57] text-[#8A6A3A]"
+          : "border-[#E3DACB] bg-white text-[#1F2A44]"
+      }`}
+    >
+      {label}
+      {!dashed && <Pencil />}
+    </button>
+  );
+
+  const option = (label: string, active: boolean, onClick: () => void) => (
+    <button
+      key={label}
+      onClick={onClick}
+      disabled={busy}
+      className={`rounded-full border px-3 py-1 text-xs ${
+        active ? "border-[#1F2A44] bg-[#1F2A44] text-[#F5F0E6]" : "border-[#E3DACB] bg-white text-[#1F2A44]"
+      }`}
+    >
+      {label}
+    </button>
+  );
+
+  const openTag = open && !["size", "add"].includes(open) && !open.startsWith("group:") ? open : null;
+  const openGroup = open?.startsWith("group:") ? open.slice(6) : null;
+
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="flex flex-wrap gap-2">
+        {sized && chip(item.size ?? "+ Size", "size", !item.size)}
+        {tags.map((t) => chip(t, t))}
+        {allowed.length > 0 && addable.length > 0 && (
+          <button
+            onClick={startAdd}
+            disabled={busy}
+            className={`rounded-full border border-dashed px-3 py-1 text-xs ${
+              open === "add" ? "border-[#1F2A44] text-[#1F2A44]" : "border-[#C9BFAE] text-[#8A8476]"
+            }`}
+          >
+            + Add Tag
+          </button>
+        )}
+      </div>
+
+      {hint && <p className="fade-in text-xs text-[#8A6A3A]">{hint}</p>}
+
+      {open === "size" && (
+        <div className="fade-in flex flex-col gap-2 rounded-xl bg-white p-3">
+          <input
+            autoFocus
+            value={sizeText}
+            onChange={(e) => setSizeText(e.target.value)}
+            placeholder="For example: L, XL, large, 42"
+            className="rounded-lg border border-[#E3DACB] px-3 py-2 text-sm"
+          />
+          <span className="text-xs text-[#8A8476]">
+            {sizeText.trim()
+              ? preview
+                ? `Will save as ${preview}`
+                : "Try L, XL, XXL or a number like 42."
+              : "Type it any way. Crowned will tidy it up."}
+          </span>
+          <div className="flex gap-2">
+            <button
+              onClick={() => preview && commit(tags, preview)}
+              disabled={!preview || busy}
+              className="flex-1 rounded-full bg-[#1F2A44] py-2 text-sm font-semibold text-[#F5F0E6] disabled:opacity-40"
+            >
+              Save Size
+            </button>
+            {item.size && (
+              <button
+                onClick={() => commit(tags, null)}
+                disabled={busy}
+                className="rounded-full px-3 py-2 text-sm font-semibold text-red-700"
+              >
+                Remove
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {openTag && (
+        <div className="fade-in flex flex-col gap-2 rounded-xl bg-white p-3">
+          <span className="text-xs text-[#8A8476]">{TAG_LABELS[groupOf(openTag) ?? ""] ?? "Tag"}</span>
+          <div className="flex flex-wrap gap-2">
+            {(TAG_GROUPS[groupOf(openTag) ?? ""] ?? []).map((o) =>
+              option(o, o === openTag, () => (o === openTag ? setOpen(null) : replace(openTag, o)))
+            )}
+          </div>
+          <button
+            onClick={() => remove(openTag)}
+            disabled={busy}
+            className="self-start py-1 text-xs font-semibold text-red-700"
+          >
+            Remove Tag
+          </button>
+        </div>
+      )}
+
+      {open === "add" && (
+        <div className="fade-in flex flex-col gap-2 rounded-xl bg-white p-3">
+          <span className="text-xs text-[#8A8476]">What would you like to add?</span>
+          <div className="flex flex-wrap gap-2">
+            {addable.map((g) => option(TAG_LABELS[g], false, () => setOpen(`group:${g}`)))}
+          </div>
+        </div>
+      )}
+
+      {openGroup && (
+        <div className="fade-in flex flex-col gap-2 rounded-xl bg-white p-3">
+          <span className="text-xs text-[#8A8476]">{TAG_LABELS[openGroup]}</span>
+          <div className="flex flex-wrap gap-2">
+            {TAG_GROUPS[openGroup].map((o) => option(o, false, () => replace(null, o)))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function Editor({
   item, onClose, onChanged,
 }: {
@@ -223,6 +423,22 @@ function Editor({
   const [confirmRemove, setConfirmRemove] = useState(false);
   const [error, setError] = useState("");
   const [updated, setUpdated] = useState(false);
+
+  async function saveTags(tags: string[], size: string | null) {
+    setError("");
+    const { error } = await createClient()
+      .from("items")
+      .update({ tags, size })
+      .eq("id", current.id);
+    if (error) {
+      console.error("Tag update failed:", error);
+      setError("Couldn't update. Try again.");
+      return;
+    }
+    setCurrent((c) => ({ ...c, tags, size }));
+    setUpdated(true);
+    onChanged();
+  }
 
   async function toggleWashman() {
     const next = !current.at_washman;
@@ -293,7 +509,7 @@ function Editor({
     });
 
     const tags = buildTags({
-      words,
+      words: `${words} ${name}`,
       ai: fix.tags,
       previous: current.tags,
       details,
@@ -374,13 +590,15 @@ function Editor({
           </div>
         )}
 
-        <div
-          key={`${current.name}-${current.colour}-${current.description}-${(current.tags ?? []).join()}`}
-          className="fade-in flex flex-col gap-2 rounded-2xl border border-[#E3DACB] bg-[#FBF8F2] p-4"
-        >
+        <div className="flex flex-col gap-3 rounded-2xl border border-[#E3DACB] bg-[#FBF8F2] p-4">
           <span className="text-xs tracking-[0.2em] text-[#8A8476]">IDENTIFIED AS</span>
-          <span className="text-lg font-semibold">{displayName(current)}</span>
-          <TagRow tags={current.tags ?? []} askSize={needsSize(current)} />
+          <span
+            key={`${current.name}-${current.colour}`}
+            className="fade-in text-lg font-semibold"
+          >
+            {displayName(current)}
+          </span>
+          <TagEditor item={current} onSave={saveTags} />
           {current.description && <span className="text-sm text-[#5C5648]">{current.description}</span>}
           {current.looks && current.looks.length > 0 && (
             <span className="text-sm text-[#5C5648]">Best for {current.looks.join(", ")}.</span>
@@ -412,9 +630,7 @@ function Editor({
         </button>
 
         <label className="flex flex-col gap-2">
-          <span className="text-lg font-semibold">
-            {needsSize(current) ? "What size is it?" : "Something not right?"}
-          </span>
+          <span className="text-lg font-semibold">Something not right?</span>
           <span className="text-sm text-[#5C5648]">
             Describe the piece in your own words. Size, colour, sleeves, fabric, anything.
           </span>
@@ -423,7 +639,7 @@ function Editor({
             onChange={(e) => setNote(e.target.value)}
             rows={3}
             disabled={saving}
-            placeholder="Size XL, long sleeve, round neck. Blue, not black."
+            placeholder="Size large, long sleeve, round neck. Blue, not black."
             className="rounded-xl border border-[#E3DACB] bg-white px-4 py-3"
           />
         </label>
@@ -491,7 +707,8 @@ export default function WardrobePage() {
   const [notice, setNotice] = useState("");
   const [editing, setEditing] = useState<Item | null>(null);
   const [filter, setFilter] = useState<string>("all");
-  const tagging = useRef<Set<string>>(new Set());
+  const tagRunning = useRef(false);
+  const tried = useRef<Set<string>>(new Set());
 
   function openFilter(key: string) {
     setFilter(key);
@@ -531,35 +748,57 @@ export default function WardrobePage() {
   }
 
   async function backfillTags(list: Item[]) {
+    if (tagRunning.current) return;
+    tagRunning.current = true;
     const supabase = createClient();
-    const missing = list.filter(
-      (i) => (!i.tags || i.tags.length === 0) && i.url && !tagging.current.has(i.id)
-    );
-    for (const item of missing) {
-      tagging.current.add(item.id);
-      try {
-        const blob = await (await fetch(item.url!)).blob();
-        const img = await createImageBitmap(blob);
-        const image = await toBase64(await toJpeg(img, 512, 0.7));
-        const read = await askAI<Tags>({ image });
-        if (!read) continue;
 
-        const size = item.size ?? readSize(read.size);
+    try {
+      const missing = list.filter(
+        (i) =>
+          (!i.tags || i.tags.length === 0) &&
+          i.url &&
+          i.category !== "Fragrance" &&
+          !tried.current.has(i.id)
+      );
+
+      for (const item of missing) {
+        tried.current.add(item.id);
+
+        let image: string | null = null;
+        try {
+          const blob = await (await fetch(item.url!)).blob();
+          const img = await createImageBitmap(blob);
+          image = await toBase64(await toJpeg(img, 512, 0.7));
+        } catch (err) {
+          console.error("Could not prepare photo:", err);
+          continue;
+        }
+
+        let read: Tags | null = null;
+        for (let attempt = 0; attempt < 3 && !read; attempt++) {
+          if (attempt > 0) await wait(6000 * attempt);
+          read = await askAI<Tags>({ image });
+        }
+
+        const size = item.size ?? readSize(read?.size);
         const tags = buildTags({
-          ai: read.tags,
-          words: `${item.name ?? ""} ${item.description ?? ""}`,
+          ai: read?.tags,
+          words: `${item.name ?? ""} ${item.type ?? ""} ${item.description ?? ""}`,
           details: item.details,
           size,
         });
-        if (tags.length === 0) continue;
 
-        const { error } = await supabase.from("items").update({ tags, size }).eq("id", item.id);
-        if (!error) {
-          setItems((prev) => prev.map((p) => (p.id === item.id ? { ...p, tags, size } : p)));
+        if (tags.length > 0) {
+          const { error } = await supabase.from("items").update({ tags, size }).eq("id", item.id);
+          if (!error) {
+            setItems((prev) => prev.map((p) => (p.id === item.id ? { ...p, tags, size } : p)));
+          }
         }
-      } catch (err) {
-        console.error("Tag fill failed:", err);
+
+        await wait(4000);
       }
+    } finally {
+      tagRunning.current = false;
     }
   }
 
@@ -649,7 +888,7 @@ export default function WardrobePage() {
       colour,
       looks: style.looks,
       size,
-      tags: buildTags({ ai: tags?.tags, words: name, size }),
+      tags: buildTags({ ai: tags?.tags, words: `${name ?? ""} ${type ?? ""}`, size }),
       needs_check: !tags || !tags.confident,
     });
 
