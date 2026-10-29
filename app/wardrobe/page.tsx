@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { normalizeStyle } from "@/lib/style-rules";
 import { buildName, titleCase, wordCount } from "@/lib/naming";
+import { buildTags, sizeFromText } from "@/lib/tags";
 
 const COLOURS = [
   "Black", "White", "Cream", "Beige", "Navy", "Blue", "Grey", "Brown", "Tan", "Wine",
@@ -47,6 +48,8 @@ type Item = {
   colour: string | null;
   accent_colour: string | null;
   details: string[] | null;
+  tags: string[] | null;
+  size: string | null;
   description: string | null;
   looks: string[] | null;
   needs_check: boolean;
@@ -62,6 +65,7 @@ type Tags = {
   type: string;
   colour: string;
   looks: string[];
+  tags?: string[];
   confident: boolean;
 };
 
@@ -72,6 +76,7 @@ type Fix = {
   colour?: string;
   accent_colour?: string;
   details?: string[];
+  tags?: string[];
   description?: string;
 };
 
@@ -177,6 +182,25 @@ async function askAI<T>(body: object): Promise<T | null> {
   }
 }
 
+function TagRow({ tags, max }: { tags: string[]; max?: number }) {
+  if (tags.length === 0) return null;
+  const shown = max ? tags.slice(0, max) : tags;
+  const extra = tags.length - shown.length;
+  return (
+    <div className="flex flex-wrap gap-1">
+      {shown.map((t) => (
+        <span
+          key={t}
+          className="rounded-full border border-[#E3DACB] bg-[#FBF8F2] px-2 py-0.5 text-[11px] text-[#5C5648]"
+        >
+          {t}
+        </span>
+      ))}
+      {extra > 0 && <span className="px-1 py-0.5 text-[11px] text-[#8A8476]">+{extra}</span>}
+    </div>
+  );
+}
+
 function Editor({
   item, onClose, onChanged,
 }: {
@@ -190,11 +214,6 @@ function Editor({
   const [confirmRemove, setConfirmRemove] = useState(false);
   const [error, setError] = useState("");
   const [updated, setUpdated] = useState(false);
-
-  const extras = [
-    current.accent_colour ? `${current.accent_colour.toLowerCase()} accents` : null,
-    ...(current.details ?? []).map((d) => d.toLowerCase()),
-  ].filter(Boolean);
 
   async function toggleWashman() {
     const next = !current.at_washman;
@@ -232,6 +251,7 @@ function Editor({
           colour: current.colour,
           accent_colour: current.accent_colour,
           details: current.details,
+          tags: (current.tags ?? []).filter((t) => !t.startsWith("Size ")),
         },
       })) ?? {};
 
@@ -244,6 +264,7 @@ function Editor({
     const type = typeChanged ? titleCase(fix.type!) : current.type ? titleCase(current.type) : null;
     const colour = colourFromText(words) ?? fix.colour ?? current.colour;
     const details = fix.details ?? current.details ?? [];
+    const size = sizeFromText(words) ?? current.size;
 
     const built = buildName({ words, previousName: current.name, colour, type, details });
 
@@ -262,6 +283,14 @@ function Editor({
       details,
     });
 
+    const tags = buildTags({
+      words,
+      ai: fix.tags,
+      previous: current.tags,
+      details,
+      size,
+    });
+
     const description =
       fix.description && (!lastTypeWord || fix.description.toLowerCase().includes(lastTypeWord))
         ? fix.description
@@ -271,6 +300,8 @@ function Editor({
       name,
       type,
       colour,
+      size,
+      tags,
       category: style.category,
       looks: style.looks,
       accent_colour:
@@ -335,17 +366,17 @@ function Editor({
         )}
 
         <div
-          key={`${current.name}-${current.colour}-${current.description}`}
-          className="fade-in flex flex-col gap-1 rounded-2xl border border-[#E3DACB] bg-[#FBF8F2] p-4"
+          key={`${current.name}-${current.colour}-${current.description}-${(current.tags ?? []).join()}`}
+          className="fade-in flex flex-col gap-2 rounded-2xl border border-[#E3DACB] bg-[#FBF8F2] p-4"
         >
           <span className="text-xs tracking-[0.2em] text-[#8A8476]">IDENTIFIED AS</span>
           <span className="text-lg font-semibold">{displayName(current)}</span>
-          {extras.length > 0 && <span className="text-sm text-[#5C5648]">With {extras.join(", ")}.</span>}
+          <TagRow tags={current.tags ?? []} />
           {current.description && <span className="text-sm text-[#5C5648]">{current.description}</span>}
           {current.looks && current.looks.length > 0 && (
             <span className="text-sm text-[#5C5648]">Best for {current.looks.join(", ")}.</span>
           )}
-          {updated && <span className="fade-in pt-1 text-sm font-semibold text-[#1F2A44]">Updated.</span>}
+          {updated && <span className="fade-in text-sm font-semibold text-[#1F2A44]">Updated.</span>}
         </div>
 
         <button
@@ -374,14 +405,14 @@ function Editor({
         <label className="flex flex-col gap-2">
           <span className="text-lg font-semibold">Something not right?</span>
           <span className="text-sm text-[#5C5648]">
-            Describe the piece in your own words. Colour, logo, fabric, anything.
+            Describe the piece in your own words. Size, colour, sleeves, fabric, anything.
           </span>
           <textarea
             value={note}
             onChange={(e) => setNote(e.target.value)}
             rows={3}
             disabled={saving}
-            placeholder="Blue leather jacket. Small white logo on the chest."
+            placeholder="Size XL, long sleeve, round neck. Blue, not black."
             className="rounded-xl border border-[#E3DACB] bg-white px-4 py-3"
           />
         </label>
@@ -411,7 +442,7 @@ function PieceCard({ item, onOpen }: { item: Item; onOpen: () => void }) {
   return (
     <button
       onClick={onOpen}
-      className="fade-in relative flex flex-col gap-1 text-left transition-transform active:scale-[0.98]"
+      className="fade-in relative flex w-full flex-col gap-1 text-left transition-transform active:scale-[0.98]"
     >
       <div className="relative overflow-hidden rounded-xl">
         {item.url && (
@@ -435,9 +466,7 @@ function PieceCard({ item, onOpen }: { item: Item; onOpen: () => void }) {
       <span className={`text-sm font-semibold ${item.at_washman ? "text-[#8A8476]" : ""}`}>
         {displayName(item)}
       </span>
-      {item.looks && item.looks.length > 0 && (
-        <span className="text-xs text-[#8A8476]">Best for {item.looks.join(", ")}</span>
-      )}
+      <TagRow tags={item.tags ?? []} max={3} />
     </button>
   );
 }
@@ -451,6 +480,11 @@ export default function WardrobePage() {
   const [notice, setNotice] = useState("");
   const [editing, setEditing] = useState<Item | null>(null);
   const [filter, setFilter] = useState<string>("all");
+
+  function openFilter(key: string) {
+    setFilter(key);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
 
   function tidyStyles(list: Item[]) {
     const supabase = createClient();
@@ -496,7 +530,7 @@ export default function WardrobePage() {
     const { data, error } = await supabase
       .from("items")
       .select(
-        "id, photo_path, photo_hash, name, category, type, colour, accent_colour, details, description, looks, needs_check, at_washman"
+        "id, photo_path, photo_hash, name, category, type, colour, accent_colour, details, tags, size, description, looks, needs_check, at_washman"
       )
       .order("created_at", { ascending: false });
 
@@ -567,6 +601,7 @@ export default function WardrobePage() {
       category: style.category,
       colour,
       looks: style.looks,
+      tags: buildTags({ ai: tags?.tags, words: name }),
       needs_check: !tags || !tags.confident,
     });
 
@@ -683,7 +718,8 @@ export default function WardrobePage() {
         @keyframes fadeIn { from { opacity: 0; transform: translateY(6px) } to { opacity: 1; transform: none } }
         .no-scrollbar::-webkit-scrollbar { display: none }
         .no-scrollbar { scrollbar-width: none }
-        @media (prefers-reduced-motion: reduce) { .shimmer, .fade-in { animation: none } }
+        .rail { scroll-behavior: smooth; -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain }
+        @media (prefers-reduced-motion: reduce) { .shimmer, .fade-in { animation: none } .rail { scroll-behavior: auto } }
       `}</style>
 
       {editing && (
@@ -742,7 +778,7 @@ export default function WardrobePage() {
 
       {review.length > 0 && filter !== "review" && (
         <button
-          onClick={() => setFilter("review")}
+          onClick={() => openFilter("review")}
           className="flex items-center justify-between rounded-2xl bg-[#B08D57]/15 p-4 text-left"
         >
           <span className="text-sm font-semibold text-[#1F2A44]">
@@ -760,7 +796,7 @@ export default function WardrobePage() {
           ].map((f) => (
             <button
               key={f.key}
-              onClick={() => setFilter(f.key)}
+              onClick={() => openFilter(f.key)}
               className={`shrink-0 rounded-full border px-4 py-2 text-sm transition-colors ${
                 filter === f.key
                   ? "border-[#1F2A44] bg-[#1F2A44] text-[#F5F0E6]"
@@ -774,9 +810,9 @@ export default function WardrobePage() {
       )}
 
       {pending.length > 0 && (
-        <div className="grid grid-cols-2 gap-3">
+        <div className="no-scrollbar rail -mx-6 flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-px-6 px-6">
           {pending.map((p) => (
-            <div key={p.key} className="flex flex-col gap-2">
+            <div key={p.key} className="flex w-[44%] shrink-0 snap-start flex-col gap-2">
               <div className="relative overflow-hidden rounded-xl">
                 <img src={p.preview} alt="New piece" className="aspect-[3/4] w-full object-cover" />
                 <div className="shimmer absolute inset-0" />
@@ -789,9 +825,9 @@ export default function WardrobePage() {
       )}
 
       {loading ? (
-        <div className="grid grid-cols-2 gap-3">
-          {[0, 1, 2, 3].map((i) => (
-            <div key={i} className="aspect-[3/4] w-full rounded-xl bg-[#E9E1D2] shimmer" />
+        <div className="flex gap-3 overflow-hidden">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="aspect-[3/4] w-[44%] shrink-0 rounded-xl bg-[#E9E1D2] shimmer" />
           ))}
         </div>
       ) : total === 0 ? (
@@ -800,22 +836,42 @@ export default function WardrobePage() {
         </p>
       ) : (
         <div className="flex flex-col gap-8">
-          {filter === "review" && (
-            <button onClick={() => setFilter("all")} className="self-start text-sm font-semibold text-[#1F2A44]">
+          {filter !== "all" && (
+            <button onClick={() => openFilter("all")} className="self-start text-sm font-semibold text-[#1F2A44]">
               ‹ All pieces
             </button>
           )}
           {visible.map((section) => (
             <section key={section.key} className="flex flex-col gap-3">
               <div className="flex items-baseline justify-between">
-                <h2 className="text-2xl">{section.label}</h2>
-                <span className="text-sm text-[#8A8476]">{section.pieces.length}</span>
+                <h2 className="text-2xl">
+                  {section.label} <span className="text-base text-[#8A8476]">{section.pieces.length}</span>
+                </h2>
+                {filter === "all" && section.pieces.length > 2 && (
+                  <button
+                    onClick={() => openFilter(section.key)}
+                    className="text-sm font-semibold text-[#1F2A44]"
+                  >
+                    See All ›
+                  </button>
+                )}
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                {section.pieces.map((item) => (
-                  <PieceCard key={item.id} item={item} onOpen={() => setEditing(item)} />
-                ))}
-              </div>
+
+              {filter === "all" ? (
+                <div className="no-scrollbar rail -mx-6 flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-px-6 px-6 pb-1">
+                  {section.pieces.map((item) => (
+                    <div key={item.id} className="w-[44%] shrink-0 snap-start">
+                      <PieceCard item={item} onOpen={() => setEditing(item)} />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-3">
+                  {section.pieces.map((item) => (
+                    <PieceCard key={item.id} item={item} onOpen={() => setEditing(item)} />
+                  ))}
+                </div>
+              )}
             </section>
           ))}
         </div>
