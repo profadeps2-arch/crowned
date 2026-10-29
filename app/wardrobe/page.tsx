@@ -16,7 +16,7 @@ const COLOUR_WORDS: Record<string, string> = {
   maroon: "Wine", burgundy: "Wine", "wine red": "Wine",
   khaki: "Beige", "sky blue": "Blue", "royal blue": "Blue", "baby blue": "Blue",
   "off white": "Cream", "off-white": "Cream", ivory: "Cream",
-  charcoal: "Grey", gray: "Grey", "ash": "Grey",
+  charcoal: "Grey", gray: "Grey", ash: "Grey",
   "army green": "Olive", camel: "Tan", mustard: "Yellow", lilac: "Purple",
   multi: "Multicolour", multicolor: "Multicolour", "multi-colour": "Multicolour",
   colourful: "Multicolour", colorful: "Multicolour",
@@ -715,8 +715,22 @@ export default function WardrobePage() {
       )}
 
       <div className="flex flex-col gap-2">
-        <label className="cursor-pointer rounded-full bg-[#1F2A44] py-4 text-center font-semibold text-[#F5F0E6] transition-transform active:scale-[0.98]">
-          Add Photos
+        <label className="flex cursor-pointer items-center justify-center gap-2 rounded-full bg-[#1F2A44] py-4 font-semibold text-[#F5F0E6] transition-transform active:scale-[0.98]">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M4 8h3l2-3h6l2 3h3v11H4z" />
+            <circle cx="12" cy="13" r="3.5" />
+          </svg>
+          Take Photo
+          <input
+            type="file"
+            accept="image/*"
+            capture="environment"
+            className="hidden"
+            onChange={addPhotos}
+          />
+        </label>
+        <label className="cursor-pointer rounded-full border border-[#1F2A44] py-3 text-center text-sm font-semibold text-[#1F2A44] transition-transform active:scale-[0.98]">
+          Choose from Library
           <input type="file" accept="image/*" multiple className="hidden" onChange={addPhotos} />
         </label>
         <p className="text-center text-sm text-[#8A8476]">
