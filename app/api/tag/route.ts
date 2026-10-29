@@ -18,7 +18,12 @@ const detailOptions = [
 
 const nameRule = `name is a descriptive title of 3 to 4 words in Title Case: colour first, then the material, pattern or style, then the piece. Always include a material, pattern or style when you can see one. Examples: Black Leather Jacket, Blue Oxford Shirt, Blue Striped Shirt, Wine Embroidered Senator, White Low-Top Sneakers, Tan Suede Loafers.`;
 
-const tagRule = `tags are up to 4 specification tags you can clearly see, chosen only from the allowed list: sleeve length, neckline, fit, material, pattern and finish. Pick at most one tag per kind. Leave out anything you cannot see clearly. Never guess a size.`;
+const tagRule = `tags are up to 4 specification tags chosen only from the allowed list: sleeve length, neckline, fit, material, pattern and finish. Pick at most one tag per kind.
+For tops, jackets and native wear, ALWAYS include the sleeve length (Short Sleeve, Long Sleeve, Sleeveless or Three-Quarter Sleeve).
+For trousers, ALWAYS include the fit.
+Add neckline, material and pattern when you can see them. Leave out anything you cannot see clearly.`;
+
+const sizeRule = `size: only if a size label or tag is clearly readable in the photo, return it exactly as printed, for example XL, XXL, M, 42 or 32. Otherwise leave size out. Never guess.`;
 
 const photoPrompt = `You are a menswear stylist in Lagos, Nigeria. Look at this photo from a man's wardrobe.
 A matching native set (agbada with buba and sokoto, buba and sokoto, a senator top and trousers, a kaftan set) counts as ONE item, category Native, with a type like Agbada Set, Buba and Sokoto, Senator Set or Kaftan Set.
@@ -27,6 +32,7 @@ If a person is wearing the clothes, pick the single most prominent piece (usuall
 type is the plain garment name, for example Jacket, Shirt, Polo, Chinos, Jeans, Agbada Set, Loafers, Sneakers, Watch.
 ${nameRule}
 ${tagRule}
+${sizeRule}
 colour is the main colour. Use Multicolour for prints with no single main colour.
 Set is_clothing to false if the photo is not clothing, shoes, an accessory or a fragrance.
 Set confident to false if the photo is unclear or you are unsure.`;
@@ -84,6 +90,7 @@ export async function POST(request: Request) {
           colour: { type: Type.STRING, enum: colours },
           looks: { type: Type.ARRAY, items: { type: Type.STRING, enum: looks } },
           tags: tagsSchema,
+          size: { type: Type.STRING },
           confident: { type: Type.BOOLEAN },
         },
         required: ["is_clothing", "multiple_items", "name", "category", "type", "colour", "looks", "tags", "confident"],
