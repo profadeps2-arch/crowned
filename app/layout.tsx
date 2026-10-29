@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Cormorant_Garamond, Inter } from "next/font/google";
 import "./globals.css";
 import BottomNav from "./components/BottomNav";
+import TopAvatar from "./components/TopAvatar";
 
 const serif = Cormorant_Garamond({
   subsets: ["latin"],
@@ -23,7 +24,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className={`${serif.variable} ${sans.variable}`}>
-        <div className="mx-auto min-h-screen max-w-md pb-24">{children}</div>
+        <div className="relative mx-auto min-h-screen max-w-md pb-24">
+          <TopAvatar />
+          {children}
+        </div>
         <BottomNav />
       </body>
     </html>
