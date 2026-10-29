@@ -18,7 +18,7 @@ const groups: Record<string, Rule[]> = {
   Outerwear: [
     { words: ["blazer", "suit jacket", "sport coat"], looks: ["Smart Casual", "Formal"] },
     { words: ["bomber", "hoodie", "puffer", "windbreaker", "track jacket", "varsity"], looks: ["Streetwear", "Casual"] },
-    { words: ["leather jacket", "denim jacket", "jean jacket", "leather"], looks: ["Streetwear", "Casual", "Smart Casual"] },
+    { words: ["leather jacket", "denim jacket", "jean jacket"], looks: ["Streetwear", "Casual", "Smart Casual"] },
     { words: ["overshirt", "shacket", "cardigan"], looks: ["Casual", "Smart Casual"] },
     { words: ["jacket", "coat"], looks: ["Casual", "Smart Casual"] },
   ],
@@ -42,6 +42,7 @@ const groups: Record<string, Rule[]> = {
     { words: ["oxford", "derby", "brogue", "dress shoes", "formal shoes"], looks: ["Formal", "Smart Casual"] },
     { words: ["palm", "mules", "mule", "sandals", "slides", "slippers"], looks: ["Native", "Casual"] },
     { words: ["boots", "boot"], looks: ["Casual", "Smart Casual", "Streetwear"] },
+    { words: ["shoes", "shoe", "footwear"], looks: ["Casual", "Smart Casual"] },
   ],
 };
 
@@ -82,16 +83,23 @@ export function normalizeStyle(item: {
     return { category: "Fragrance", looks: ALL };
   }
 
-  const accessory = groups.Accessories.find((r) => r.words.some((w) => has(text, w)));
+  const wearable = !["Shoes", "Accessories"].includes(item.category ?? "");
+  if (wearable && NATIVE_SET_WORDS.some((w) => has(text, w))) {
+    return { category: "Native", looks: ["Native"] };
+  }
+
+  const own = item.category && groups[item.category]
+    ? groups[item.category].find((r) => r.words.some((w) => has(text, w)))
+    : undefined;
+
+  const accessory = own
+    ? undefined
+    : groups.Accessories.find((r) => r.words.some((w) => has(text, w)));
   if (accessory) {
     return { category: "Accessories", looks: accessory.looks };
   }
 
-  if (NATIVE_SET_WORDS.some((w) => has(text, w))) {
-    return { category: "Native", looks: ["Native"] };
-  }
-
-  const match = findRule(text, item.category);
+  const match = own ? { group: item.category as string, rule: own } : findRule(text, item.category);
   const category = match
     ? match.group
     : item.category === "Native"
