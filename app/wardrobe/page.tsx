@@ -56,6 +56,32 @@ const SECTIONS = [
 
 const SIZED = ["Native", "Tops", "Bottoms", "Outerwear", "Shoes"];
 
+const EVERY_LOOK = ["Streetwear", "Casual", "Smart Casual", "Native", "Formal"];
+
+const SECTION_LOOKS: Record<string, string[]> = {
+  Native: ["Native"],
+  Tops: ["Casual", "Smart Casual"],
+  Bottoms: ["Casual", "Smart Casual"],
+  Outerwear: ["Casual", "Smart Casual"],
+  Shoes: ["Casual", "Smart Casual"],
+  Accessories: EVERY_LOOK,
+  Fragrance: EVERY_LOOK,
+};
+
+function sectionLabel(category: string | null) {
+  return SECTIONS.find((s) => s.key === category)?.label ?? "To Sort";
+}
+
+function styleInSection(
+  item: { type: string | null; name: string | null; details?: string[] | null },
+  category: string
+) {
+  const style = normalizeStyle({ ...item, category });
+  return style.category === category
+    ? style
+    : { category, looks: SECTION_LOOKS[category] ?? ["Casual"] };
+}
+
 type Item = {
   id: string;
   photo_path: string;
@@ -73,6 +99,8 @@ type Item = {
   looks: string[] | null;
   needs_check: boolean;
   at_washman: boolean;
+  confirmed: boolean;
+  category_locked: boolean;
   url?: string;
 };
 
@@ -497,6 +525,59 @@ function TagEditor({
   );
 }
 
+function SectionSheet({
+  item, onPick, onClose,
+}: {
+  item: Item;
+  onPick: (category: string) => void;
+  onClose: () => void;
+}) {
+  return (
+    <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/30" onClick={onClose}>
+      <div
+        className="sheet-up w-full max-w-md rounded-t-3xl bg-[#FBF8F2] px-6 pb-10 pt-3"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="mx-auto mb-5 h-1 w-10 rounded-full bg-[#D9D1C3]" />
+        <p className="text-lg font-semibold text-[#1F2A44]">Where does this belong?</p>
+        <p className="mb-4 text-sm text-[#5C5648]">{displayName(item)}</p>
+        <div className="flex flex-col">
+          {SECTIONS.map((s) => (
+            <button
+              key={s.key}
+              onClick={() => onPick(s.key)}
+              className="flex items-center justify-between border-b border-[#EFE8DC] py-3.5 text-left text-[#1F2A44] last:border-0"
+            >
+              <span>{s.label}</span>
+              {item.category === s.key && (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M5 12l5 5L20 7" />
+                </svg>
+              )}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+async function saveSection(item: Item, category: string) {
+  const style = styleInSection(item, category);
+  const changes = {
+    category: style.category,
+    looks: style.looks,
+    category_locked: true,
+    needs_check: false,
+  };
+  const { error } = await createClient().from("items").update(changes).eq("id", item.id);
+  if (error) {
+    console.error("Section update failed:", error);
+    return null;
+  }
+  return changes;
+}
+
 function Editor({
   item, onClose, onChanged,
 }: {
@@ -510,6 +591,21 @@ function Editor({
   const [confirmRemove, setConfirmRemove] = useState(false);
   const [error, setError] = useState("");
   const [updated, setUpdated] = useState(false);
+  const [sheet, setSheet] = useState(false);
+
+  async function moveTo(category: string) {
+    setSheet(false);
+    if (category === current.category) return;
+    setError("");
+    const changes = await saveSection(current, category);
+    if (!changes) {
+      setError("Couldn't update. Try again.");
+      return;
+    }
+    setCurrent((c) => ({ ...c, ...changes }));
+    setUpdated(true);
+    onChanged();
+  }
 
   async function saveTags(tags: string[], size: string | null) {
     setError("");
@@ -645,12 +741,15 @@ function Editor({
       wordCount(fix.name) >= wordCount(built);
     const name = aiNameOk ? titleCase(fix.name!) : built;
 
-    const style = normalizeStyle({
-      category: typeChanged ? fix.category ?? current.category : current.category,
-      type,
-      name,
-      details,
-    });
+    const keepSection = current.category_locked && !typeChanged && !!current.category;
+    const style = keepSection
+      ? styleInSection({ type, name, details }, current.category!)
+      : normalizeStyle({
+          category: typeChanged ? fix.category ?? current.category : current.category,
+          type,
+          name,
+          details,
+        });
 
     const tags = buildTags({
       words: `${words} ${name}`,
@@ -683,6 +782,7 @@ function Editor({
       details,
       description,
       needs_check: false,
+      category_locked: keepSection,
     };
 
     const { error } = await createClient().from("items").update(changes).eq("id", current.id);
@@ -740,6 +840,13 @@ function Editor({
           <span key={`${current.name}-${current.colour}`} className="fade-in text-lg font-semibold">
             {displayName(current)}
           </span>
+          <button
+            onClick={() => setSheet(true)}
+            className="flex items-center gap-1.5 self-start text-sm text-[#5C5648]"
+          >
+            In <span className="font-semibold text-[#1F2A44]">{sectionLabel(current.category)}</span>
+            <Pencil />
+          </button>
           <TagEditor item={current} onSave={saveTags} onSaveColour={saveColour} />
           {current.description && <span className="text-sm text-[#5C5648]">{current.description}</span>}
           {current.looks && current.looks.length > 0 && (
@@ -747,6 +854,8 @@ function Editor({
           )}
           {updated && <span className="fade-in text-sm font-semibold text-[#1F2A44]">Updated.</span>}
         </div>
+
+        {sheet && <SectionSheet item={current} onPick={moveTo} onClose={() => setSheet(false)} />}
 
         <button
           role="switch"
@@ -849,6 +958,7 @@ export default function WardrobePage() {
   const [notice, setNotice] = useState("");
   const [editing, setEditing] = useState<Item | null>(null);
   const [filter, setFilter] = useState<string>("all");
+  const [sorting, setSorting] = useState<Item | null>(null);
   const tagRunning = useRef(false);
   const tried = useRef<Set<string>>(new Set());
 
@@ -857,10 +967,37 @@ export default function WardrobePage() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
+  async function pickSection(item: Item, category: string) {
+    setSorting(null);
+    if (category === item.category) return;
+    const changes = await saveSection(item, category);
+    if (!changes) {
+      setNotice("Couldn't update. Try again.");
+      return;
+    }
+    setItems((list) => list.map((i) => (i.id === item.id ? { ...i, ...changes } : i)));
+  }
+
+  async function allGood() {
+    const ids = items.filter((i) => !i.confirmed).map((i) => i.id);
+    if (ids.length === 0) return;
+    setItems((list) => list.map((i) => (ids.includes(i.id) ? { ...i, confirmed: true, needs_check: false } : i)));
+    const { error } = await createClient()
+      .from("items")
+      .update({ confirmed: true, needs_check: false })
+      .in("id", ids);
+    if (error) {
+      console.error("Confirm failed:", error);
+      setNotice("Couldn't update. Try again.");
+      load();
+    }
+  }
+
   function tidyStyles(list: Item[]) {
     const supabase = createClient();
     for (const item of list) {
       if (!item.type && !item.name) continue;
+      if (item.category_locked) continue;
       const style = normalizeStyle(item);
       const sameLooks = (item.looks ?? []).join(",") === style.looks.join(",");
       if (item.category !== style.category || !sameLooks) {
@@ -956,7 +1093,7 @@ export default function WardrobePage() {
     const { data, error } = await supabase
       .from("items")
       .select(
-        "id, photo_path, photo_hash, name, category, type, colour, colour_label, accent_colour, details, tags, size, description, looks, needs_check, at_washman"
+        "id, photo_path, photo_hash, name, category, type, colour, colour_label, accent_colour, details, tags, size, description, looks, needs_check, at_washman, confirmed, category_locked"
       )
       .order("created_at", { ascending: false });
 
@@ -967,7 +1104,12 @@ export default function WardrobePage() {
       return;
     }
 
-    const list: Item[] = (data ?? []).map((i) => ({ ...i, at_washman: !!i.at_washman }));
+    const list: Item[] = (data ?? []).map((i) => ({
+      ...i,
+      at_washman: !!i.at_washman,
+      confirmed: i.confirmed !== false,
+      category_locked: !!i.category_locked,
+    }));
     tidyStyles(list);
     if (list.length > 0) {
       const { data: signed } = await supabase.storage
@@ -1032,6 +1174,7 @@ export default function WardrobePage() {
       size,
       tags: buildTags({ ai: tags?.tags, words: `${name ?? ""} ${type ?? ""}`, size }),
       needs_check: !tags || !tags.confident,
+      confirmed: false,
     });
 
     if (error) {
@@ -1113,6 +1256,7 @@ export default function WardrobePage() {
 
   const total = items.length + pending.length;
   const review = items.filter((i) => i.needs_check);
+  const fresh = items.filter((i) => !i.confirmed);
   const status = readiness(items);
 
   const sections = [
@@ -1145,10 +1289,12 @@ export default function WardrobePage() {
         @keyframes shimmer { from { background-position: 150% 0 } to { background-position: -100% 0 } }
         .fade-in { animation: fadeIn 0.5s ease-out both }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(6px) } to { opacity: 1; transform: none } }
+        .sheet-up { animation: sheetUp 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) both }
+        @keyframes sheetUp { from { transform: translateY(100%) } to { transform: none } }
         .no-scrollbar::-webkit-scrollbar { display: none }
         .no-scrollbar { scrollbar-width: none }
         .rail { scroll-behavior: smooth; -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain }
-        @media (prefers-reduced-motion: reduce) { .shimmer, .fade-in { animation: none } .rail { scroll-behavior: auto } }
+        @media (prefers-reduced-motion: reduce) { .shimmer, .fade-in, .sheet-up { animation: none } .rail { scroll-behavior: auto } }
       `}</style>
 
       {editing && (
@@ -1202,6 +1348,58 @@ export default function WardrobePage() {
 
       {notice && <p className="fade-in text-center text-sm text-[#5C5648]">{notice}</p>}
 
+      {(pending.length > 0 || fresh.length > 0) && (
+        <section className="fade-in flex flex-col gap-3 rounded-3xl border border-[#E3DACB] bg-[#FBF8F2] py-4">
+          <div className="flex items-center justify-between px-4">
+            <div className="flex flex-col">
+              <h2 className="text-2xl">
+                Just Added <span className="text-base text-[#8A8476]">{pending.length + fresh.length}</span>
+              </h2>
+              <span className="text-xs text-[#5C5648]">
+                {pending.length > 0 ? "Sorting your pieces…" : "Check each one landed in the right place."}
+              </span>
+            </div>
+            {pending.length === 0 && fresh.length > 0 && (
+              <button
+                onClick={allGood}
+                className="rounded-full bg-[#1F2A44] px-4 py-2 text-sm font-semibold text-[#F5F0E6] transition-transform active:scale-95"
+              >
+                All Good
+              </button>
+            )}
+          </div>
+
+          <div className="no-scrollbar rail flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-px-4 px-4">
+            {pending.map((p) => (
+              <div key={p.key} className="flex w-[42%] shrink-0 snap-start flex-col gap-2">
+                <div className="relative overflow-hidden rounded-xl">
+                  <img src={p.preview} alt="New piece" className="aspect-[3/4] w-full object-cover" />
+                  <div className="shimmer absolute inset-0" />
+                </div>
+                <div className="h-3 w-2/3 rounded-full bg-[#E3DACB] shimmer" />
+                <div className="h-2 w-1/3 rounded-full bg-[#E3DACB] shimmer" />
+              </div>
+            ))}
+            {fresh.map((item) => (
+              <div key={item.id} className="flex w-[42%] shrink-0 snap-start flex-col gap-1.5">
+                <PieceCard item={item} onOpen={() => setEditing(item)} />
+                <button
+                  onClick={() => setSorting(item)}
+                  className="flex items-center gap-1 self-start rounded-full border border-[#E3DACB] bg-white px-2.5 py-1 text-[11px] text-[#5C5648]"
+                >
+                  In <span className="font-semibold text-[#1F2A44]">{sectionLabel(item.category)}</span>
+                  <Pencil />
+                </button>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {sorting && (
+        <SectionSheet item={sorting} onPick={(c) => pickSection(sorting, c)} onClose={() => setSorting(null)} />
+      )}
+
       {review.length > 0 && filter !== "review" && (
         <button
           onClick={() => openFilter("review")}
@@ -1231,21 +1429,6 @@ export default function WardrobePage() {
             >
               {f.label} <span className="opacity-60">{f.count}</span>
             </button>
-          ))}
-        </div>
-      )}
-
-      {pending.length > 0 && (
-        <div className="no-scrollbar rail -mx-6 flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-px-6 px-6">
-          {pending.map((p) => (
-            <div key={p.key} className="flex w-[44%] shrink-0 snap-start flex-col gap-2">
-              <div className="relative overflow-hidden rounded-xl">
-                <img src={p.preview} alt="New piece" className="aspect-[3/4] w-full object-cover" />
-                <div className="shimmer absolute inset-0" />
-              </div>
-              <div className="h-3 w-2/3 rounded-full bg-[#E3DACB] shimmer" />
-              <div className="h-2 w-1/3 rounded-full bg-[#E3DACB] shimmer" />
-            </div>
           ))}
         </div>
       )}
