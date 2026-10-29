@@ -12,15 +12,14 @@ const tabs = [
 
 export default function BottomNav() {
   const pathname = usePathname();
-
-  if (pathname === "/") return null;
+  if (pathname === "/" || pathname === "/profile") return null;
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 border-t border-[#E3DACB] bg-[#FBF8F2]">
       <div className="mx-auto flex max-w-md justify-around py-3">
         {tabs.map((tab) => {
-          const active = pathname.startsWith(tab.href);
           const Icon = tab.icon;
+          const active = pathname === tab.href;
           return (
             <Link
               key={tab.href}
@@ -29,7 +28,7 @@ export default function BottomNav() {
                 active ? "font-semibold text-[#1F2A44]" : "text-[#8A8476]"
               }`}
             >
-              <Icon size={22} strokeWidth={active ? 2.2 : 1.6} />
+              <Icon size={22} />
               {tab.label}
             </Link>
           );
