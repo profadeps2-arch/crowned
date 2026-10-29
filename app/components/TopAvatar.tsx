@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import Avatar from "./Avatar";
 
 export default function TopAvatar() {
-  const pathname = usePathname();
+  const pathname = usePathname() ?? "";
   if (["/", "/profile", "/me"].includes(pathname) || pathname.startsWith("/auth")) return null;
 
   return (
