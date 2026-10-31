@@ -7,6 +7,7 @@ import { OCCASIONS, buildLooks, missingFor, whyItWorks, type Look, type Occasion
 import { weatherContext } from "@/lib/weather";
 import { groupFor } from "@/lib/customize";
 import { saveLook, wearLook } from "@/lib/looks-db";
+import { pop, success, swish } from "@/lib/feedback";
 import { loadPick, savePick } from "@/lib/today-pick";
 import { useWardrobe } from "../components/useWardrobe";
 import { useWeather } from "../components/useWeather";
@@ -135,7 +136,10 @@ export default function TodayView() {
     setProblem("");
     const err = await saveLook(plan.look, plan.occasion.label);
     if (err) setProblem(err);
-    else setSaved(true);
+    else {
+      setSaved(true);
+      pop();
+    }
   }
 
   async function wear() {
@@ -149,6 +153,7 @@ export default function TodayView() {
     const today = new Date().toISOString().slice(0, 10);
     setPieces((list) => list.map((p) => (ids.has(p.id) ? { ...p, last_worn: today } : p)));
     setWorn(true);
+    success();
   }
 
   const tiles = glance(pieces);
@@ -215,7 +220,10 @@ export default function TodayView() {
               <h2 className="title-2">{plan.look.title}</h2>
             </div>
             <button
-              onClick={() => choose(false)}
+              onClick={() => {
+                swish();
+                choose(false);
+              }}
               className="flex shrink-0 items-center gap-1.5 pb-1 text-[15px] font-semibold text-orange-deep active:opacity-60"
             >
               <RefreshCw size={14} aria-hidden /> Another
@@ -243,7 +251,7 @@ export default function TodayView() {
 
           <div className="flex flex-col gap-3">
             <button onClick={love} className="btn btn-orange" aria-pressed={saved}>
-              <Heart size={18} fill={saved ? "currentColor" : "none"} aria-hidden />
+              <Heart key={String(saved)} size={18} fill={saved ? "currentColor" : "none"} className={saved ? "pop" : ""} aria-hidden />
               {saved ? "Saved to Outfits" : "Love This Look"}
             </button>
             <button onClick={wear} disabled={busy} className="btn btn-ghost">

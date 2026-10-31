@@ -18,7 +18,7 @@ export function useScreenTone(tone: "light" | "dark") {
 
     if (tone === "dark") {
       root.dataset.tone = "dark";
-      metas.forEach((m) => (m.content = "#000000"));
+      metas.forEach((m) => (m.content = "#120F0C"));
     }
 
     return () => {

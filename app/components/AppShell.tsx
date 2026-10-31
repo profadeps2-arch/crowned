@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
 import { usePathname } from "next/navigation";
+import { tap } from "@/lib/feedback";
 import TopAvatar from "./TopAvatar";
 import BottomNav from "./BottomNav";
 
@@ -10,6 +12,16 @@ const NO_NAV = ["/", "/profile"];
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() ?? "";
+
+  // A light tap on every button, chip, tab and tab bar link.
+  useEffect(() => {
+    const onDown = (e: PointerEvent) => {
+      const el = (e.target as HTMLElement | null)?.closest<HTMLElement>(".btn, .chip, .seg-item, nav a");
+      if (el && !(el as HTMLButtonElement).disabled) tap();
+    };
+    document.addEventListener("pointerdown", onDown, { passive: true });
+    return () => document.removeEventListener("pointerdown", onDown);
+  }, []);
   const showTop = !NO_TOP.includes(pathname) && !pathname.startsWith("/auth");
   const showNav = !NO_NAV.includes(pathname);
 
