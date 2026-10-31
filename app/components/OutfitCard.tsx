@@ -24,7 +24,7 @@ export default function OutfitCard({
   const more = pieces.length - shown.length;
 
   return (
-    <article className="card flex flex-col gap-3 p-3">
+    <article className="flex flex-col gap-4 border-t border-line pt-6">
       {shown.length > 0 ? (
         <div className="grid grid-cols-4 gap-2">
           {shown.map((p, i) => (
@@ -32,7 +32,7 @@ export default function OutfitCard({
               key={p.id}
               onClick={() => onOpen(p)}
               aria-label={pieceName(p)}
-              className="block overflow-hidden rounded-xl active:scale-[0.97]"
+              className="block overflow-hidden rounded-xl transition-transform duration-500 active:scale-[0.98]"
             >
               <Photo src={p.url} alt="" className="aspect-[3/4] w-full">
                 {more > 0 && i === shown.length - 1 && (
@@ -50,13 +50,13 @@ export default function OutfitCard({
         </p>
       )}
 
-      <div className="flex flex-col gap-0.5 px-1">
+      <div className="flex flex-col gap-1">
         <span className="eyebrow">{eyebrow}</span>
-        <h3 className="headline text-navy">{title}</h3>
+        <h3 className="title-2">{title}</h3>
         {note && <p className="footnote text-muted">{note}</p>}
       </div>
 
-      {children && <div className="flex items-center gap-2 px-1 pb-1">{children}</div>}
+      {children && <div className="flex items-center gap-2 pb-2">{children}</div>}
     </article>
   );
 }

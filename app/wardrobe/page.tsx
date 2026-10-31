@@ -267,7 +267,7 @@ function TagRow({
   return (
     <div className="flex flex-wrap gap-1">
       {askSize && (
-        <span className="rounded-full border border-dashed border-orange px-2 py-0.5 text-[11px] text-orange-deep">
+        <span className="rounded-full border border-dashed border-line px-2 py-0.5 text-[11px] text-navy">
           + Size
         </span>
       )}
@@ -360,9 +360,9 @@ function TagEditor({
       disabled={busy}
       className={`flex items-center gap-1.5 rounded-full border border-transparent px-3 py-1 text-[13px] transition-colors ${
         open === key
-          ? "bg-orange text-on-orange"
+          ? "bg-navy text-cream"
           : dashed
-          ? "border-dashed border-orange text-orange-deep"
+          ? "border-dashed border-line text-navy"
           : "bg-fill text-navy"
       }`}
     >
@@ -378,7 +378,7 @@ function TagEditor({
       onClick={onClick}
       disabled={busy}
       className={`flex items-center gap-1.5 rounded-full border border-transparent px-3 py-1 text-[13px] ${
-        active ? "bg-orange text-on-orange" : "bg-fill text-navy"
+        active ? "bg-navy text-cream" : "bg-fill text-navy"
       }`}
     >
       {colour && <Dot colour={colour} />}
@@ -409,7 +409,7 @@ function TagEditor({
         )}
       </div>
 
-      {hint && <p className="fade-in text-xs text-orange-deep">{hint}</p>}
+      {hint && <p className="fade-in text-xs text-navy">{hint}</p>}
 
       {open === "colour" && (
         <div className="fade-in flex flex-col gap-3 rounded-xl bg-card p-3">
@@ -431,7 +431,7 @@ function TagEditor({
               <button
                 onClick={() => colourText.trim() && commitColour(colourText.trim())}
                 disabled={!colourText.trim() || busy}
-                className="btn btn-orange !h-11 !w-auto px-5 !text-[15px]"
+                className="btn btn-navy !h-11 !w-auto px-5 !text-[15px]"
               >
                 {busy ? "Saving…" : "Save"}
               </button>
@@ -471,7 +471,7 @@ function TagEditor({
             <button
               onClick={() => sizePreview && commit(tags, sizePreview)}
               disabled={!sizePreview || busy}
-              className="btn btn-orange !h-11 flex-1 !text-[15px]"
+              className="btn btn-navy !h-11 flex-1 !text-[15px]"
             >
               Save Size
             </button>
@@ -821,7 +821,7 @@ function Editor({
       <div className="mx-auto flex max-w-md flex-col gap-6 px-6 pb-16 pt-10">
         <div className="flex items-center justify-between">
           <h2 className="title-1">Edit Piece</h2>
-          <button onClick={onClose} className="text-[17px] font-semibold text-orange-deep">
+          <button onClick={onClose} className="text-[17px] font-semibold text-navy">
             Done
           </button>
         </div>
@@ -837,7 +837,7 @@ function Editor({
           </div>
         )}
 
-        <div className="flex flex-col gap-3 rounded-2xl bg-card p-4">
+        <div className="flex flex-col gap-3 border-y border-line py-4">
           <span className="text-xs tracking-[0.2em] text-muted">IDENTIFIED AS</span>
           <span key={`${current.name}-${current.colour}`} className="fade-in text-lg font-semibold">
             {displayName(current)}
@@ -863,7 +863,7 @@ function Editor({
           role="switch"
           aria-checked={current.at_washman}
           onClick={toggleWashman}
-          className="flex items-center justify-between gap-4 rounded-2xl bg-card p-4 text-left"
+          className="flex items-center justify-between gap-4 border-y border-line py-4 text-left"
         >
           <span className="flex flex-col">
             <span className="font-semibold">At the Washman</span>
@@ -1277,7 +1277,7 @@ export default function WardrobePage() {
       : sections.filter((s) => s.key === filter);
 
   return (
-    <main className="flex flex-col gap-6 px-6 pb-12 pt-6">
+    <main className="flex flex-col gap-6 px-6 pb-12 pt-[calc(2rem+env(safe-area-inset-top))]">
       <style>{`
         .shimmer {
           background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,0.45) 50%, transparent 70%);
@@ -1308,13 +1308,13 @@ export default function WardrobePage() {
         status.ok ? (
           <Link
             href="/today"
-            className="flex items-center justify-between rounded-2xl bg-card p-4"
+            className="flex items-center justify-between border-y border-line py-4"
           >
             <span className="subhead">Your wardrobe is ready to style.</span>
-            <span className="shrink-0 whitespace-nowrap text-[15px] font-medium text-orange-deep">Open Today ›</span>
+            <span className="shrink-0 whitespace-nowrap text-[15px] font-medium text-navy">Open Today ›</span>
           </Link>
         ) : (
-          <div className="rounded-2xl bg-card p-4 text-sm">
+          <div className="border-y border-line py-4 text-sm">
             Add {listJoin(status.missing)} to get your first outfit.
           </div>
         )
@@ -1360,7 +1360,7 @@ export default function WardrobePage() {
             {pending.length === 0 && fresh.length > 0 && (
               <button
                 onClick={allGood}
-                className="btn btn-orange !h-10 !w-auto px-4 !text-[15px]"
+                className="btn btn-navy !h-10 !w-auto px-4 !text-[15px]"
               >
                 All Good
               </button>
@@ -1421,7 +1421,7 @@ export default function WardrobePage() {
               onClick={() => openFilter(f.key)}
               className={`shrink-0 rounded-full border border-transparent px-4 py-2 text-[15px] transition-colors ${
                 filter === f.key
-                  ? "bg-orange text-on-orange"
+                  ? "bg-navy text-cream"
                   : "bg-fill text-navy"
               }`}
             >

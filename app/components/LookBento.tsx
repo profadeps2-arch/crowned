@@ -16,8 +16,8 @@ function Tile({
     <button
       onClick={() => onOpen(piece)}
       aria-label={pieceName(piece)}
-      className={`rise block overflow-hidden rounded-[20px] shadow-[0_2px_10px_rgb(0_0_0/0.08)] transition-transform duration-300 active:scale-[0.98] ${className}`}
-      style={{ "--d": `${delay * 90}ms` } as React.CSSProperties}
+      className={`unveil block overflow-hidden rounded-[14px] transition-transform duration-500 active:scale-[0.99] ${className}`}
+      style={{ "--d": `${delay * 110}ms` } as React.CSSProperties}
     >
       <Photo src={piece.url} alt="" className="h-full w-full" />
     </button>
@@ -43,9 +43,9 @@ export function LookBento({ look, onOpen }: { look: Look; onOpen: (p: Piece) => 
         ))}
       </div>
       <div className="flex gap-2">
-        <Tile piece={look.shoes} delay={body.length} onOpen={onOpen} className="h-32 min-w-0 flex-1" />
+        <Tile piece={look.shoes} delay={body.length} onOpen={onOpen} className="h-28 min-w-0 flex-1" />
         {look.extra && (
-          <Tile piece={look.extra} delay={body.length + 1} onOpen={onOpen} className="h-32 w-32 shrink-0" />
+          <Tile piece={look.extra} delay={body.length + 1} onOpen={onOpen} className="h-28 w-28 shrink-0" />
         )}
       </div>
     </div>
@@ -66,11 +66,11 @@ export function PieceViewer({ piece, onClose }: { piece: Piece | null; onClose: 
     <button
       onClick={onClose}
       aria-label="Close"
-      className="rise fixed inset-0 z-50 flex flex-col items-center justify-center gap-4 bg-black/85 p-6 backdrop-blur-xl"
+      className="rise fixed inset-0 z-50 flex flex-col items-center justify-center gap-4 bg-black/90 p-6 backdrop-blur-xl"
     >
       {piece.url && (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={piece.url} alt={pieceName(piece)} className="max-h-[75vh] w-full max-w-md rounded-[20px] object-contain" />
+        <img src={piece.url} alt={pieceName(piece)} className="max-h-[75vh] w-full max-w-md rounded-[14px] object-contain" />
       )}
       <span className="text-[15px] font-semibold text-white">{pieceName(piece)}</span>
     </button>
@@ -98,7 +98,7 @@ export function Breakdown({ look, onOpen }: { look: Look; onOpen: (p: Piece) => 
             <Photo src={piece.url} alt="" className="h-14 w-14 shrink-0 rounded-xl" />
             <span className="flex min-w-0 flex-col">
               <span className="eyebrow">{label}</span>
-              <span className="headline truncate !font-medium">{pieceName(piece)}</span>
+              <span className="subhead truncate text-navy">{pieceName(piece)}</span>
             </span>
           </button>
         </li>
