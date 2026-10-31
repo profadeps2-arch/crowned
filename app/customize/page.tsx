@@ -20,8 +20,11 @@ const MIN_LOADING_MS = 2600;
 
 export default function CustomizePage() {
   const router = useRouter();
-  const { pieces, setPieces, loading, error } = useWardrobe();
-  const { state: weather } = useWeather();
+  const { pieces, setPieces, prefs, loading, error } = useWardrobe();
+  const { state: weather } = useWeather({
+    ready: !loading,
+    saved: prefs.lat !== null && prefs.lon !== null ? { lat: prefs.lat, lon: prefs.lon, city: prefs.city } : null,
+  });
 
   const [group, setGroup] = useState<Group | null>(null);
   const [answers, setAnswers] = useState<Record<string, number>>({});
@@ -52,7 +55,9 @@ export default function CustomizePage() {
 
     const full: StyleContext = {
       ...choice,
-      ...(weather.status === "ready" ? weatherContext(weather.weather) : {}),
+      ...(weather.status === "ready" && prefs.weatherAware ? weatherContext(weather.weather) : {}),
+      likes: prefs.styles,
+      colours: prefs.colours,
     };
     if (fresh) shown.current.clear();
 
@@ -113,7 +118,7 @@ export default function CustomizePage() {
   async function wear(look: Look) {
     setBusy(true);
     setProblem("");
-    const err = await wearLook(look);
+    const err = await wearLook(look, occasion?.label ?? "Outfit");
     setBusy(false);
     if (err) return setProblem(err);
     const ids = new Set([...look.main, look.outer, look.shoes, look.extra, look.scent].filter(Boolean).map((p) => p!.id));

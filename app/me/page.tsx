@@ -4,6 +4,7 @@ import { useEffect, useState, type ChangeEvent, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { COLOUR_OPTIONS, DEFAULT_PREFS, STYLE_OPTIONS, findPlace, loadPrefs, type Prefs, type Unit } from "@/lib/prefs";
 
 const BUILDS = ["Slim", "Athletic", "Average", "Broad", "Big frame"];
 const TOP_SIZES = ["XS", "S", "M", "L", "XL", "XXL", "XXXL"];
@@ -106,6 +107,39 @@ function Chips({
   );
 }
 
+function MultiChips({
+  options, value, onToggle,
+}: {
+  options: { value: string; label: string; hex?: string }[];
+  value: string[];
+  onToggle: (v: string) => void;
+}) {
+  return (
+    <div className="flex flex-wrap gap-2 px-4 pb-4">
+      {options.map((o) => {
+        const on = value.includes(o.value);
+        return (
+          <button
+            key={o.value}
+            onClick={() => onToggle(o.value)}
+            aria-pressed={on}
+            className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm ${
+              on
+                ? "border-[#1F2A44] bg-[#1F2A44] text-[#FDFAF6]"
+                : "border-[#E9E4DE] bg-white text-[#1F2A44]"
+            }`}
+          >
+            {o.hex && (
+              <span className="h-3.5 w-3.5 rounded-full border border-black/15" style={{ background: o.hex }} aria-hidden />
+            )}
+            {o.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function MePage() {
   const router = useRouter();
   const [uid, setUid] = useState<string | null>(null);
@@ -125,6 +159,8 @@ export default function MePage() {
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [prefs, setPrefs] = useState<Prefs>(DEFAULT_PREFS);
+  const [cityDraft, setCityDraft] = useState("");
 
   const cm = Math.round((feet * 12 + inches) * 2.54);
 
@@ -164,6 +200,10 @@ export default function MePage() {
           .createSignedUrl(prof.avatar_path, 3600);
         setAvatarUrl(signed?.signedUrl ?? null);
       }
+
+      const loadedPrefs = await loadPrefs(supabase, user.id);
+      setPrefs(loadedPrefs);
+      setCityDraft(loadedPrefs.city ?? "");
 
       const { count } = await supabase.from("items").select("id", { count: "exact", head: true });
       const { count: wash } = await supabase
@@ -210,6 +250,80 @@ export default function MePage() {
       }
     }
     setBusy(false);
+  }
+
+  /** Saves style, colour, location and weather choices. Rolls back if the save fails. */
+  async function savePrefs(update: Partial<Prefs>, done?: string) {
+    if (!uid) return false;
+    const before = prefs;
+    const next = { ...prefs, ...update };
+    setPrefs(next);
+    setMessage("");
+
+    const row: Record<string, unknown> = { id: uid, updated_at: new Date().toISOString() };
+    if ("styles" in update) row.style_prefs = next.styles;
+    if ("colours" in update) row.fav_colours = next.colours;
+    if ("city" in update) row.city = next.city;
+    if ("lat" in update) row.lat = next.lat;
+    if ("lon" in update) row.lon = next.lon;
+    if ("unit" in update) row.temp_unit = next.unit;
+    if ("weatherAware" in update) row.weather_aware = next.weatherAware;
+
+    const { error } = await createClient().from("profiles").upsert(row);
+    if (error) {
+      console.error("Preferences save failed:", error);
+      setPrefs(before);
+      setMessage("We could not save that. Please try again.");
+      return false;
+    }
+    if (done) setMessage(done);
+    return true;
+  }
+
+  const toggleIn = (list: string[], v: string) =>
+    list.includes(v) ? list.filter((x) => x !== v) : [...list, v];
+
+  async function findCity() {
+    if (cityDraft.trim().length < 2) return;
+    setBusy(true);
+    setMessage("");
+    try {
+      const place = await findPlace(cityDraft);
+      if (!place) {
+        setMessage("We could not find that place. Try the city name only.");
+      } else if (await savePrefs({ city: place.name, lat: place.lat, lon: place.lon }, `Location set to ${place.name}.`)) {
+        setCityDraft(place.name);
+        setOpen(null);
+      }
+    } catch (err) {
+      console.error("City lookup failed:", err);
+      setMessage("We could not look that up right now. Please try again.");
+    }
+    setBusy(false);
+  }
+
+  function useHere() {
+    if (!navigator.geolocation) return setMessage("Location is not available on this device.");
+    setBusy(true);
+    setMessage("");
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const ok = await savePrefs(
+          { city: "Current location", lat: pos.coords.latitude, lon: pos.coords.longitude },
+          "Using your current location."
+        );
+        if (ok) {
+          setCityDraft("");
+          setOpen(null);
+        }
+        setBusy(false);
+      },
+      () => {
+        setMessage("We could not get your location. Allow it in your browser, or type your city.");
+        setBusy(false);
+      },
+      { timeout: 8000 }
+    );
   }
 
   async function changePhoto(e: ChangeEvent<HTMLInputElement>) {
@@ -412,6 +526,123 @@ export default function MePage() {
           />
           {open === "shoe" && (
             <Chips options={SHOES} value={profile.shoe_size} onPick={(v) => save({ shoe_size: v })} />
+          )}
+        </div>
+      </Section>
+
+      <Section title="YOUR STYLE">
+        <div>
+          <Row
+            label="Looks you like"
+            value={prefs.styles.length ? `${prefs.styles.length} chosen` : "Add"}
+            open={open === "styles"}
+            onClick={() => toggle("styles")}
+          />
+          {open === "styles" && (
+            <MultiChips
+              options={STYLE_OPTIONS}
+              value={prefs.styles}
+              onToggle={(v) => savePrefs({ styles: toggleIn(prefs.styles, v) })}
+            />
+          )}
+        </div>
+        <div>
+          <Row
+            label="Favourite colours"
+            value={prefs.colours.length ? prefs.colours.slice(0, 3).join(", ") + (prefs.colours.length > 3 ? "…" : "") : "Add"}
+            open={open === "colours"}
+            onClick={() => toggle("colours")}
+          />
+          {open === "colours" && (
+            <MultiChips
+              options={COLOUR_OPTIONS.map((c) => ({ value: c.name, label: c.name, hex: c.hex }))}
+              value={prefs.colours}
+              onToggle={(v) => savePrefs({ colours: toggleIn(prefs.colours, v) })}
+            />
+          )}
+        </div>
+      </Section>
+
+      <Section title="LOCATION AND WEATHER">
+        <div>
+          <Row
+            label="Your city"
+            value={prefs.city ?? "Uses your phone"}
+            open={open === "city"}
+            onClick={() => toggle("city")}
+          />
+          {open === "city" && (
+            <div className="flex flex-col gap-3 px-4 pb-4">
+              <div className="flex gap-2">
+                <input
+                  value={cityDraft}
+                  onChange={(e) => setCityDraft(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && findCity()}
+                  placeholder="For example, Lagos"
+                  aria-label="City"
+                  className="min-w-0 flex-1 rounded-xl border border-[#E9E4DE] bg-white px-3 py-2"
+                />
+                <button
+                  onClick={findCity}
+                  disabled={busy || cityDraft.trim().length < 2}
+                  className="rounded-full bg-[#1F2A44] px-4 text-sm font-semibold text-[#FDFAF6] disabled:opacity-40"
+                >
+                  Find
+                </button>
+              </div>
+              <div className="flex gap-4">
+                <button onClick={useHere} disabled={busy} className="text-sm font-semibold text-[#1F2A44] disabled:opacity-40">
+                  Use my current location
+                </button>
+                {(prefs.city || prefs.lat !== null) && (
+                  <button
+                    onClick={() => {
+                      setCityDraft("");
+                      savePrefs({ city: null, lat: null, lon: null }, "Location cleared. We will use your phone.");
+                    }}
+                    disabled={busy}
+                    className="text-sm font-semibold text-[#6E6A66] disabled:opacity-40"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+        <div>
+          <Row
+            label="Temperature"
+            value={prefs.unit === "F" ? "Fahrenheit" : "Celsius"}
+            open={open === "unit"}
+            onClick={() => toggle("unit")}
+          />
+          {open === "unit" && (
+            <Chips
+              options={["Celsius", "Fahrenheit"]}
+              value={prefs.unit === "F" ? "Fahrenheit" : "Celsius"}
+              onPick={(v) => savePrefs({ unit: (v === "Fahrenheit" ? "F" : "C") as Unit })}
+            />
+          )}
+        </div>
+        <div>
+          <Row
+            label="Dress for the weather"
+            value={prefs.weatherAware ? "On" : "Off"}
+            open={open === "aware"}
+            onClick={() => toggle("aware")}
+          />
+          {open === "aware" && (
+            <div className="flex flex-col gap-3">
+              <Chips
+                options={["On", "Off"]}
+                value={prefs.weatherAware ? "On" : "Off"}
+                onPick={(v) => savePrefs({ weatherAware: v === "On" })}
+              />
+              <p className="-mt-2 px-4 pb-4 text-xs text-[#6E6A66]">
+                On, heat and rain shape your outfits. Off, the weather is shown but ignored.
+              </p>
+            </div>
           )}
         </div>
       </Section>

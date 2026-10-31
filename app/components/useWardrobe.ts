@@ -4,12 +4,14 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { Piece } from "@/lib/outfits";
+import { DEFAULT_PREFS, loadPrefs, type Prefs } from "@/lib/prefs";
 
-/** Loads the signed-in user's wardrobe with photo links, and their first name. */
+/** Loads the signed-in user's wardrobe with photo links, their first name and their saved preferences. */
 export function useWardrobe() {
   const router = useRouter();
   const [pieces, setPieces] = useState<Piece[]>([]);
   const [name, setName] = useState("");
+  const [prefs, setPrefs] = useState<Prefs>(DEFAULT_PREFS);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -22,13 +24,15 @@ export function useWardrobe() {
         return;
       }
 
-      const [{ data: profile }, { data, error }] = await Promise.all([
+      const [{ data: profile }, { data, error }, loaded] = await Promise.all([
         supabase.from("profiles").select("name").eq("id", user.id).maybeSingle(),
         supabase
           .from("items")
           .select("id, photo_path, name, category, type, colour, looks, tags, at_washman, last_worn")
           .order("created_at", { ascending: false }),
+        loadPrefs(supabase, user.id),
       ]);
+      setPrefs(loaded);
 
       const full = (profile?.name ?? user.user_metadata?.full_name ?? "").trim();
       setName(full.split(/\s+/)[0] ?? "");
@@ -52,5 +56,5 @@ export function useWardrobe() {
     })();
   }, [router]);
 
-  return { pieces, setPieces, name, loading, error };
+  return { pieces, setPieces, name, prefs, loading, error };
 }

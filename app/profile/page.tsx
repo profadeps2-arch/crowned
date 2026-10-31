@@ -55,7 +55,7 @@ export default function ProfilePage() {
       setSaving(false);
       return;
     }
-    router.push("/style");
+    router.push("/today");
   }
 
   return (

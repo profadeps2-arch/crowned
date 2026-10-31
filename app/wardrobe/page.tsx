@@ -1309,11 +1309,11 @@ export default function WardrobePage() {
       {!loading && (
         status.ok ? (
           <Link
-            href="/style"
+            href="/today"
             className="flex items-center justify-between rounded-2xl border border-[#E9E4DE] bg-[#FFFFFF] p-4"
           >
             <span className="text-sm">Your wardrobe is ready to style.</span>
-            <span className="text-sm font-semibold text-[#1F2A44]">Style Me ›</span>
+            <span className="text-sm font-semibold text-[#1F2A44]">See today&apos;s outfit ›</span>
           </Link>
         ) : (
           <div className="rounded-2xl border border-[#E9E4DE] bg-[#FFFFFF] p-4 text-sm">
@@ -1323,7 +1323,7 @@ export default function WardrobePage() {
       )}
 
       <div className="flex flex-col gap-2">
-        <label className="flex cursor-pointer items-center justify-center gap-2 rounded-full bg-[#1F2A44] py-4 font-semibold text-[#FDFAF6] transition-transform active:scale-[0.98]">
+        <label className="flex cursor-pointer items-center justify-center gap-2 rounded-full bg-orange py-4 font-semibold text-on-orange shadow-[0_10px_24px_-12px_rgba(253,145,74,0.8)] transition-transform active:scale-[0.98]">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M4 8h3l2-3h6l2 3h3v11H4z" />
             <circle cx="12" cy="13" r="3.5" />

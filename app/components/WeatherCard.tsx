@@ -3,6 +3,7 @@
 import { CloudFog, CloudLightning, CloudRain, CloudSun, Cloud, Droplets, Sun, Moon, Wind, CloudDrizzle } from "lucide-react";
 import type { WeatherState } from "./useWeather";
 import { weatherLine, type Sky } from "@/lib/weather";
+import type { Unit } from "@/lib/prefs";
 
 function SkyIcon({ sky, day, size = 40 }: { sky: Sky; day: boolean; size?: number }) {
   const p = { size, strokeWidth: 1.6, "aria-hidden": true } as const;
@@ -21,10 +22,13 @@ const time = (ms: number) =>
 export default function WeatherCard({
   state,
   onRetry,
+  unit = "C",
 }: {
   state: WeatherState;
   onRetry: () => void;
+  unit?: Unit;
 }) {
+  const deg = (c: number) => Math.round(unit === "F" ? (c * 9) / 5 + 32 : c);
   if (state.status === "loading") {
     return (
       <div className="card flex animate-pulse flex-col gap-4 p-5" aria-busy="true" aria-label="Loading the weather">
@@ -60,11 +64,11 @@ export default function WeatherCard({
         </span>
         <div className="flex min-w-0 flex-col">
           <div className="flex items-baseline gap-2">
-            <span className="text-4xl font-bold leading-none text-navy">{Math.round(w.temp)}°</span>
+            <span className="text-4xl font-bold leading-none text-navy">{deg(w.temp)}°</span>
             <span className="text-base font-medium text-navy">{w.label}</span>
           </div>
           <span className="text-sm text-muted">
-            Feels like {Math.round(w.feels)}° · H {Math.round(w.high)}° L {Math.round(w.low)}°
+            Feels like {deg(w.feels)}° · H {deg(w.high)}° L {deg(w.low)}°
           </span>
         </div>
       </div>
@@ -89,7 +93,8 @@ export default function WeatherCard({
       <p className="flex items-center gap-2 text-[11px] text-muted">
         <span className="h-1.5 w-1.5 rounded-full bg-orange" aria-hidden />
         Live · updated {time(w.fetchedAt)}
-        {state.fallback && " · showing Lagos. Allow location for your area."}
+        {state.place && ` · ${state.place}`}
+        {state.fallback && " · showing Lagos. Allow location, or set your city in Profile."}
       </p>
     </section>
   );

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Heart, SlidersHorizontal, RefreshCw } from "lucide-react";
-import { OCCASIONS, buildLooks, missingFor, whyItWorks, type Look, type Occasion, type Piece } from "@/lib/outfits";
+import { OCCASIONS, buildLooks, missingFor, whyItWorks, type Look, type Occasion, type Piece, type StyleContext } from "@/lib/outfits";
 import { weatherContext } from "@/lib/weather";
 import { saveLook, wearLook } from "@/lib/looks-db";
 import { useWardrobe } from "../components/useWardrobe";
@@ -29,8 +29,11 @@ function occasionsFor(d: Date): string[] {
 type Plan = { occasion: Occasion; look: Look };
 
 export default function TodayView() {
-  const { pieces, setPieces, name, loading, error } = useWardrobe();
-  const { state: weather, retry } = useWeather();
+  const { pieces, setPieces, name, prefs, loading, error } = useWardrobe();
+  const { state: weather, retry } = useWeather({
+    ready: !loading,
+    saved: prefs.lat !== null && prefs.lon !== null ? { lat: prefs.lat, lon: prefs.lon, city: prefs.city } : null,
+  });
   const [waited, setWaited] = useState(false);
   const [plan, setPlan] = useState<Plan | null>(null);
   const [empty, setEmpty] = useState("");
@@ -48,8 +51,12 @@ export default function TodayView() {
     return () => clearTimeout(t);
   }, []);
 
-  const ctx = weather.status === "ready" ? weatherContext(weather.weather) : {};
-  const settled = weather.status !== "loading" || waited;
+  const ctx: StyleContext = {
+    ...(weather.status === "ready" && prefs.weatherAware ? weatherContext(weather.weather) : {}),
+    likes: prefs.styles,
+    colours: prefs.colours,
+  };
+  const settled = !loading && (weather.status !== "loading" || waited);
 
   const choose = useCallback(
     (fresh: boolean) => {
@@ -77,7 +84,7 @@ export default function TodayView() {
     },
     // ctx is rebuilt each render. Its values are what matter.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [pieces, now, ctx.hot, ctx.cool, ctx.rainy]
+    [pieces, now, ctx.hot, ctx.cool, ctx.rainy, prefs.styles, prefs.colours]
   );
 
   // Pick once the wardrobe and the weather have both settled.
@@ -100,7 +107,7 @@ export default function TodayView() {
     if (!plan) return;
     setBusy(true);
     setProblem("");
-    const err = await wearLook(plan.look);
+    const err = await wearLook(plan.look, plan.occasion.label);
     setBusy(false);
     if (err) return setProblem(err);
     const ids = new Set([plan.look.main, [plan.look.outer], [plan.look.shoes], [plan.look.extra]].flat().filter(Boolean).map((p) => p!.id));
@@ -123,7 +130,7 @@ export default function TodayView() {
         </h1>
       </header>
 
-      <WeatherCard state={weather} onRetry={retry} />
+      <WeatherCard state={weather} onRetry={retry} unit={prefs.unit} />
 
       {error && (
         <div className="card p-5 text-sm text-navy">{error}</div>
