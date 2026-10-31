@@ -87,12 +87,12 @@ export function weatherContext(w: Weather | null | undefined): StyleContext {
   };
 }
 
-/** One calm sentence about the day, for the Today card. */
-export function weatherLine(w: Weather): string {
+/** One calm sentence about the day, or null on an ordinary day so the card stays small. */
+export function weatherLine(w: Weather): string | null {
   if (w.sky === "storm") return "Storms around. Stay dry and dress for it.";
   if (w.sky === "rain" || w.sky === "drizzle" || w.rainChance >= 60) return "Rain is likely. Closed shoes will serve you.";
   if (w.feels >= 33) return "Properly hot. Keep the fabrics light.";
   if (w.feels >= 30) return "Warm out there. Breathable pieces win.";
   if (w.temp <= 22) return "A cooler day. A layer will help.";
-  return "A comfortable day to dress well.";
+  return null;
 }

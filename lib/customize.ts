@@ -214,3 +214,19 @@ export function resolve(group: Group, answers: Record<string, number>) {
   ctx.dressUp = Math.max(-2, Math.min(2, dress));
   return { occasion, ctx };
 }
+
+/** Which Customize group fits an engine occasion, so Today can open the right questions. */
+export function groupFor(occasion: string): string {
+  switch (occasion) {
+    case "Church": return "church";
+    case "Office":
+    case "Interview": return "work";
+    case "Owambe":
+    case "Aso ebi":
+    case "Traditional wedding": return "owambe";
+    case "Date night": return "date";
+    case "White wedding": return "special";
+    case "Streetwear": return "street";
+    default: return "everyday";
+  }
+}
