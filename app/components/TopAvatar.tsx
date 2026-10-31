@@ -1,6 +1,5 @@
 import Avatar from "./Avatar";
 import Crown from "./Crown";
-import SoundToggle from "./SoundToggle";
 
 // Whether to show this bar at all is decided by AppShell.
 export default function TopAvatar() {
@@ -10,10 +9,7 @@ export default function TopAvatar() {
         <Crown size={18} className="text-orange" strokeWidth={1.6} />
         CROWNED
       </div>
-      <div className="flex items-center gap-3">
-        <SoundToggle />
-        <Avatar />
-      </div>
+      <Avatar />
     </header>
   );
 }

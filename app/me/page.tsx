@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronLeft } from "lucide-react";
+import SoundRow from "../components/SoundToggle";
 import { useEffect, useState, type ChangeEvent, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -430,7 +431,7 @@ export default function MePage() {
 
       {message && <p className="fade-in text-center subhead text-navy">{message}</p>}
 
-      <Section title="YOUR FIT">
+      <Section title="Your fit">
         <div>
           <Row label="Name" value={profile.name ?? "Add"} open={open === "name"} onClick={() => toggle("name")} />
           {open === "name" && (
@@ -493,7 +494,7 @@ export default function MePage() {
         </div>
       </Section>
 
-      <Section title="YOUR USUAL SIZES">
+      <Section title="Your usual sizes">
         <div>
           <Row label="Tops" value={profile.top_size ?? "Add"} open={open === "top"} onClick={() => toggle("top")} />
           {open === "top" && (
@@ -524,7 +525,7 @@ export default function MePage() {
         </div>
       </Section>
 
-      <Section title="YOUR STYLE">
+      <Section title="Your style">
         <div>
           <Row
             label="Looks you like"
@@ -557,7 +558,7 @@ export default function MePage() {
         </div>
       </Section>
 
-      <Section title="LOCATION AND WEATHER">
+      <Section title="Location and weather">
         <div>
           <Row
             label="Your city"
@@ -641,7 +642,7 @@ export default function MePage() {
         </div>
       </Section>
 
-      <Section title="WARDROBE">
+      <Section title="Wardrobe">
         <Link href="/wardrobe" className="flex min-h-[52px] items-center justify-between px-4 py-3 transition-colors active:bg-fill">
           <span className="text-navy">
             {pieces} {pieces === 1 ? "piece" : "pieces"}
@@ -653,7 +654,11 @@ export default function MePage() {
         </Link>
       </Section>
 
-      <Section title="ACCOUNT">
+      <Section title="App">
+        <SoundRow />
+      </Section>
+
+      <Section title="Account">
         <button onClick={signOut} className="flex min-h-[52px] w-full items-center px-4 text-left text-navy transition-colors active:bg-fill">
           Sign Out
         </button>

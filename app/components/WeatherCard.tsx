@@ -1,6 +1,6 @@
 "use client";
 
-import { CloudFog, CloudLightning, CloudRain, CloudSun, Cloud, Droplets, Sun, Moon, Wind, CloudDrizzle } from "lucide-react";
+import { CloudFog, CloudLightning, CloudRain, CloudSun, Cloud, Sun, Moon, CloudDrizzle } from "lucide-react";
 import type { WeatherState } from "./useWeather";
 import { weatherLine, type Sky } from "@/lib/weather";
 import type { Unit } from "@/lib/prefs";
@@ -15,9 +15,6 @@ function SkyIcon({ sky, day, size = 40 }: { sky: Sky; day: boolean; size?: numbe
   if (sky === "storm") return <CloudLightning {...p} />;
   return <Cloud {...p} />;
 }
-
-const time = (ms: number) =>
-  new Date(ms).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
 export default function WeatherCard({
   state,
@@ -56,37 +53,25 @@ export default function WeatherCard({
   const w = state.weather;
   const advice = weatherLine(w);
   return (
-    <section className="card flex flex-col gap-2 p-3.5" aria-label="Current weather">
+    <section className="flex flex-col gap-2" aria-label="Current weather">
       <div className="flex items-center gap-3">
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-orange-soft text-orange-deep">
-          <SkyIcon sky={w.sky} day={w.isDay} size={24} />
+        <span className="shrink-0 text-navy" aria-hidden>
+          <SkyIcon sky={w.sky} day={w.isDay} size={30} />
         </span>
-        <div className="flex min-w-0 flex-1 flex-col">
-          <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-bold leading-none text-navy">{deg(w.temp)}°</span>
-            <span className="truncate text-sm font-medium text-navy">{w.label}</span>
-          </div>
-          <span className="text-xs text-muted">
-            Feels {deg(w.feels)}° · H {deg(w.high)}° L {deg(w.low)}°
+        <div className="flex min-w-0 flex-col">
+          <span className="text-[22px] font-bold leading-tight tracking-[-0.02em] text-navy">
+            {deg(w.temp)}°  {w.label}
+          </span>
+          <span className="footnote text-muted">
+            Feels {deg(w.feels)}°, high {deg(w.high)}°, low {deg(w.low)}°
+            {state.place ? `, ${state.place}` : state.fallback ? ", Lagos" : ""}
           </span>
         </div>
-        <span className="flex shrink-0 items-center gap-1.5 self-start text-[11px] text-muted" title="Live">
-          <span className="h-1.5 w-1.5 rounded-full bg-orange" aria-hidden />
-          {time(w.fetchedAt)}
-        </span>
       </div>
-
-      <dl className="flex items-center justify-between gap-2 rounded-xl bg-fill px-3 py-2 text-xs text-navy">
-        <div className="flex items-center gap-1"><dt className="sr-only">Rain chance</dt><CloudRain size={13} aria-hidden /><dd className="font-semibold">{Math.round(w.rainChance)}%</dd></div>
-        <div className="flex items-center gap-1"><dt className="sr-only">Humidity</dt><Droplets size={13} aria-hidden /><dd className="font-semibold">{Math.round(w.humidity)}%</dd></div>
-        <div className="flex items-center gap-1"><dt className="sr-only">Wind</dt><Wind size={13} aria-hidden /><dd className="font-semibold">{Math.round(w.wind)} km/h</dd></div>
-      </dl>
-
-      {(advice || state.place || state.fallback) && (
-        <p className="text-xs text-muted">
+      {(advice || state.fallback) && (
+        <p className="footnote text-muted">
           {advice}
-          {state.place && `${advice ? " " : ""}${state.place}.`}
-          {state.fallback && `${advice ? " " : ""}Showing Lagos. Allow location, or set your city in Profile.`}
+          {state.fallback && `${advice ? " " : ""}Allow location, or set your city in Profile.`}
         </p>
       )}
     </section>

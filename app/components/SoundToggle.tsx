@@ -1,12 +1,10 @@
 "use client";
 
-import { useSyncExternalStore, useState } from "react";
-import { Volume2, VolumeX } from "lucide-react";
+import { useState, useSyncExternalStore } from "react";
 import { feedbackOn, setFeedback } from "@/lib/feedback";
 
-/** Switches the app's sounds and haptics on or off. */
-export default function SoundToggle() {
-  // Read the saved choice without a render before it is known.
+/** A Profile row that switches the app's sounds and haptics on or off. */
+export default function SoundRow() {
   const saved = useSyncExternalStore(
     () => () => {},
     () => feedbackOn(),
@@ -18,15 +16,14 @@ export default function SoundToggle() {
   return (
     <button
       onClick={() => {
-        const next = !on;
-        setChoice(next);
-        setFeedback(next);
+        setChoice(!on);
+        setFeedback(!on);
       }}
-      aria-label={on ? "Turn sound off" : "Turn sound on"}
       aria-pressed={on}
-      className="flex h-9 w-9 items-center justify-center rounded-full bg-card text-navy shadow-[var(--lift)] transition-transform duration-150 active:scale-90"
+      className="flex min-h-[52px] w-full items-center justify-between gap-4 px-4 py-3 text-left transition-colors active:bg-fill"
     >
-      {on ? <Volume2 size={17} aria-hidden /> : <VolumeX size={17} aria-hidden />}
+      <span className="text-navy">Sound and haptics</span>
+      <span className="text-muted">{on ? "On" : "Off"}</span>
     </button>
   );
 }
