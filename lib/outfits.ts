@@ -48,6 +48,8 @@ export type StyleContext = {
   /** His preferred looks tags and favourite colours. They only nudge the ranking. */
   likes?: string[];
   colours?: string[];
+  /** Colours he picked for today. Pieces in this palette are strongly preferred. */
+  palette?: string[];
 };
 
 export const OCCASIONS: Occasion[] = [
@@ -228,6 +230,7 @@ function candidates(pieces: Piece[], occ: Occasion, ctx: StyleContext): Candidat
     for (const p of body) {
       if (ctx.likes?.length && (p.looks ?? []).some((l) => ctx.likes!.includes(norm(l)))) fitPenalty += 0.7;
       if (ctx.colours?.length && p.colour && ctx.colours.includes(p.colour)) fitPenalty += 0.8;
+      if (ctx.palette?.length && p.colour) fitPenalty += ctx.palette.includes(p.colour) ? 2.5 : -1.5;
     }
     const core = [...body, shoe];
     out.push({

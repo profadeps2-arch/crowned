@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Bookmark, ChevronLeft, ChevronRight, RefreshCw } from "lucide-react";
 import { OCCASIONS, buildLooks, missingFor, whyItWorks, type Look, type Occasion, type StyleContext } from "@/lib/outfits";
-import { GROUPS, resolve, type Group } from "@/lib/customize";
+import { GROUPS, PALETTES, resolve, type Group } from "@/lib/customize";
 import { weatherContext } from "@/lib/weather";
 import { saveLook, wearLook } from "@/lib/looks-db";
 import { useWardrobe } from "../components/useWardrobe";
@@ -33,6 +33,7 @@ export default function CustomizeView() {
   const [group, setGroup] = useState<Group | null>(() => GROUPS.find((g) => g.id === presetId) ?? null);
   const fromToday = !!presetId && group?.id === presetId;
   const [answers, setAnswers] = useState<Record<string, number>>({});
+  const [palette, setPalette] = useState(0);
   const [styling, setStyling] = useState(false);
   const [looks, setLooks] = useState<Look[]>([]);
   const [occasion, setOccasion] = useState<Occasion | null>(null);
@@ -63,6 +64,7 @@ export default function CustomizeView() {
       ...(weather.status === "ready" && prefs.weatherAware ? weatherContext(weather.weather) : {}),
       likes: prefs.styles,
       colours: prefs.colours,
+      palette: PALETTES[palette].colours,
     };
     if (fresh) shown.current.clear();
 
@@ -166,6 +168,7 @@ export default function CustomizeView() {
                 onClick={() => {
                   setGroup(g);
                   setAnswers({});
+                  setPalette(0);
                 }}
                 disabled={loading}
                 className="flex w-full items-center gap-3 py-[18px] text-left transition-opacity active:opacity-50 disabled:opacity-50"
@@ -213,6 +216,24 @@ export default function CustomizeView() {
               </div>
             </fieldset>
           ))}
+
+          <fieldset className="flex flex-col">
+            <legend className="mb-1 text-[17px] font-medium text-navy">Colours</legend>
+            <p className="mb-4 text-[14px] text-muted">Optional. Leave it and we pick what works.</p>
+            <div className="flex flex-wrap gap-2">
+              {PALETTES.map((pal, i) => (
+                <button
+                  key={pal.label}
+                  type="button"
+                  aria-pressed={palette === i}
+                  onClick={() => setPalette(i)}
+                  className="chip"
+                >
+                  {pal.label}
+                </button>
+              ))}
+            </div>
+          </fieldset>
 
           <button onClick={() => run(true)} disabled={!complete || loading} className="btn btn-orange">
             Style Me

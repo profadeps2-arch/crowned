@@ -12,6 +12,15 @@ export type Group = {
   questions: Question[];
 };
 
+/** Colour moods he can ask for. The first means no preference. */
+export const PALETTES: { label: string; colours: string[] }[] = [
+  { label: "Your call", colours: [] },
+  { label: "Dark and classic", colours: ["Black", "Navy", "Grey", "Brown"] },
+  { label: "Light and clean", colours: ["White", "Cream", "Beige", "Grey"] },
+  { label: "Earth tones", colours: ["Brown", "Beige", "Olive", "Tan", "Cream"] },
+  { label: "Bold", colours: ["Red", "Burgundy", "Blue", "Green"] },
+];
+
 export const GROUPS: Group[] = [
   {
     id: "work",
