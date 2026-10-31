@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Heart, SlidersHorizontal, RefreshCw } from "lucide-react";
+import { ChevronRight, Heart, SlidersHorizontal, RefreshCw } from "lucide-react";
 import { OCCASIONS, buildLooks, missingFor, whyItWorks, type Look, type Occasion, type Piece, type StyleContext } from "@/lib/outfits";
 import { weatherContext } from "@/lib/weather";
 import { groupFor } from "@/lib/customize";
@@ -14,6 +14,8 @@ import WeatherCard from "../components/WeatherCard";
 import { Breakdown, LookBento, PieceViewer } from "../components/LookBento";
 import ReadyScreen from "../components/ReadyScreen";
 import Crown from "../components/Crown";
+import Avatar from "../components/Avatar";
+import Photo from "../components/Photo";
 
 function greeting(hour: number) {
   if (hour < 12) return "Good morning";
@@ -29,6 +31,23 @@ function occasionsFor(d: Date): string[] {
 }
 
 type Plan = { occasion: Occasion; look: Look };
+
+const GLANCE_LABELS: Record<string, string> = { Outerwear: "Jackets" };
+const GLANCE_ORDER = ["Tops", "Bottoms", "Outerwear", "Shoes", "Native", "Accessories"];
+
+/** One tile per category: a photo and a count. */
+function glance(pieces: Piece[]) {
+  const by = new Map<string, Piece[]>();
+  for (const p of pieces) {
+    if (!p.category) continue;
+    by.set(p.category, [...(by.get(p.category) ?? []), p]);
+  }
+  const keys = [...GLANCE_ORDER.filter((k) => by.has(k)), ...[...by.keys()].filter((k) => !GLANCE_ORDER.includes(k))];
+  return keys.map((k) => {
+    const list = by.get(k)!;
+    return { key: k, label: GLANCE_LABELS[k] ?? k, count: list.length, photo: list.find((p) => p.url)?.url ?? null };
+  });
+}
 
 export default function TodayView() {
   const { pieces, setPieces, uid, name, prefs, loading, error } = useWardrobe();
@@ -134,44 +153,41 @@ export default function TodayView() {
   }
 
   const thinking = loading || (!error && !settled) || (!plan && !empty && !error);
+  const [open, setOpen] = useState(false);
+  const tiles = glance(pieces);
+  const ready = plan && !thinking && !error;
+  const rainOk = weather.status === "ready" && prefs.weatherAware;
 
   return (
-    <main className="flex flex-col gap-6 px-5 pb-8 pt-4">
-      <header className="flex flex-col gap-1">
-        <span className="eyebrow">
-          {now.toLocaleDateString([], { weekday: "long", day: "numeric", month: "long" })}
-        </span>
-        <h1 className="large-title">
-          {greeting(now.getHours())}
-          {name ? `, ${name}` : ""}.
-        </h1>
+    <main className="flex flex-col gap-5 px-5 pb-8 pt-[calc(1rem+env(safe-area-inset-top))]">
+      <header className="flex items-start justify-between gap-4">
+        <div className="flex min-w-0 flex-col gap-1">
+          <h1 className="large-title">
+            {greeting(now.getHours())}
+            {name ? `, ${name}` : ""}.
+          </h1>
+          <p className="subhead text-orange-deep">Your style is ready for today.</p>
+        </div>
+        <div className="shrink-0 pt-1"><Avatar size={40} /></div>
       </header>
 
-      <WeatherCard state={weather} onRetry={retry} unit={prefs.unit} />
+      <WeatherCard state={weather} onRetry={retry} unit={prefs.unit} now={now} />
 
-      {plan && !thinking && !error && (
-        <div className="-mt-2">
-          <Link
-            href={`/customize?group=${groupFor(plan.occasion.label)}`}
-            className="btn btn-outline w-full"
-          >
-            <SlidersHorizontal size={18} aria-hidden /> Customize Today&apos;s Outfit
-          </Link>
-        </div>
+      {ready && (
+        <Link
+          href={`/customize?group=${groupFor(plan.occasion.label)}`}
+          className="btn btn-outline w-full"
+        >
+          <SlidersHorizontal size={18} aria-hidden /> Customize Today&apos;s Outfit
+        </Link>
       )}
 
-      {error && (
-        <div className="card p-5 subhead text-navy">{error}</div>
-      )}
+      {error && <div className="card p-5 subhead text-navy">{error}</div>}
 
       {thinking && !error && (
         <div className="flex animate-pulse flex-col gap-3" aria-busy="true" aria-label="Choosing your outfit">
-          <div className="h-5 w-40 rounded bg-sand" />
-          <div className="aspect-[4/5] w-full rounded-2xl bg-sand" />
-          <div className="flex gap-2">
-            <div className="h-32 flex-1 rounded-2xl bg-sand" />
-            <div className="h-32 w-32 rounded-2xl bg-sand" />
-          </div>
+          <div className="h-5 w-32 rounded bg-sand" />
+          <div className="h-48 w-full rounded-[20px] bg-sand" />
         </div>
       )}
 
@@ -188,50 +204,105 @@ export default function TodayView() {
         </div>
       )}
 
-      {plan && !thinking && !error && (
-        <section className="flex flex-col gap-5" aria-label="Today's outfit">
-          <div className="flex items-end justify-between gap-3">
-            <div className="flex flex-col gap-1">
-              <span className="eyebrow">Today&apos;s outfit recommendation</span>
-              <h2 className="title-2">{plan.look.title}</h2>
-            </div>
+      {ready && (
+        <section className="flex flex-col gap-2" aria-label="Today's look">
+          <h2 className="headline px-1">Today&apos;s Look</h2>
+          <div className="card flex gap-4 p-3">
             <button
-              onClick={() => choose(false)}
-              className="flex shrink-0 items-center gap-1.5 pb-1 text-[15px] font-semibold text-orange-deep active:opacity-60"
+              onClick={() => setOpen(true)}
+              aria-label="View outfit"
+              className="grid w-[38%] shrink-0 grid-rows-2 gap-1 self-stretch overflow-hidden rounded-2xl"
+              style={{ minHeight: 168 }}
             >
-              <RefreshCw size={14} aria-hidden /> Another
+              {[...plan.look.main, ...(plan.look.main.length < 2 ? [plan.look.shoes] : [])].slice(0, 2).map((p) => (
+                <Photo key={p.id} src={p.url} alt="" className="h-full w-full" />
+              ))}
             </button>
-          </div>
-
-          <LookBento key={plan.look.key} look={plan.look} onOpen={setViewing} />
-
-          <div className="flex flex-col gap-2">
-            <h3 className="headline px-1">What you are wearing</h3>
-            <Breakdown look={plan.look} onOpen={setViewing} />
-          </div>
-
-          <div className="card flex flex-col gap-2 p-5">
-            <h3 className="headline">Why it works</h3>
-            <p className="subhead text-muted">
-              {whyItWorks(plan.look, plan.occasion, ctx)}
-            </p>
-            {plan.look.tips.map((t) => (
-              <p key={t} className="subhead text-muted">{t}</p>
-            ))}
-          </div>
-
-          {problem && <p className="text-center text-sm text-danger">{problem}</p>}
-
-          <div className="flex flex-col gap-3">
-            <button onClick={love} className="btn btn-orange" aria-pressed={saved}>
-              <Heart size={18} fill={saved ? "currentColor" : "none"} aria-hidden />
-              {saved ? "Saved to Outfits" : "Love This Look"}
-            </button>
-            <button onClick={wear} disabled={busy} className="btn btn-ghost">
-              I am wearing this today
-            </button>
+            <div className="flex min-w-0 flex-1 flex-col gap-2 py-1">
+              <div className="flex flex-col gap-0.5">
+                <span className="eyebrow">{plan.occasion.label}</span>
+                <h3 className="headline">{plan.look.title}</h3>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {rainOk && <span className="rounded-full bg-orange-soft px-2.5 py-1 text-[12px] font-medium text-orange-deep">Weather appropriate</span>}
+                <span className="rounded-full bg-orange-soft px-2.5 py-1 text-[12px] font-medium text-orange-deep">From your wardrobe</span>
+              </div>
+              <button onClick={() => setOpen(true)} className="btn btn-orange mt-auto !h-11 !text-[15px]">
+                View Outfit
+              </button>
+            </div>
           </div>
         </section>
+      )}
+
+      {!loading && !error && tiles.length > 0 && (
+        <section className="flex flex-col gap-2" aria-label="Your wardrobe at a glance">
+          <div className="flex items-center justify-between px-1">
+            <h2 className="headline">Your wardrobe at a glance</h2>
+            <Link href="/wardrobe" className="flex items-center text-[15px] text-orange-deep">
+              See all <ChevronRight size={16} aria-hidden />
+            </Link>
+          </div>
+          <div className="no-scrollbar -mx-5 flex gap-3 overflow-x-auto px-5">
+            {tiles.map((t) => (
+              <Link key={t.key} href="/wardrobe" className="flex w-[88px] shrink-0 flex-col gap-1.5">
+                <Photo src={t.photo} alt="" className="aspect-square w-full rounded-2xl" />
+                <span className="flex flex-col px-0.5">
+                  <span className="text-[15px] font-semibold leading-tight text-navy">{t.label}</span>
+                  <span className="footnote text-muted">{t.count} {t.count === 1 ? "item" : "items"}</span>
+                </span>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {open && plan && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-cream" role="dialog" aria-label="Today's outfit">
+          <div className="mx-auto flex max-w-md flex-col gap-5 px-5 pb-10 pt-[calc(0.75rem+env(safe-area-inset-top))]">
+            <div className="flex items-center justify-between">
+              <button onClick={() => setOpen(false)} className="min-h-11 text-[17px] font-semibold text-orange-deep">Done</button>
+              <button
+                onClick={() => choose(false)}
+                className="flex min-h-11 items-center gap-1.5 text-[15px] font-semibold text-orange-deep active:opacity-60"
+              >
+                <RefreshCw size={14} aria-hidden /> Another
+              </button>
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <span className="eyebrow">{plan.occasion.label}</span>
+              <h2 className="large-title">{plan.look.title}</h2>
+            </div>
+
+            <LookBento key={plan.look.key} look={plan.look} onOpen={setViewing} />
+
+            <div className="flex flex-col gap-2">
+              <h3 className="headline px-1">What you are wearing</h3>
+              <Breakdown look={plan.look} onOpen={setViewing} />
+            </div>
+
+            <div className="card flex flex-col gap-2 p-5">
+              <h3 className="headline">Why it works</h3>
+              <p className="subhead text-muted">{whyItWorks(plan.look, plan.occasion, ctx)}</p>
+              {plan.look.tips.map((t) => (
+                <p key={t} className="subhead text-muted">{t}</p>
+              ))}
+            </div>
+
+            {problem && <p className="text-center text-sm text-danger">{problem}</p>}
+
+            <div className="flex flex-col gap-3">
+              <button onClick={love} className="btn btn-orange" aria-pressed={saved}>
+                <Heart size={18} fill={saved ? "currentColor" : "none"} aria-hidden />
+                {saved ? "Saved to Outfits" : "Love This Look"}
+              </button>
+              <button onClick={wear} disabled={busy} className="btn btn-ghost">
+                I am wearing this today
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       <PieceViewer piece={viewing} onClose={() => setViewing(null)} />
