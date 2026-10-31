@@ -18,7 +18,7 @@
   --color-orange: #FD914A;
   --color-orange-soft: #FFEBDB;
   --color-orange-deep: #B8500F;
-  --color-on-orange: #FFFFFF; /* text on orange buttons. Change to #1F2A44 for higher contrast. */
+  --color-on-orange: #1F2A44; /* navy on orange, for readable contrast */
 
   /* Dark screens: loading, splash overlays */
   --color-night: #0D1723;

@@ -36,7 +36,20 @@ export type Occasion = {
   need: string;
 };
 
+/** What the day and the customer ask of the outfit. All fields are optional. */
+export type StyleContext = {
+  hot?: boolean;
+  cool?: boolean;
+  rainy?: boolean;
+  /** Positive leans formal, negative leans relaxed. */
+  dressUp?: number;
+  style?: "native" | "western";
+  outer?: "yes" | "no";
+};
+
 export const OCCASIONS: Occasion[] = [
+  { label: "Everyday", primary: ["casual", "smart casual"], secondary: ["streetwear"], need: "Add a tee or polo, trousers and clean shoes." },
+  { label: "Streetwear", primary: ["streetwear", "casual"], secondary: [], need: "Add a tee, trousers or joggers, and sneakers." },
   { label: "Owambe", primary: ["native"], secondary: ["formal", "smart casual"], need: "Add a native set and shoes." },
   { label: "Church", primary: ["native", "formal", "smart casual"], secondary: [], need: "Add a native set, or a shirt and trousers, with smart shoes." },
   { label: "Office", primary: ["smart casual", "formal"], secondary: ["native"], need: "Add a shirt, trousers and smart shoes." },
@@ -169,13 +182,13 @@ function ranked(list: Piece[], occ: Occasion, limit: number) {
     .map((x) => x.p);
 }
 
-function candidates(pieces: Piece[], occ: Occasion): Candidate[] {
+function candidates(pieces: Piece[], occ: Occasion, ctx: StyleContext): Candidate[] {
   const ready = pieces.filter((p) => !p.at_washman && p.url);
   const of = (cat: string) => ready.filter((p) => p.category === cat);
 
-  const natives = ranked(of("Native"), occ, 12);
-  const tops = ranked(of("Tops"), occ, 12);
-  const bottoms = ranked(of("Bottoms"), occ, 12);
+  const natives = ctx.style === "western" ? [] : ranked(of("Native"), occ, 12);
+  const tops = ctx.style === "native" ? [] : ranked(of("Tops"), occ, 12);
+  const bottoms = ctx.style === "native" ? [] : ranked(of("Bottoms"), occ, 12);
   const shoes = ranked(of("Shoes"), occ, 8);
   const outers = ranked(of("Outerwear"), occ, 4);
   const accs = ranked(of("Accessories"), occ, 4);
@@ -195,6 +208,16 @@ function candidates(pieces: Piece[], occ: Occasion): Candidate[] {
     }
     const bodyFormal = body.reduce((s, p) => s + formality(p, occ), 0) / body.length;
     if (Math.abs(formality(shoe, occ) - bodyFormal) >= 2) fitPenalty -= 2;
+
+    // Weather and the customer's answers.
+    const openShoe = has(shoe, "palm", "sandal", "slide", "mule", "slipper");
+    if (ctx.hot && outer) fitPenalty -= 5;
+    if (ctx.hot && native && has(main[0], "agbada")) fitPenalty -= 3;
+    if (ctx.cool && !native && !outer && outers.length > 0) fitPenalty -= 1;
+    if (ctx.rainy && openShoe) fitPenalty -= 4;
+    if (ctx.outer === "yes") fitPenalty += outer ? 2 : -2;
+    if (ctx.outer === "no" && outer) fitPenalty -= 4;
+    fitPenalty += (ctx.dressUp ?? 0) * bodyFormal * 0.8;
     const core = [...body, shoe];
     out.push({
       key: all.map((p) => p.id).sort().join("|"),
@@ -283,8 +306,13 @@ function tipsFor(c: Candidate, tier: Tier, occ: Occasion, scent: Piece | null): 
   return t.slice(0, 2);
 }
 
-export function buildLooks(pieces: Piece[], occ: Occasion, exclude: Set<string>): Look[] {
-  const cands = candidates(pieces, occ);
+export function buildLooks(
+  pieces: Piece[],
+  occ: Occasion,
+  exclude: Set<string>,
+  ctx: StyleContext = {}
+): Look[] {
+  const cands = candidates(pieces, occ, ctx);
   if (cands.length === 0) return [];
 
   const formals = cands.map((c) => c.formal);
@@ -345,7 +373,7 @@ export function buildLooks(pieces: Piece[], occ: Occasion, exclude: Set<string>)
   return chosen.sort((a, b) => TIERS.indexOf(a.tier) - TIERS.indexOf(b.tier));
 }
 
-export function missingFor(pieces: Piece[], occ: Occasion): string {
+export function missingFor(pieces: Piece[], occ: Occasion, ctx: StyleContext = {}): string {
   const ready = pieces.filter((p) => !p.at_washman);
   const hasCat = (cat: string) => ready.some((p) => p.category === cat);
 
@@ -360,6 +388,13 @@ export function missingFor(pieces: Piece[], occ: Occasion): string {
   }
   if (!hasCat("Shoes")) missing.push("shoes");
 
+  if (ctx.style === "native" && !hasCat("Native")) {
+    return "You asked for native, and there is no native set in your wardrobe yet. Add one, or choose shirt and trousers.";
+  }
+  if (ctx.style === "western" && !(hasCat("Tops") && hasCat("Bottoms"))) {
+    return "You asked for shirt and trousers, and one of them is missing. Add it, or choose native.";
+  }
+
   if (hasCat("Shoes") && (hasCat("Native") || (hasCat("Tops") && hasCat("Bottoms")))) {
     return `Nothing in your wardrobe suits ${occ.label} yet. ${occ.need}`;
   }
@@ -369,4 +404,42 @@ export function missingFor(pieces: Piece[], occ: Occasion): string {
       ? missing.join("")
       : `${missing.slice(0, -1).join(", ")} and ${missing[missing.length - 1]}`;
   return `Add ${list} to get your first outfit.`;
+}
+/** Two or three plain sentences on why this look was chosen. */
+export function whyItWorks(look: Look, occ: Occasion, ctx: StyleContext = {}): string {
+  const native = look.main.length === 1 && look.main[0].category === "Native";
+  const out: string[] = [];
+
+  if (native) {
+    out.push(`A native set is the right call for ${occ.label}.`);
+  } else {
+    const level = Math.floor(
+      look.main.reduce((sum, p) => sum + formality(p, occ), 0) / look.main.length
+    );
+    const word = level >= 4 ? "sharp" : level === 3 ? "neat" : "easy";
+    out.push(`${pieceName(look.main[0])} with ${pieceName(look.main[1])} reads ${word} for ${occ.label}.`);
+  }
+
+  const body = [...look.main, ...(look.outer ? [look.outer] : [])];
+  const bolds = new Set(
+    body.map((p) => p.colour).filter((c): c is string => !!c && !NEUTRAL.has(c))
+  );
+  if (bolds.size === 0) out.push("Neutral tones keep it clean and easy to repeat.");
+  else if (bolds.size === 1) out.push("One bold colour, with everything else kept calm.");
+
+  const openShoe = has(look.shoes, "palm", "sandal", "slide", "mule", "slipper");
+  if (ctx.rainy && !openShoe) out.push("Closed shoes, because rain is likely.");
+  else if (ctx.hot && !look.outer) out.push("Kept light for the heat.");
+  else if (ctx.cool && look.outer) out.push("The extra layer keeps you comfortable in the cool.");
+  else {
+    const all = [...look.main, look.outer, look.shoes, look.extra].filter((p): p is Piece => !!p);
+    if (all.every((p) => daysSince(p.last_worn) >= 5)) out.push("None of it was worn in the last few days.");
+  }
+
+  return out.slice(0, 3).join(" ");
+}
+
+/** Every piece in a look, in display order. */
+export function piecesOf(look: Look): Piece[] {
+  return [...look.main, look.outer, look.shoes, look.extra].filter((p): p is Piece => !!p);
 }

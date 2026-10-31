@@ -6,6 +6,10 @@ const nextConfig: NextConfig = {
     agentFeedback: true,
   },
   cacheComponents: true,
+  async redirects() {
+    // Style Me became Today (home) and Customize.
+    return [{ source: "/style", destination: "/today", permanent: false }];
+  },
   partialPrefetching: true,
   turbopack: {
     rules: {
