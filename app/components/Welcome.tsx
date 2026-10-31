@@ -69,7 +69,7 @@ export default function Welcome({ failed = false }: { failed?: boolean }) {
         className="absolute inset-0"
         style={{
           background:
-            "linear-gradient(180deg, rgba(13,23,35,0.2) 0%, rgba(13,23,35,0.5) 40%, rgba(13,23,35,0.97) 82%)",
+            "linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.45) 40%, rgba(0,0,0,0.96) 82%)",
         }}
       />
 
@@ -80,12 +80,12 @@ export default function Welcome({ failed = false }: { failed?: boolean }) {
       )}
 
       <div className="relative z-10 mt-auto flex flex-col gap-4 px-6 pb-[calc(2rem+env(safe-area-inset-bottom))]">
-        <span className="rise text-xs font-semibold uppercase tracking-[0.2em] text-orange">
+        <span className="rise text-[13px] font-semibold uppercase tracking-[0.16em] text-orange">
           Crowned · Your personal stylist
         </span>
 
         <h1
-          className="rise text-[44px] leading-[1.02] text-white"
+          className="rise text-[44px] font-bold leading-[1.04] tracking-[-0.035em] text-white"
           style={{ "--d": "0.1s" } as React.CSSProperties}
         >
           Every man is a king.
@@ -93,7 +93,7 @@ export default function Welcome({ failed = false }: { failed?: boolean }) {
         </h1>
 
         <p
-          className="rise max-w-xs text-[15px] leading-relaxed text-night-text"
+          className="rise max-w-xs text-[17px] leading-snug text-night-text"
           style={{ "--d": "0.2s" } as React.CSSProperties}
         >
           Your outfit, sorted in 1 minute. For owambe, office, church and every
@@ -105,7 +105,7 @@ export default function Welcome({ failed = false }: { failed?: boolean }) {
         </div>
 
         {failed && (
-          <p role="alert" className="rise text-center text-sm text-[#F0A99C]">
+          <p role="alert" className="rise text-center text-[15px] text-[#FF8A80]">
             We could not sign you in. Please try again.
           </p>
         )}

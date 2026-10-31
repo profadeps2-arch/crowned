@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Bookmark, ChevronLeft, RefreshCw } from "lucide-react";
+import { Bookmark, ChevronLeft, ChevronRight, RefreshCw } from "lucide-react";
 import { OCCASIONS, buildLooks, missingFor, whyItWorks, type Look, type Occasion, type StyleContext } from "@/lib/outfits";
 import { GROUPS, resolve, type Group } from "@/lib/customize";
 import { weatherContext } from "@/lib/weather";
@@ -143,20 +143,20 @@ export default function CustomizeView() {
     <main className="flex flex-col gap-6 px-5 pb-8 pt-4">
       {styling && <StyleLoading />}
 
-      {error && <div className="card p-5 text-sm text-navy">{error}</div>}
+      {error && <div className="card p-5 subhead text-navy">{error}</div>}
 
       {/* 1. Pick the occasion */}
       {!showResults && !group && !error && (
         <>
           <header className="flex flex-col gap-1">
-            <Link href="/today" className="flex items-center gap-1 self-start text-sm font-semibold text-navy">
-              <ChevronLeft size={16} aria-hidden /> Today
+            <Link href="/today" className="flex items-center gap-1 self-start text-[17px] font-medium text-orange-deep">
+              <ChevronLeft size={20} aria-hidden /> Today
             </Link>
-            <h1 className="text-3xl leading-tight">Where will you be seen?</h1>
-            <p className="text-sm text-muted">Pick the occasion. A couple of quick questions follow.</p>
+            <h1 className="large-title">Where will you be seen?</h1>
+            <p className="subhead text-muted">Pick the occasion. A couple of quick questions follow.</p>
           </header>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="list">
             {GROUPS.map((g) => (
               <button
                 key={g.id}
@@ -165,10 +165,13 @@ export default function CustomizeView() {
                   setAnswers({});
                 }}
                 disabled={loading}
-                className="card flex min-h-28 flex-col items-start justify-between gap-3 p-4 text-left transition-transform active:scale-[0.98] disabled:opacity-50"
+                className="flex w-full items-center gap-3 p-4 text-left transition-colors active:bg-fill disabled:opacity-50"
               >
-                <span className="text-[17px] font-semibold leading-snug text-navy">{g.label}</span>
-                <span className="text-xs leading-snug text-muted">{g.blurb}</span>
+                <span className="flex min-w-0 flex-1 flex-col">
+                  <span className="headline text-navy">{g.label}</span>
+                  <span className="footnote text-muted">{g.blurb}</span>
+                </span>
+                <ChevronRight size={18} className="shrink-0 text-muted" aria-hidden />
               </button>
             ))}
           </div>
@@ -181,17 +184,17 @@ export default function CustomizeView() {
           <header className="flex flex-col gap-1">
             <button
               onClick={() => setGroup(null)}
-              className="flex items-center gap-1 self-start text-sm font-semibold text-navy"
+              className="flex items-center gap-1 self-start text-[17px] font-medium text-orange-deep"
             >
-              <ChevronLeft size={16} aria-hidden /> {fromToday ? "Other occasions" : "Occasions"}
+              <ChevronLeft size={20} aria-hidden /> {fromToday ? "Other occasions" : "Occasions"}
             </button>
             <span className="eyebrow">{group.label}</span>
-            <h1 className="text-3xl leading-tight">{fromToday ? "Customize today's outfit" : "A little more detail"}</h1>
+            <h1 className="large-title">{fromToday ? "Customize today's outfit" : "A little more detail"}</h1>
           </header>
 
           {group.questions.map((q) => (
             <fieldset key={q.id} className="flex flex-col gap-3">
-              <legend className="mb-3 text-base font-semibold text-navy">{q.ask}</legend>
+              <legend className="headline mb-3 text-navy">{q.ask}</legend>
               <div className="flex flex-wrap gap-2.5">
                 {q.options.map((o, i) => (
                   <button
@@ -199,7 +202,7 @@ export default function CustomizeView() {
                     type="button"
                     aria-pressed={answers[q.id] === i}
                     onClick={() => setAnswers((a) => ({ ...a, [q.id]: i }))}
-                    className="chip"
+                    className="chip !h-11"
                   >
                     {o.label}
                   </button>
@@ -219,18 +222,18 @@ export default function CustomizeView() {
       {showResults && occasion && (
         <>
           <header className="flex flex-col gap-1">
-            <button onClick={changeAnswers} className="flex items-center gap-1 self-start text-sm font-semibold text-navy">
-              <ChevronLeft size={16} aria-hidden /> Change answers
+            <button onClick={changeAnswers} className="flex items-center gap-1 self-start text-[17px] font-medium text-orange-deep">
+              <ChevronLeft size={20} aria-hidden /> Change answers
             </button>
-            <h1 className="text-3xl leading-tight">{occasion.label}</h1>
+            <h1 className="large-title">{occasion.label}</h1>
             {looks.length > 0 && (
-              <p className="text-sm text-muted">{COUNT_WORDS[looks.length]} from your wardrobe.</p>
+              <p className="subhead text-muted">{COUNT_WORDS[looks.length]} from your wardrobe.</p>
             )}
           </header>
 
           {looks.length === 0 && (
             <div className="card flex flex-col gap-4 p-5">
-              <p className="text-sm text-navy">{message}</p>
+              <p className="subhead text-navy">{message}</p>
               <Link href="/wardrobe" className="btn btn-orange">Go to Wardrobe</Link>
             </div>
           )}
@@ -250,16 +253,16 @@ export default function CustomizeView() {
                   >
                     <div className="flex flex-col gap-1">
                       <span className="eyebrow">{look.tier}</span>
-                      <h2 className="text-xl leading-tight">{look.title}</h2>
+                      <h2 className="title-2">{look.title}</h2>
                     </div>
 
                     <LookBento look={look} onOpen={setViewing} />
 
                     <div className="card flex flex-col gap-2 p-4">
-                      <h3 className="text-sm font-semibold">Why it works</h3>
-                      <p className="text-sm leading-relaxed text-muted">{whyItWorks(look, occasion, ctx)}</p>
+                      <h3 className="headline">Why it works</h3>
+                      <p className="subhead text-muted">{whyItWorks(look, occasion, ctx)}</p>
                       {look.tips.map((t) => (
-                        <p key={t} className="text-sm leading-relaxed text-muted">{t}</p>
+                        <p key={t} className="subhead text-muted">{t}</p>
                       ))}
                     </div>
 
@@ -279,7 +282,7 @@ export default function CustomizeView() {
                 ))}
               </div>
 
-              {problem && <p className="text-center text-sm text-[#C0392B]">{problem}</p>}
+              {problem && <p className="text-center text-sm text-danger">{problem}</p>}
 
               <div className="flex flex-col items-center gap-4">
                 {looks.length > 1 && (
@@ -289,12 +292,12 @@ export default function CustomizeView() {
                         key={l.key}
                         onClick={() => goTo(i)}
                         aria-label={`${l.tier} look`}
-                        className={`h-2 rounded-full transition-all ${i === index ? "w-6 bg-orange" : "w-2 bg-navy/20"}`}
+                        className={`h-2 rounded-full transition-all ${i === index ? "w-6 bg-orange" : "w-2 bg-muted/30"}`}
                       />
                     ))}
                   </div>
                 )}
-                <button onClick={() => run(false)} className="flex items-center gap-2 text-sm font-semibold text-navy">
+                <button onClick={() => run(false)} className="flex items-center gap-2 text-[17px] font-medium text-orange-deep">
                   <RefreshCw size={15} aria-hidden /> Show me others
                 </button>
               </div>

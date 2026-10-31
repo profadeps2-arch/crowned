@@ -20,10 +20,10 @@ export default function ReadyScreen({
         <Crown variant="solid" size={72} className="text-orange" />
       </div>
       <div className="rise flex flex-col gap-3" style={{ "--d": "0.9s" } as React.CSSProperties}>
-        <h2 className="text-4xl font-bold leading-tight text-night-text">
+        <h2 className="large-title text-night-text">
           Your outfit is ready{name ? `, ${name}` : ""}.
         </h2>
-        <p className="text-sm text-night-muted">{title}</p>
+        <p className="text-[17px] text-night-muted">{title}</p>
       </div>
       <button onClick={onDone} className="btn btn-orange rise mt-4 w-full max-w-xs" style={{ "--d": "1.3s" } as React.CSSProperties}>
         Done

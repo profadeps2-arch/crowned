@@ -49,8 +49,8 @@ function Empty({ title, text, action }: { title: string; text: string; action?: 
   return (
     <div className="card flex flex-col items-center gap-4 p-8 text-center">
       <Crown size={40} className="text-orange" />
-      <h2 className="text-xl">{title}</h2>
-      <p className="text-sm text-muted">{text}</p>
+      <h2 className="title-2">{title}</h2>
+      <p className="subhead text-muted">{text}</p>
       {action && (
         <Link href={action.href} className="btn btn-orange w-full">
           {action.label}
@@ -213,33 +213,29 @@ export default function OutfitsPage() {
 
   return (
     <main className="flex flex-col gap-5 px-5 pb-8 pt-4">
-      <header className="flex flex-col gap-1">
-        <span className="eyebrow">Your outfits</span>
-        <h1 className="text-3xl leading-tight">Outfits</h1>
-      </header>
+      <h1 className="large-title">Outfits</h1>
 
-      <div role="tablist" aria-label="Outfits" className="no-scrollbar -mx-5 flex gap-2 overflow-x-auto px-5">
+      <div role="tablist" aria-label="Outfits" className="seg">
         {tabs.map((t) => (
           <button
             key={t.id}
             role="tab"
             aria-selected={tab === t.id}
-            aria-pressed={tab === t.id}
             onClick={() => {
               setTab(t.id);
               setConfirming(null);
               setProblem("");
             }}
-            className="chip"
+            className="seg-item"
           >
             {t.label}
-            {t.n ? <span className="opacity-70">{t.n}</span> : null}
+            {t.n ? <span className="ml-1 text-muted">{t.n}</span> : null}
           </button>
         ))}
       </div>
 
-      {error && <div className="card p-5 text-sm text-navy">{error}</div>}
-      {problem && <p className="text-center text-sm text-[#C0392B]">{problem}</p>}
+      {error && <div className="card p-5 subhead text-navy">{error}</div>}
+      {problem && <p className="text-center text-sm text-danger">{problem}</p>}
 
       {/* Recommended */}
       {tab === "recommended" && !error && (
@@ -326,7 +322,7 @@ export default function OutfitsPage() {
                       <button
                         onClick={() => setConfirming(k)}
                         aria-label="Remove outfit"
-                        className="btn btn-outline !h-11 !w-11 shrink-0 !px-0"
+                        className="btn !h-11 !w-11 shrink-0 !px-0 bg-fill text-danger"
                       >
                         <Trash2 size={17} aria-hidden />
                       </button>
@@ -381,7 +377,7 @@ export default function OutfitsPage() {
                       <button
                         onClick={() => setConfirming(k)}
                         aria-label="Remove from history"
-                        className="btn btn-outline !h-11 !w-11 shrink-0 !px-0"
+                        className="btn !h-11 !w-11 shrink-0 !px-0 bg-fill text-danger"
                       >
                         <Trash2 size={17} aria-hidden />
                       </button>

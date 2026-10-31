@@ -1,5 +1,6 @@
 "use client";
 
+import { ChevronLeft } from "lucide-react";
 import { useEffect, useState, type ChangeEvent, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -54,8 +55,8 @@ function toJpeg(img: ImageBitmap, max: number, quality: number): Promise<Blob> {
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="flex flex-col gap-2">
-      <h2 className="px-1 text-xs tracking-[0.2em] text-[#6E6A66]">{title}</h2>
-      <div className="divide-y divide-[#EFE8DC] overflow-hidden rounded-2xl border border-[#E9E4DE] bg-[#FFFFFF]">
+      <h2 className="eyebrow px-4 !font-normal">{title}</h2>
+      <div className="list">
         {children}
       </div>
     </section>
@@ -71,11 +72,11 @@ function Row({
   onClick: () => void;
 }) {
   return (
-    <button onClick={onClick} className="flex w-full items-center justify-between gap-4 px-4 py-4 text-left">
-      <span className="font-medium text-[#1F2A44]">{label}</span>
-      <span className="flex items-center gap-2 text-sm text-[#6E6A66]">
+    <button onClick={onClick} className="flex min-h-[52px] w-full items-center justify-between gap-4 px-4 py-3 text-left transition-colors active:bg-fill">
+      <span className="text-navy">{label}</span>
+      <span className="flex items-center gap-2 text-muted">
         {value}
-        <span className={`text-[#6E6A66] transition-transform ${open ? "rotate-90" : ""}`}>›</span>
+        <span className={`text-xl leading-none text-muted/60 transition-transform ${open ? "rotate-90" : ""}`}>›</span>
       </span>
     </button>
   );
@@ -94,11 +95,8 @@ function Chips({
         <button
           key={o}
           onClick={() => onPick(o)}
-          className={`rounded-full border px-4 py-2 text-sm ${
-            value === o
-              ? "border-orange bg-orange text-on-orange"
-              : "border-[#E9E4DE] bg-white text-[#1F2A44]"
-          }`}
+          aria-pressed={value === o}
+          className="chip"
         >
           {o}
         </button>
@@ -123,11 +121,7 @@ function MultiChips({
             key={o.value}
             onClick={() => onToggle(o.value)}
             aria-pressed={on}
-            className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm ${
-              on
-                ? "border-orange bg-orange text-on-orange"
-                : "border-[#E9E4DE] bg-white text-[#1F2A44]"
-            }`}
+            className="chip"
           >
             {o.hex && (
               <span className="h-3.5 w-3.5 rounded-full border border-black/15" style={{ background: o.hex }} aria-hidden />
@@ -388,53 +382,53 @@ export default function MePage() {
   if (loading) {
     return (
       <main className="flex flex-col items-center gap-4 px-6 py-16">
-        <div className="h-24 w-24 animate-pulse rounded-full bg-[#F7ECE1]" />
-        <div className="h-5 w-40 animate-pulse rounded-full bg-[#F7ECE1]" />
+        <div className="h-24 w-24 animate-pulse rounded-full bg-sand" />
+        <div className="h-5 w-40 animate-pulse rounded-full bg-sand" />
       </main>
     );
   }
 
   return (
-    <main className="flex flex-col gap-8 px-6 pb-16 pt-10">
+    <main className="flex flex-col gap-6 px-5 pb-16 pt-[calc(0.75rem+env(safe-area-inset-top))]">
       <div className="flex items-center justify-between">
-        <button onClick={() => router.back()} className="text-sm font-semibold text-[#1F2A44]">
-          ‹ Back
+        <button onClick={() => router.back()} className="-ml-1.5 flex min-h-11 items-center gap-0.5 text-[17px] text-orange-deep active:opacity-60">
+          <ChevronLeft size={24} aria-hidden /> Back
         </button>
       </div>
 
       <div className="flex flex-col items-center gap-3 text-center">
-        <div className="h-24 w-24 overflow-hidden rounded-full border border-[#E9E4DE] bg-[#1F2A44]">
+        <div className="h-24 w-24 overflow-hidden rounded-full bg-navy">
           {photo ? (
             <img src={photo} alt="Your photo" className="h-full w-full object-cover" referrerPolicy="no-referrer" />
           ) : (
-            <span className="flex h-full w-full items-center justify-center text-4xl font-semibold text-[#FDFAF6]">
+            <span className="flex h-full w-full items-center justify-center text-4xl font-semibold text-cream">
               {initial}
             </span>
           )}
         </div>
-        <button onClick={() => toggle("photo")} className="text-sm font-semibold text-[#1F2A44]">
+        <button onClick={() => toggle("photo")} className="text-[15px] font-medium text-orange-deep">
           {busy && open === null && message === "" ? "Updating…" : "Change Photo"}
         </button>
         {open === "photo" && (
           <div className="flex w-full max-w-xs flex-col gap-2">
-            <label className="cursor-pointer rounded-full bg-orange py-3 text-sm font-semibold text-on-orange">
+            <label className="btn btn-orange cursor-pointer !h-11 !text-[15px]">
               Take Photo
               <input type="file" accept="image/*" capture="user" className="hidden" onChange={changePhoto} />
             </label>
-            <label className="cursor-pointer rounded-full border border-line bg-card py-3 text-sm font-semibold text-navy">
+            <label className="btn btn-outline cursor-pointer !h-11 !text-[15px]">
               Choose from Library
               <input type="file" accept="image/*" className="hidden" onChange={changePhoto} />
             </label>
           </div>
         )}
         <div className="flex flex-col gap-1">
-          <h1 className="text-3xl">{profile.name ?? ""}</h1>
-          <span className="text-sm text-[#6E6A66]">{email}</span>
-          <span className="text-xs text-[#6E6A66]">Member since {since}</span>
+          <h1 className="title-1">{profile.name ?? ""}</h1>
+          <span className="subhead text-muted">{email}</span>
+          <span className="footnote text-muted">Member since {since}</span>
         </div>
       </div>
 
-      {message && <p className="fade-in text-center text-sm text-[#1F2A44]">{message}</p>}
+      {message && <p className="fade-in text-center subhead text-navy">{message}</p>}
 
       <Section title="YOUR FIT">
         <div>
@@ -444,12 +438,12 @@ export default function MePage() {
               <input
                 value={nameDraft}
                 onChange={(e) => setNameDraft(e.target.value)}
-                className="min-w-0 flex-1 rounded-xl border border-[#E9E4DE] bg-white px-3 py-2"
+                className="min-w-0 flex-1 field"
               />
               <button
                 onClick={() => nameDraft.trim().length >= 2 && save({ name: nameDraft.trim() })}
                 disabled={busy || nameDraft.trim().length < 2}
-                className="rounded-full bg-orange px-4 text-sm font-semibold text-on-orange disabled:opacity-40"
+                className="btn btn-orange !h-12 !w-auto px-5 !text-[15px]"
               >
                 Save
               </button>
@@ -464,7 +458,7 @@ export default function MePage() {
               <select
                 value={feet}
                 onChange={(e) => setFeet(Number(e.target.value))}
-                className="rounded-xl border border-[#E9E4DE] bg-white px-3 py-2"
+                className="field"
               >
                 {[4, 5, 6, 7].map((f) => (
                   <option key={f} value={f}>{f} ft</option>
@@ -473,17 +467,17 @@ export default function MePage() {
               <select
                 value={inches}
                 onChange={(e) => setInches(Number(e.target.value))}
-                className="rounded-xl border border-[#E9E4DE] bg-white px-3 py-2"
+                className="field"
               >
                 {Array.from({ length: 12 }, (_, i) => i).map((i) => (
                   <option key={i} value={i}>{i} in</option>
                 ))}
               </select>
-              <span className="text-sm text-[#6E6A66]">= {cm} cm</span>
+              <span className="text-sm text-muted">= {cm} cm</span>
               <button
                 onClick={() => save({ height_cm: cm })}
                 disabled={busy}
-                className="ml-auto rounded-full bg-orange px-4 py-2 text-sm font-semibold text-on-orange disabled:opacity-40"
+                className="btn btn-orange ml-auto !h-12 !w-auto px-5 !text-[15px]"
               >
                 Save
               </button>
@@ -580,18 +574,18 @@ export default function MePage() {
                   onKeyDown={(e) => e.key === "Enter" && findCity()}
                   placeholder="For example, Lagos"
                   aria-label="City"
-                  className="min-w-0 flex-1 rounded-xl border border-[#E9E4DE] bg-white px-3 py-2"
+                  className="min-w-0 flex-1 field"
                 />
                 <button
                   onClick={findCity}
                   disabled={busy || cityDraft.trim().length < 2}
-                  className="rounded-full bg-orange px-4 text-sm font-semibold text-on-orange disabled:opacity-40"
+                  className="btn btn-orange !h-12 !w-auto px-5 !text-[15px]"
                 >
                   Find
                 </button>
               </div>
               <div className="flex gap-4">
-                <button onClick={useHere} disabled={busy} className="text-sm font-semibold text-[#1F2A44] disabled:opacity-40">
+                <button onClick={useHere} disabled={busy} className="text-[15px] font-medium text-orange-deep disabled:opacity-40">
                   Use my current location
                 </button>
                 {(prefs.city || prefs.lat !== null) && (
@@ -601,7 +595,7 @@ export default function MePage() {
                       savePrefs({ city: null, lat: null, lon: null }, "Location cleared. We will use your phone.");
                     }}
                     disabled={busy}
-                    className="text-sm font-semibold text-[#6E6A66] disabled:opacity-40"
+                    className="text-[15px] font-medium text-muted disabled:opacity-40"
                   >
                     Clear
                   </button>
@@ -639,7 +633,7 @@ export default function MePage() {
                 value={prefs.weatherAware ? "On" : "Off"}
                 onPick={(v) => savePrefs({ weatherAware: v === "On" })}
               />
-              <p className="-mt-2 px-4 pb-4 text-xs text-[#6E6A66]">
+              <p className="-mt-2 px-4 pb-4 text-xs text-muted">
                 On, heat and rain shape your outfits. Off, the weather is shown but ignored.
               </p>
             </div>
@@ -648,45 +642,45 @@ export default function MePage() {
       </Section>
 
       <Section title="WARDROBE">
-        <Link href="/wardrobe" className="flex items-center justify-between px-4 py-4">
-          <span className="font-medium text-[#1F2A44]">
+        <Link href="/wardrobe" className="flex min-h-[52px] items-center justify-between px-4 py-3 transition-colors active:bg-fill">
+          <span className="text-navy">
             {pieces} {pieces === 1 ? "piece" : "pieces"}
           </span>
-          <span className="flex items-center gap-2 text-sm text-[#6E6A66]">
+          <span className="flex items-center gap-2 text-sm text-muted">
             {washman > 0 && `${washman} at the Washman`}
-            <span className="text-[#6E6A66]">›</span>
+            <span className="text-muted">›</span>
           </span>
         </Link>
       </Section>
 
       <Section title="ACCOUNT">
-        <button onClick={signOut} className="w-full px-4 py-4 text-left font-medium text-[#1F2A44]">
+        <button onClick={signOut} className="flex min-h-[52px] w-full items-center px-4 text-left text-navy transition-colors active:bg-fill">
           Sign Out
         </button>
         <div>
           <button
             onClick={() => setConfirmDelete((c) => !c)}
-            className="w-full px-4 py-4 text-left font-medium text-red-700"
+            className="flex min-h-[52px] w-full items-center px-4 text-left text-danger transition-colors active:bg-fill"
           >
             Delete Account
           </button>
           {confirmDelete && (
             <div className="flex flex-col gap-3 px-4 pb-4">
-              <p className="text-sm text-[#6E6A66]">
+              <p className="text-sm text-muted">
                 This permanently deletes your wardrobe, photos and profile. It can&apos;t be undone.
               </p>
               <div className="flex gap-2">
                 <button
                   onClick={deleteAccount}
                   disabled={busy}
-                  className="flex-1 rounded-full bg-red-700 py-3 text-sm font-semibold text-white disabled:opacity-50"
+                  className="flex-1 btn !h-11 flex-1 bg-red-700 text-white !text-[15px]"
                 >
                   {busy ? "Deleting…" : "Delete My Account"}
                 </button>
                 <button
                   onClick={() => setConfirmDelete(false)}
                   disabled={busy}
-                  className="rounded-full border border-[#E9E4DE] px-4 text-sm font-semibold text-[#1F2A44]"
+                  className="btn btn-outline !h-11 !w-auto px-5 !text-[15px]"
                 >
                   Cancel
                 </button>

@@ -1,11 +1,12 @@
 import type { Metadata, Viewport } from "next";
-import { DM_Sans } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import AppShell from "./components/AppShell";
 
-const sans = DM_Sans({
+// Used where SF Pro is not available (Android, desktop). Apple devices use SF Pro.
+const sans = Inter({
   subsets: ["latin"],
-  variable: "--font-dm-sans",
+  variable: "--font-inter",
 });
 
 export const metadata: Metadata = {
@@ -14,8 +15,11 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#FDFAF6",
-  colorScheme: "light",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#F2F2F7" },
+    { media: "(prefers-color-scheme: dark)", color: "#000000" },
+  ],
+  colorScheme: "light dark",
   viewportFit: "cover",
 };
 

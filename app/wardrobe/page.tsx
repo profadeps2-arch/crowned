@@ -267,19 +267,19 @@ function TagRow({
   return (
     <div className="flex flex-wrap gap-1">
       {askSize && (
-        <span className="rounded-full border border-dashed border-[#FD914A] px-2 py-0.5 text-[11px] text-[#B8500F]">
+        <span className="rounded-full border border-dashed border-orange px-2 py-0.5 text-[11px] text-orange-deep">
           + Size
         </span>
       )}
       {shown.map((t) => (
         <span
           key={t}
-          className="rounded-full border border-[#E9E4DE] bg-[#FFFFFF] px-2 py-0.5 text-[11px] text-[#6E6A66]"
+          className="rounded-full bg-fill px-2 py-0.5 text-[11px] text-muted"
         >
           {t}
         </span>
       ))}
-      {extra > 0 && <span className="px-1 py-0.5 text-[11px] text-[#6E6A66]">+{extra}</span>}
+      {extra > 0 && <span className="px-1 py-0.5 text-[11px] text-muted">+{extra}</span>}
     </div>
   );
 }
@@ -358,12 +358,12 @@ function TagEditor({
       key={key}
       onClick={() => toggle(key)}
       disabled={busy}
-      className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs transition-colors ${
+      className={`flex items-center gap-1.5 rounded-full border border-transparent px-3 py-1 text-[13px] transition-colors ${
         open === key
-          ? "border-orange bg-orange text-on-orange"
+          ? "bg-orange text-on-orange"
           : dashed
-          ? "border-dashed border-[#FD914A] text-[#B8500F]"
-          : "border-[#E9E4DE] bg-white text-[#1F2A44]"
+          ? "border-dashed border-orange text-orange-deep"
+          : "bg-fill text-navy"
       }`}
     >
       {colour !== undefined && <Dot colour={colour} />}
@@ -377,8 +377,8 @@ function TagEditor({
       key={label}
       onClick={onClick}
       disabled={busy}
-      className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs ${
-        active ? "border-orange bg-orange text-on-orange" : "border-[#E9E4DE] bg-white text-[#1F2A44]"
+      className={`flex items-center gap-1.5 rounded-full border border-transparent px-3 py-1 text-[13px] ${
+        active ? "bg-orange text-on-orange" : "bg-fill text-navy"
       }`}
     >
       {colour && <Dot colour={colour} />}
@@ -400,8 +400,8 @@ function TagEditor({
           <button
             onClick={startAdd}
             disabled={busy}
-            className={`rounded-full border border-dashed px-3 py-1 text-xs ${
-              open === "add" ? "border-orange text-navy" : "border-[#C9BFAE] text-[#6E6A66]"
+            className={`rounded-full border border-dashed px-3 py-1 text-[13px] ${
+              open === "add" ? "border-orange text-navy" : "border-line text-muted"
             }`}
           >
             + Add Tag
@@ -409,35 +409,35 @@ function TagEditor({
         )}
       </div>
 
-      {hint && <p className="fade-in text-xs text-[#B8500F]">{hint}</p>}
+      {hint && <p className="fade-in text-xs text-orange-deep">{hint}</p>}
 
       {open === "colour" && (
-        <div className="fade-in flex flex-col gap-3 rounded-xl bg-white p-3">
-          <span className="text-xs text-[#6E6A66]">Colour</span>
+        <div className="fade-in flex flex-col gap-3 rounded-xl bg-card p-3">
+          <span className="text-xs text-muted">Colour</span>
           <div className="flex flex-wrap gap-2">
             {COLOURS.map((c) =>
               option(c, c === item.colour && !item.colour_label, () => commitColour(c, c), c)
             )}
           </div>
-          <div className="flex flex-col gap-2 border-t border-[#EFE8DC] pt-3">
-            <span className="text-xs text-[#6E6A66]">Can&apos;t find it? Write it your way.</span>
+          <div className="flex flex-col gap-2 border-t border-line pt-3">
+            <span className="text-xs text-muted">Can&apos;t find it? Write it your way.</span>
             <div className="flex gap-2">
               <input
                 value={colourText}
                 onChange={(e) => setColourText(e.target.value)}
                 placeholder="Teal, cognac, wine red…"
-                className="min-w-0 flex-1 rounded-lg border border-[#E9E4DE] px-3 py-2 text-sm"
+                className="field min-w-0 flex-1 !h-11"
               />
               <button
                 onClick={() => colourText.trim() && commitColour(colourText.trim())}
                 disabled={!colourText.trim() || busy}
-                className="rounded-full bg-orange px-4 text-sm font-semibold text-on-orange disabled:opacity-40"
+                className="btn btn-orange !h-11 !w-auto px-5 !text-[15px]"
               >
                 {busy ? "Saving…" : "Save"}
               </button>
             </div>
             {colourText.trim() && (
-              <span className="flex items-center gap-1.5 text-xs text-[#6E6A66]">
+              <span className="flex items-center gap-1.5 text-xs text-muted">
                 {colourPreview ? (
                   <>
                     <Dot colour={colourPreview} /> We&apos;ll style it as {colourPreview}.
@@ -452,15 +452,15 @@ function TagEditor({
       )}
 
       {open === "size" && (
-        <div className="fade-in flex flex-col gap-2 rounded-xl bg-white p-3">
+        <div className="fade-in flex flex-col gap-2 rounded-xl bg-card p-3">
           <input
             autoFocus
             value={sizeText}
             onChange={(e) => setSizeText(e.target.value)}
             placeholder="For example: L, XL, large, 42"
-            className="rounded-lg border border-[#E9E4DE] px-3 py-2 text-sm"
+            className="field !h-11"
           />
-          <span className="text-xs text-[#6E6A66]">
+          <span className="text-xs text-muted">
             {sizeText.trim()
               ? sizePreview
                 ? `Will save as ${sizePreview}`
@@ -471,7 +471,7 @@ function TagEditor({
             <button
               onClick={() => sizePreview && commit(tags, sizePreview)}
               disabled={!sizePreview || busy}
-              className="flex-1 rounded-full bg-orange py-2 text-sm font-semibold text-on-orange disabled:opacity-40"
+              className="btn btn-orange !h-11 flex-1 !text-[15px]"
             >
               Save Size
             </button>
@@ -489,8 +489,8 @@ function TagEditor({
       )}
 
       {openTag && (
-        <div className="fade-in flex flex-col gap-2 rounded-xl bg-white p-3">
-          <span className="text-xs text-[#6E6A66]">{TAG_LABELS[groupOf(openTag) ?? ""] ?? "Tag"}</span>
+        <div className="fade-in flex flex-col gap-2 rounded-xl bg-card p-3">
+          <span className="text-xs text-muted">{TAG_LABELS[groupOf(openTag) ?? ""] ?? "Tag"}</span>
           <div className="flex flex-wrap gap-2">
             {(TAG_GROUPS[groupOf(openTag) ?? ""] ?? []).map((o) =>
               option(o, o === openTag, () => (o === openTag ? setOpen(null) : replace(openTag, o)))
@@ -507,8 +507,8 @@ function TagEditor({
       )}
 
       {open === "add" && (
-        <div className="fade-in flex flex-col gap-2 rounded-xl bg-white p-3">
-          <span className="text-xs text-[#6E6A66]">What would you like to add?</span>
+        <div className="fade-in flex flex-col gap-2 rounded-xl bg-card p-3">
+          <span className="text-xs text-muted">What would you like to add?</span>
           <div className="flex flex-wrap gap-2">
             {addable.map((g) => option(TAG_LABELS[g], false, () => setOpen(`group:${g}`)))}
           </div>
@@ -516,8 +516,8 @@ function TagEditor({
       )}
 
       {openGroup && (
-        <div className="fade-in flex flex-col gap-2 rounded-xl bg-white p-3">
-          <span className="text-xs text-[#6E6A66]">{TAG_LABELS[openGroup]}</span>
+        <div className="fade-in flex flex-col gap-2 rounded-xl bg-card p-3">
+          <span className="text-xs text-muted">{TAG_LABELS[openGroup]}</span>
           <div className="flex flex-wrap gap-2">
             {TAG_GROUPS[openGroup].map((o) => option(o, false, () => replace(null, o)))}
           </div>
@@ -535,20 +535,20 @@ function SectionSheet({
   onClose: () => void;
 }) {
   return (
-    <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/30" onClick={onClose}>
+    <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/40" onClick={onClose}>
       <div
-        className="sheet-up w-full max-w-md rounded-t-3xl bg-[#FFFFFF] px-6 pb-10 pt-3"
+        className="sheet-up w-full max-w-md rounded-t-3xl bg-card px-6 pb-10 pt-3"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="mx-auto mb-5 h-1 w-10 rounded-full bg-[#D9D1C3]" />
-        <p className="text-lg font-semibold text-[#1F2A44]">Where does this belong?</p>
-        <p className="mb-4 text-sm text-[#6E6A66]">{displayName(item)}</p>
+        <div className="mx-auto mb-5 h-1 w-10 rounded-full bg-muted/40" />
+        <p className="title-2 text-navy">Where does this belong?</p>
+        <p className="mb-4 text-sm text-muted">{displayName(item)}</p>
         <div className="flex flex-col">
           {SECTIONS.map((s) => (
             <button
               key={s.key}
               onClick={() => onPick(s.key)}
-              className="flex items-center justify-between border-b border-[#EFE8DC] py-3.5 text-left text-[#1F2A44] last:border-0"
+              className="flex items-center justify-between border-b border-line py-3.5 text-left text-navy last:border-0"
             >
               <span>{s.label}</span>
               {item.category === s.key && (
@@ -817,11 +817,11 @@ function Editor({
   }
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-[#FDFAF6]">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-cream">
       <div className="mx-auto flex max-w-md flex-col gap-6 px-6 pb-16 pt-10">
         <div className="flex items-center justify-between">
-          <h2 className="text-3xl">Edit Piece</h2>
-          <button onClick={onClose} className="text-sm font-semibold text-[#1F2A44]">
+          <h2 className="title-1">Edit Piece</h2>
+          <button onClick={onClose} className="text-[17px] font-semibold text-orange-deep">
             Done
           </button>
         </div>
@@ -837,24 +837,24 @@ function Editor({
           </div>
         )}
 
-        <div className="flex flex-col gap-3 rounded-2xl border border-[#E9E4DE] bg-[#FFFFFF] p-4">
-          <span className="text-xs tracking-[0.2em] text-[#6E6A66]">IDENTIFIED AS</span>
+        <div className="flex flex-col gap-3 rounded-2xl bg-card p-4">
+          <span className="text-xs tracking-[0.2em] text-muted">IDENTIFIED AS</span>
           <span key={`${current.name}-${current.colour}`} className="fade-in text-lg font-semibold">
             {displayName(current)}
           </span>
           <button
             onClick={() => setSheet(true)}
-            className="flex items-center gap-1.5 self-start text-sm text-[#6E6A66]"
+            className="flex items-center gap-1.5 self-start text-sm text-muted"
           >
-            In <span className="font-semibold text-[#1F2A44]">{sectionLabel(current.category)}</span>
+            In <span className="font-semibold text-navy">{sectionLabel(current.category)}</span>
             <Pencil />
           </button>
           <TagEditor item={current} onSave={saveTags} onSaveColour={saveColour} />
-          {current.description && <span className="text-sm text-[#6E6A66]">{current.description}</span>}
+          {current.description && <span className="text-sm text-muted">{current.description}</span>}
           {current.looks && current.looks.length > 0 && (
-            <span className="text-sm text-[#6E6A66]">Best for {current.looks.join(", ")}.</span>
+            <span className="text-sm text-muted">Best for {current.looks.join(", ")}.</span>
           )}
-          {updated && <span className="fade-in text-sm font-semibold text-[#1F2A44]">Updated.</span>}
+          {updated && <span className="fade-in text-sm font-semibold text-navy">Updated.</span>}
         </div>
 
         {sheet && <SectionSheet item={current} onPick={moveTo} onClose={() => setSheet(false)} />}
@@ -863,15 +863,15 @@ function Editor({
           role="switch"
           aria-checked={current.at_washman}
           onClick={toggleWashman}
-          className="flex items-center justify-between gap-4 rounded-2xl border border-[#E9E4DE] bg-[#FFFFFF] p-4 text-left"
+          className="flex items-center justify-between gap-4 rounded-2xl bg-card p-4 text-left"
         >
           <span className="flex flex-col">
             <span className="font-semibold">At the Washman</span>
-            <span className="text-sm text-[#6E6A66]">Crowned won&apos;t style this until it&apos;s back.</span>
+            <span className="text-sm text-muted">Crowned won&apos;t style this until it&apos;s back.</span>
           </span>
           <span
             className={`relative h-7 w-12 shrink-0 rounded-full transition-colors ${
-              current.at_washman ? "bg-orange" : "bg-[#D9D1C3]"
+              current.at_washman ? "bg-orange" : "bg-fill"
             }`}
           >
             <span
@@ -884,7 +884,7 @@ function Editor({
 
         <label className="flex flex-col gap-2">
           <span className="text-lg font-semibold">Something not right?</span>
-          <span className="text-sm text-[#6E6A66]">
+          <span className="text-sm text-muted">
             Describe the piece in your own words. Size, colour, sleeves, fabric, anything.
           </span>
           <textarea
@@ -893,7 +893,7 @@ function Editor({
             rows={3}
             disabled={saving}
             placeholder="Size large, long sleeve, round neck. Blue, not black."
-            className="rounded-xl border border-[#E9E4DE] bg-white px-4 py-3"
+            className="field !h-12"
           />
         </label>
 
@@ -902,7 +902,7 @@ function Editor({
         <button
           onClick={update}
           disabled={saving}
-          className="rounded-full bg-orange py-4 font-semibold text-on-orange transition-opacity disabled:opacity-60"
+          className="btn btn-orange"
         >
           {saving ? "Updating…" : "Update"}
         </button>
@@ -911,7 +911,7 @@ function Editor({
           <button onClick={remove} disabled={saving} className="py-2 text-sm font-semibold text-red-700">
             {confirmRemove ? "Remove" : "Remove from Wardrobe"}
           </button>
-          {confirmRemove && <span className="text-xs text-[#6E6A66]">This can&apos;t be undone.</span>}
+          {confirmRemove && <span className="text-xs text-muted">This can&apos;t be undone.</span>}
         </div>
       </div>
     </div>
@@ -929,17 +929,17 @@ function PieceCard({ item, onOpen }: { item: Item; onOpen: () => void }) {
           <Photo src={item.url} alt={item.description ?? displayName(item)} className="aspect-[3/4] w-full" />
         </div>
         {item.needs_check && !item.at_washman && (
-          <span className="absolute left-2 top-2 rounded-full bg-[#FD914A] px-2 py-1 text-xs font-semibold text-[#1F2A44]">
+          <span className="absolute left-2 top-2 rounded-full bg-orange px-2 py-1 text-xs font-semibold text-navy">
             Review
           </span>
         )}
         {item.at_washman && (
-          <span className="absolute bottom-2 left-2 rounded-full bg-[#1F2A44] px-2 py-1 text-xs font-semibold text-[#FDFAF6]">
+          <span className="absolute bottom-2 left-2 rounded-full bg-navy px-2 py-1 text-xs font-semibold text-cream">
             At the Washman
           </span>
         )}
       </div>
-      <span className={`text-sm font-semibold ${item.at_washman ? "text-[#6E6A66]" : ""}`}>
+      <span className={`text-sm font-semibold ${item.at_washman ? "text-muted" : ""}`}>
         {displayName(item)}
       </span>
       <TagRow tags={item.tags ?? []} max={3} askSize={needsSize(item)} />
@@ -1300,28 +1300,28 @@ export default function WardrobePage() {
       )}
 
       <div className="flex items-baseline justify-between">
-        <h1 className="text-3xl">Wardrobe</h1>
-        <span className="text-sm text-[#6E6A66]">{total} {total === 1 ? "piece" : "pieces"}</span>
+        <h1 className="large-title">Wardrobe</h1>
+        <span className="subhead text-muted">{total} {total === 1 ? "piece" : "pieces"}</span>
       </div>
 
       {!loading && (
         status.ok ? (
           <Link
             href="/today"
-            className="flex items-center justify-between rounded-2xl border border-[#E9E4DE] bg-[#FFFFFF] p-4"
+            className="flex items-center justify-between rounded-2xl bg-card p-4"
           >
-            <span className="text-sm">Your wardrobe is ready to style.</span>
-            <span className="shrink-0 whitespace-nowrap text-sm font-semibold text-[#1F2A44]">Open Today ›</span>
+            <span className="subhead">Your wardrobe is ready to style.</span>
+            <span className="shrink-0 whitespace-nowrap text-[15px] font-medium text-orange-deep">Open Today ›</span>
           </Link>
         ) : (
-          <div className="rounded-2xl border border-[#E9E4DE] bg-[#FFFFFF] p-4 text-sm">
+          <div className="rounded-2xl bg-card p-4 text-sm">
             Add {listJoin(status.missing)} to get your first outfit.
           </div>
         )
       )}
 
       <div className="flex flex-col gap-2">
-        <label className="flex cursor-pointer items-center justify-center gap-2 rounded-full bg-orange py-4 font-semibold text-on-orange shadow-[0_10px_24px_-12px_rgba(253,145,74,0.8)] transition-transform active:scale-[0.98]">
+        <label className="btn btn-orange cursor-pointer">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M4 8h3l2-3h6l2 3h3v11H4z" />
             <circle cx="12" cy="13" r="3.5" />
@@ -1335,32 +1335,32 @@ export default function WardrobePage() {
             onChange={addPhotos}
           />
         </label>
-        <label className="cursor-pointer rounded-full border border-line bg-card py-3 text-center text-sm font-semibold text-navy transition-transform active:scale-[0.98]">
+        <label className="btn btn-outline cursor-pointer">
           Choose from Library
           <input type="file" accept="image/*" multiple className="hidden" onChange={addPhotos} />
         </label>
-        <p className="text-center text-sm text-[#6E6A66]">
+        <p className="text-center text-sm text-muted">
           One piece per photo, on a plain background.
         </p>
       </div>
 
-      {notice && <p className="fade-in text-center text-sm text-[#6E6A66]">{notice}</p>}
+      {notice && <p className="fade-in text-center text-sm text-muted">{notice}</p>}
 
       {(pending.length > 0 || fresh.length > 0) && (
-        <section className="fade-in flex flex-col gap-3 rounded-3xl border border-[#E9E4DE] bg-[#FFFFFF] py-4">
+        <section className="fade-in flex flex-col gap-3 rounded-3xl bg-card py-4">
           <div className="flex items-center justify-between px-4">
             <div className="flex flex-col">
-              <h2 className="text-2xl">
-                Just Added <span className="text-base text-[#6E6A66]">{pending.length + fresh.length}</span>
+              <h2 className="title-2">
+                Just Added <span className="text-base text-muted">{pending.length + fresh.length}</span>
               </h2>
-              <span className="text-xs text-[#6E6A66]">
+              <span className="text-xs text-muted">
                 {pending.length > 0 ? "Sorting your pieces…" : "Check each one landed in the right place."}
               </span>
             </div>
             {pending.length === 0 && fresh.length > 0 && (
               <button
                 onClick={allGood}
-                className="rounded-full bg-orange px-4 py-2 text-sm font-semibold text-on-orange transition-transform active:scale-95"
+                className="btn btn-orange !h-10 !w-auto px-4 !text-[15px]"
               >
                 All Good
               </button>
@@ -1374,8 +1374,8 @@ export default function WardrobePage() {
                   <img src={p.preview} alt="New piece" className="aspect-[3/4] w-full object-cover" />
                   <div className="shimmer absolute inset-0" />
                 </div>
-                <div className="h-3 w-2/3 rounded-full bg-[#E9E4DE] shimmer" />
-                <div className="h-2 w-1/3 rounded-full bg-[#E9E4DE] shimmer" />
+                <div className="h-3 w-2/3 rounded-full bg-fill shimmer" />
+                <div className="h-2 w-1/3 rounded-full bg-fill shimmer" />
               </div>
             ))}
             {fresh.map((item) => (
@@ -1383,9 +1383,9 @@ export default function WardrobePage() {
                 <PieceCard item={item} onOpen={() => setEditing(item)} />
                 <button
                   onClick={() => setSorting(item)}
-                  className="flex items-center gap-1 self-start rounded-full border border-[#E9E4DE] bg-white px-2.5 py-1 text-[11px] text-[#6E6A66]"
+                  className="flex items-center gap-1 self-start rounded-full bg-fill px-2.5 py-1 text-[11px] text-muted"
                 >
-                  In <span className="font-semibold text-[#1F2A44]">{sectionLabel(item.category)}</span>
+                  In <span className="font-semibold text-navy">{sectionLabel(item.category)}</span>
                   <Pencil />
                 </button>
               </div>
@@ -1401,17 +1401,17 @@ export default function WardrobePage() {
       {review.length > 0 && filter !== "review" && (
         <button
           onClick={() => openFilter("review")}
-          className="flex items-center justify-between rounded-2xl bg-[#FD914A]/15 p-4 text-left"
+          className="flex items-center justify-between rounded-2xl bg-orange/15 p-4 text-left"
         >
-          <span className="text-sm font-semibold text-[#1F2A44]">
+          <span className="text-sm font-semibold text-navy">
             {review.length === 1 ? "1 piece needs a quick look" : `${review.length} pieces need a quick look`}
           </span>
-          <span className="text-[#1F2A44]">›</span>
+          <span className="text-navy">›</span>
         </button>
       )}
 
       {!loading && sections.length > 0 && (
-        <div className="no-scrollbar sticky top-0 z-10 -mx-6 flex gap-2 overflow-x-auto bg-[#FDFAF6]/90 px-6 py-2 backdrop-blur">
+        <div className="no-scrollbar sticky top-0 z-10 -mx-6 flex gap-2 overflow-x-auto bg-cream/90 px-6 py-2 backdrop-blur">
           {[
             { key: "all", label: "All", count: items.length },
             ...sections.map((s) => ({ key: s.key, label: s.label, count: s.pieces.length })),
@@ -1419,10 +1419,10 @@ export default function WardrobePage() {
             <button
               key={f.key}
               onClick={() => openFilter(f.key)}
-              className={`shrink-0 rounded-full border px-4 py-2 text-sm transition-colors ${
+              className={`shrink-0 rounded-full border border-transparent px-4 py-2 text-[15px] transition-colors ${
                 filter === f.key
-                  ? "border-orange bg-orange text-on-orange"
-                  : "border-[#E9E4DE] bg-[#FFFFFF] text-[#1F2A44]"
+                  ? "bg-orange text-on-orange"
+                  : "bg-fill text-navy"
               }`}
             >
               {f.label} <span className="opacity-60">{f.count}</span>
@@ -1434,34 +1434,34 @@ export default function WardrobePage() {
       {loading ? (
         <div className="flex gap-3 overflow-hidden">
           {[0, 1, 2].map((i) => (
-            <div key={i} className="aspect-[3/4] w-[44%] shrink-0 rounded-xl bg-[#F7ECE1] shimmer" />
+            <div key={i} className="aspect-[3/4] w-[44%] shrink-0 rounded-xl bg-sand shimmer" />
           ))}
         </div>
       ) : total === 0 ? (
         <div className="card flex flex-col items-center gap-3 p-8 text-center">
           <Crown size={40} className="text-orange" />
           <h2 className="text-xl">Your wardrobe is empty</h2>
-          <p className="text-sm text-[#6E6A66]">
+          <p className="text-sm text-muted">
             Start with the pieces you wear most.
           </p>
         </div>
       ) : (
         <div className="flex flex-col gap-8">
           {filter !== "all" && (
-            <button onClick={() => openFilter("all")} className="self-start text-sm font-semibold text-[#1F2A44]">
+            <button onClick={() => openFilter("all")} className="self-start text-sm font-semibold text-navy">
               ‹ All pieces
             </button>
           )}
           {visible.map((section) => (
             <section key={section.key} className="flex flex-col gap-3">
               <div className="flex items-baseline justify-between">
-                <h2 className="text-2xl">
-                  {section.label} <span className="text-base text-[#6E6A66]">{section.pieces.length}</span>
+                <h2 className="title-2">
+                  {section.label} <span className="text-base text-muted">{section.pieces.length}</span>
                 </h2>
                 {filter === "all" && section.pieces.length > 2 && (
                   <button
                     onClick={() => openFilter(section.key)}
-                    className="text-sm font-semibold text-[#1F2A44]"
+                    className="text-sm font-semibold text-navy"
                   >
                     See All ›
                   </button>
