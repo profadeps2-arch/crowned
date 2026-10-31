@@ -61,8 +61,23 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Not signed in" }, { status: 401 });
   }
 
-  const { image, note, current } = await request.json();
+  // A phone photo is resized before it is sent, so anything this large is not from the app.
+  const MAX_BODY = 3_000_000;
+  if (Number(request.headers.get("content-length") ?? 0) > MAX_BODY) {
+    return NextResponse.json({ error: "Photo is too large" }, { status: 413 });
+  }
+
+  let body: { image?: unknown; note?: unknown; current?: unknown };
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Bad request" }, { status: 400 });
+  }
+  const { image, note, current } = body;
   const isCorrection = typeof note === "string" && note.trim().length > 0;
+  if (!isCorrection && (typeof image !== "string" || image.length === 0 || image.length > MAX_BODY)) {
+    return NextResponse.json({ error: "No photo" }, { status: 400 });
+  }
 
   const tagsSchema = { type: Type.ARRAY, items: { type: Type.STRING, enum: ALL_TAGS } };
 
@@ -101,7 +116,7 @@ export async function POST(request: Request) {
   const parts = isCorrection
     ? [{ text: correctionPrompt(current, note) }]
     : [
-        { inlineData: { mimeType: "image/jpeg", data: image } },
+        { inlineData: { mimeType: "image/jpeg", data: image as string } },
         { text: photoPrompt },
       ];
 
