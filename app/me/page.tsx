@@ -53,8 +53,8 @@ function toJpeg(img: ImageBitmap, max: number, quality: number): Promise<Blob> {
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="flex flex-col gap-2">
-      <h2 className="px-1 text-xs tracking-[0.2em] text-[#8A8476]">{title}</h2>
-      <div className="divide-y divide-[#EFE8DC] overflow-hidden rounded-2xl border border-[#E3DACB] bg-[#FBF8F2]">
+      <h2 className="px-1 text-xs tracking-[0.2em] text-[#6E6A66]">{title}</h2>
+      <div className="divide-y divide-[#EFE8DC] overflow-hidden rounded-2xl border border-[#E9E4DE] bg-[#FFFFFF]">
         {children}
       </div>
     </section>
@@ -72,9 +72,9 @@ function Row({
   return (
     <button onClick={onClick} className="flex w-full items-center justify-between gap-4 px-4 py-4 text-left">
       <span className="font-medium text-[#1F2A44]">{label}</span>
-      <span className="flex items-center gap-2 text-sm text-[#5C5648]">
+      <span className="flex items-center gap-2 text-sm text-[#6E6A66]">
         {value}
-        <span className={`text-[#8A8476] transition-transform ${open ? "rotate-90" : ""}`}>›</span>
+        <span className={`text-[#6E6A66] transition-transform ${open ? "rotate-90" : ""}`}>›</span>
       </span>
     </button>
   );
@@ -95,8 +95,8 @@ function Chips({
           onClick={() => onPick(o)}
           className={`rounded-full border px-4 py-2 text-sm ${
             value === o
-              ? "border-[#1F2A44] bg-[#1F2A44] text-[#F5F0E6]"
-              : "border-[#E3DACB] bg-white text-[#1F2A44]"
+              ? "border-[#1F2A44] bg-[#1F2A44] text-[#FDFAF6]"
+              : "border-[#E9E4DE] bg-white text-[#1F2A44]"
           }`}
         >
           {o}
@@ -274,8 +274,8 @@ export default function MePage() {
   if (loading) {
     return (
       <main className="flex flex-col items-center gap-4 px-6 py-16">
-        <div className="h-24 w-24 animate-pulse rounded-full bg-[#E9E1D2]" />
-        <div className="h-5 w-40 animate-pulse rounded-full bg-[#E9E1D2]" />
+        <div className="h-24 w-24 animate-pulse rounded-full bg-[#F7ECE1]" />
+        <div className="h-5 w-40 animate-pulse rounded-full bg-[#F7ECE1]" />
       </main>
     );
   }
@@ -289,11 +289,11 @@ export default function MePage() {
       </div>
 
       <div className="flex flex-col items-center gap-3 text-center">
-        <div className="h-24 w-24 overflow-hidden rounded-full border border-[#E3DACB] bg-[#1F2A44]">
+        <div className="h-24 w-24 overflow-hidden rounded-full border border-[#E9E4DE] bg-[#1F2A44]">
           {photo ? (
             <img src={photo} alt="Your photo" className="h-full w-full object-cover" referrerPolicy="no-referrer" />
           ) : (
-            <span className="flex h-full w-full items-center justify-center text-4xl font-semibold text-[#F5F0E6]">
+            <span className="flex h-full w-full items-center justify-center text-4xl font-semibold text-[#FDFAF6]">
               {initial}
             </span>
           )}
@@ -303,7 +303,7 @@ export default function MePage() {
         </button>
         {open === "photo" && (
           <div className="flex w-full max-w-xs flex-col gap-2">
-            <label className="cursor-pointer rounded-full bg-[#1F2A44] py-3 text-sm font-semibold text-[#F5F0E6]">
+            <label className="cursor-pointer rounded-full bg-[#1F2A44] py-3 text-sm font-semibold text-[#FDFAF6]">
               Take Photo
               <input type="file" accept="image/*" capture="user" className="hidden" onChange={changePhoto} />
             </label>
@@ -315,8 +315,8 @@ export default function MePage() {
         )}
         <div className="flex flex-col gap-1">
           <h1 className="text-3xl">King {profile.name ?? ""}</h1>
-          <span className="text-sm text-[#5C5648]">{email}</span>
-          <span className="text-xs text-[#8A8476]">Member since {since}</span>
+          <span className="text-sm text-[#6E6A66]">{email}</span>
+          <span className="text-xs text-[#6E6A66]">Member since {since}</span>
         </div>
       </div>
 
@@ -330,12 +330,12 @@ export default function MePage() {
               <input
                 value={nameDraft}
                 onChange={(e) => setNameDraft(e.target.value)}
-                className="min-w-0 flex-1 rounded-xl border border-[#E3DACB] bg-white px-3 py-2"
+                className="min-w-0 flex-1 rounded-xl border border-[#E9E4DE] bg-white px-3 py-2"
               />
               <button
                 onClick={() => nameDraft.trim().length >= 2 && save({ name: nameDraft.trim() })}
                 disabled={busy || nameDraft.trim().length < 2}
-                className="rounded-full bg-[#1F2A44] px-4 text-sm font-semibold text-[#F5F0E6] disabled:opacity-40"
+                className="rounded-full bg-[#1F2A44] px-4 text-sm font-semibold text-[#FDFAF6] disabled:opacity-40"
               >
                 Save
               </button>
@@ -350,7 +350,7 @@ export default function MePage() {
               <select
                 value={feet}
                 onChange={(e) => setFeet(Number(e.target.value))}
-                className="rounded-xl border border-[#E3DACB] bg-white px-3 py-2"
+                className="rounded-xl border border-[#E9E4DE] bg-white px-3 py-2"
               >
                 {[4, 5, 6, 7].map((f) => (
                   <option key={f} value={f}>{f} ft</option>
@@ -359,17 +359,17 @@ export default function MePage() {
               <select
                 value={inches}
                 onChange={(e) => setInches(Number(e.target.value))}
-                className="rounded-xl border border-[#E3DACB] bg-white px-3 py-2"
+                className="rounded-xl border border-[#E9E4DE] bg-white px-3 py-2"
               >
                 {Array.from({ length: 12 }, (_, i) => i).map((i) => (
                   <option key={i} value={i}>{i} in</option>
                 ))}
               </select>
-              <span className="text-sm text-[#5C5648]">= {cm} cm</span>
+              <span className="text-sm text-[#6E6A66]">= {cm} cm</span>
               <button
                 onClick={() => save({ height_cm: cm })}
                 disabled={busy}
-                className="ml-auto rounded-full bg-[#1F2A44] px-4 py-2 text-sm font-semibold text-[#F5F0E6] disabled:opacity-40"
+                className="ml-auto rounded-full bg-[#1F2A44] px-4 py-2 text-sm font-semibold text-[#FDFAF6] disabled:opacity-40"
               >
                 Save
               </button>
@@ -421,9 +421,9 @@ export default function MePage() {
           <span className="font-medium text-[#1F2A44]">
             {pieces} {pieces === 1 ? "piece" : "pieces"}
           </span>
-          <span className="flex items-center gap-2 text-sm text-[#5C5648]">
+          <span className="flex items-center gap-2 text-sm text-[#6E6A66]">
             {washman > 0 && `${washman} at the Washman`}
-            <span className="text-[#8A8476]">›</span>
+            <span className="text-[#6E6A66]">›</span>
           </span>
         </Link>
       </Section>
@@ -441,7 +441,7 @@ export default function MePage() {
           </button>
           {confirmDelete && (
             <div className="flex flex-col gap-3 px-4 pb-4">
-              <p className="text-sm text-[#5C5648]">
+              <p className="text-sm text-[#6E6A66]">
                 This permanently deletes your wardrobe, photos and profile. It can&apos;t be undone.
               </p>
               <div className="flex gap-2">
@@ -455,7 +455,7 @@ export default function MePage() {
                 <button
                   onClick={() => setConfirmDelete(false)}
                   disabled={busy}
-                  className="rounded-full border border-[#E3DACB] px-4 text-sm font-semibold text-[#1F2A44]"
+                  className="rounded-full border border-[#E9E4DE] px-4 text-sm font-semibold text-[#1F2A44]"
                 >
                   Cancel
                 </button>
