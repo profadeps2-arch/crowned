@@ -27,7 +27,7 @@ export default function BottomNav() {
             className="pointer-events-none absolute left-2 top-2 h-[52px] w-[calc((100%-1rem)/4)] p-1 transition-transform duration-500 ease-[cubic-bezier(0.3,1.25,0.5,1)]"
             style={{ transform: `translateX(${activeIndex * 100}%)` }}
           >
-            <span className="block h-full w-full rounded-full bg-orange-soft shadow-[var(--lift)]" />
+            <span className="block h-full w-full rounded-full bg-fill" />
           </span>
         )}
         {tabs.map((tab, i) => {

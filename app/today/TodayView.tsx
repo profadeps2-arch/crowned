@@ -201,7 +201,7 @@ export default function TodayView() {
 
       {!thinking && !error && !plan && empty && (
         <div className="card flex flex-col items-center gap-4 p-8 text-center">
-          <Crown size={40} className="text-orange" />
+          <Crown size={40} className="text-navy" />
           <h2 className="title-2">{pieces.length === 0 ? "Your wardrobe is empty" : "We need a little more"}</h2>
           <p className="text-sm text-muted">
             {pieces.length === 0 ? "Add a few pieces and your first outfit appears here." : empty}

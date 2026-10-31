@@ -6,7 +6,7 @@ import { useEffect } from "react";
  * Call at the top of any screen that fills the viewport. While it is mounted
  * with "dark", the page behind it and the phone's status bar turn black, so
  * there is no light flash at the edges or when you pull past the top.
- * With "light" the screen follows the phone's own light or dark setting.
+ * With "light" the screen stays white.
  *
  *   useScreenTone(analysing ? "dark" : "light");
  */
@@ -18,7 +18,7 @@ export function useScreenTone(tone: "light" | "dark") {
 
     if (tone === "dark") {
       root.dataset.tone = "dark";
-      metas.forEach((m) => (m.content = "#120F0C"));
+      metas.forEach((m) => (m.content = "#0B0B0D"));
     }
 
     return () => {
