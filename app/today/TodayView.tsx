@@ -149,6 +149,20 @@ export default function TodayView() {
 
       <WeatherCard state={weather} onRetry={retry} unit={prefs.unit} />
 
+      {plan && !thinking && !error && (
+        <div className="-mt-2 flex flex-col items-center gap-2">
+          <Link
+            href={`/customize?group=${groupFor(plan.occasion.label)}`}
+            className="btn btn-outline w-full"
+          >
+            <SlidersHorizontal size={18} aria-hidden /> Customize Today&apos;s Outfit
+          </Link>
+          <Link href="/customize" className="text-sm text-muted underline-offset-4 hover:underline">
+            Dressing for a different occasion?
+          </Link>
+        </div>
+      )}
+
       {error && (
         <div className="card p-5 text-sm text-navy">{error}</div>
       )}
@@ -181,8 +195,9 @@ export default function TodayView() {
         <section className="flex flex-col gap-5" aria-label="Today's outfit">
           <div className="flex items-end justify-between gap-3">
             <div className="flex flex-col gap-1">
-              <span className="eyebrow">Today&apos;s outfit · {plan.occasion.label}</span>
+              <span className="eyebrow">Today&apos;s outfit recommendation</span>
               <h2 className="text-2xl leading-tight">{plan.look.title}</h2>
+              <span className="text-sm text-muted">For {plan.occasion.label}</span>
             </div>
             <button
               onClick={() => choose(false)}
@@ -216,15 +231,9 @@ export default function TodayView() {
               <Heart size={18} fill={saved ? "currentColor" : "none"} aria-hidden />
               {saved ? "Saved to Outfits" : "Love This Look"}
             </button>
-            <Link href={`/customize?group=${groupFor(plan.occasion.label)}`} className="btn btn-outline">
-              <SlidersHorizontal size={18} aria-hidden /> Customize Today&apos;s Outfit
-            </Link>
             <button onClick={wear} disabled={busy} className="text-sm font-semibold text-navy disabled:opacity-50">
               I am wearing this today
             </button>
-            <Link href="/customize" className="text-center text-sm text-muted underline-offset-4 hover:underline">
-              Dressing for a different occasion?
-            </Link>
           </div>
         </section>
       )}
