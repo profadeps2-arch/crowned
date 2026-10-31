@@ -3,8 +3,7 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
-// White button with dark text, as Google's own guidelines allow. Reads well on
-// the dark welcome photo and in both light and dark mode.
+// A quiet outlined button with the Google mark.
 export default function GoogleButton() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -27,7 +26,7 @@ export default function GoogleButton() {
 
   return (
     <div className="flex flex-col gap-3">
-      <button onClick={signIn} disabled={busy} className="btn bg-white text-[#1C1C1E]">
+      <button onClick={signIn} disabled={busy} className="btn btn-outline">
         <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true">
           <path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.6 5.4 2.6 13.2l7.9 6.2C12.4 13.7 17.7 9.5 24 9.5z" />
           <path fill="#4285F4" d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.4c-.5 2.9-2.2 5.3-4.6 6.9l7.4 5.8c4.3-4 6.9-9.9 6.9-17.2z" />

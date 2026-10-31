@@ -153,7 +153,6 @@ export default function MePage() {
   const [inches, setInches] = useState(9);
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
-  const [confirmDelete, setConfirmDelete] = useState(false);
   const [prefs, setPrefs] = useState<Prefs>(DEFAULT_PREFS);
   const [cityDraft, setCityDraft] = useState("");
 
@@ -360,19 +359,6 @@ export default function MePage() {
   }
 
   async function signOut() {
-    await createClient().auth.signOut();
-    router.replace("/");
-  }
-
-  async function deleteAccount() {
-    setBusy(true);
-    setMessage("");
-    const res = await fetch("/api/account/delete", { method: "POST" });
-    if (!res.ok) {
-      setMessage("Couldn't delete your account. Try again.");
-      setBusy(false);
-      return;
-    }
     await createClient().auth.signOut();
     router.replace("/");
   }
@@ -662,37 +648,6 @@ export default function MePage() {
         <button onClick={signOut} className="flex min-h-[52px] w-full items-center px-4 text-left text-navy transition-colors active:bg-fill">
           Sign Out
         </button>
-        <div>
-          <button
-            onClick={() => setConfirmDelete((c) => !c)}
-            className="flex min-h-[52px] w-full items-center px-4 text-left text-danger transition-colors active:bg-fill"
-          >
-            Delete Account
-          </button>
-          {confirmDelete && (
-            <div className="flex flex-col gap-3 px-4 pb-4">
-              <p className="text-sm text-muted">
-                This permanently deletes your wardrobe, photos and profile. It can&apos;t be undone.
-              </p>
-              <div className="flex gap-2">
-                <button
-                  onClick={deleteAccount}
-                  disabled={busy}
-                  className="flex-1 btn !h-11 flex-1 bg-red-700 text-white !text-[15px]"
-                >
-                  {busy ? "Deleting…" : "Delete My Account"}
-                </button>
-                <button
-                  onClick={() => setConfirmDelete(false)}
-                  disabled={busy}
-                  className="btn btn-outline !h-11 !w-auto px-5 !text-[15px]"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
       </Section>
     </main>
   );
