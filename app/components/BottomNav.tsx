@@ -2,21 +2,19 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Sun, Shirt, Sparkles, User } from "lucide-react";
+import { House, Shirt, Sparkles, User } from "lucide-react";
 
-// The four tabs. Until the Today and Outfits screens are built (steps 3 and 4),
-// Today points at /style and Outfits at /saved. Those two hrefs are the only
-// lines that change later.
+// The four tabs. Outfits still points at /saved until step 4 replaces it.
 const tabs = [
-  { href: "/style", label: "Today", icon: Sun },
-  { href: "/wardrobe", label: "Wardrobe", icon: Shirt },
-  { href: "/saved", label: "Outfits", icon: Sparkles },
-  { href: "/me", label: "Profile", icon: User },
+  { href: "/today", match: ["/today", "/customize"], label: "Today", icon: House },
+  { href: "/wardrobe", match: ["/wardrobe"], label: "Wardrobe", icon: Shirt },
+  { href: "/saved", match: ["/saved"], label: "Outfits", icon: Sparkles },
+  { href: "/me", match: ["/me"], label: "Profile", icon: User },
 ];
 
 // Whether to show this bar at all is decided by AppShell.
 export default function BottomNav() {
-  const pathname = usePathname();
+  const pathname = usePathname() ?? "";
 
   return (
     <nav
@@ -26,7 +24,7 @@ export default function BottomNav() {
       <div className="mx-auto flex max-w-md justify-around pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-2.5">
         {tabs.map((tab) => {
           const Icon = tab.icon;
-          const active = pathname === tab.href || pathname.startsWith(`${tab.href}/`);
+          const active = tab.match.some((m) => pathname === m || pathname.startsWith(`${m}/`));
           return (
             <Link
               key={tab.href}

@@ -17,7 +17,7 @@ export async function GET(request: Request) {
         .eq("id", user!.id)
         .maybeSingle();
 
-      return NextResponse.redirect(`${origin}${profile ? "/style" : "/profile"}`);
+      return NextResponse.redirect(`${origin}${profile ? "/today" : "/profile"}`);
     }
   }
 
