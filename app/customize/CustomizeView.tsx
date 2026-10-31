@@ -140,7 +140,7 @@ export default function CustomizeView() {
   const showResults = !!occasion && !styling && (looks.length > 0 || !!message);
 
   return (
-    <main className="flex flex-col gap-6 px-5 pb-8 pt-4">
+    <main className="flex flex-col gap-8 px-6 pb-8 pt-[calc(1.5rem+env(safe-area-inset-top))]">
       {styling && <StyleLoading />}
 
       {error && <div className="card p-5 subhead text-navy">{error}</div>}
@@ -149,7 +149,7 @@ export default function CustomizeView() {
       {!showResults && !group && !error && (
         <>
           <header className="flex flex-col gap-1">
-            <Link href="/today" className="flex items-center gap-1 self-start text-[17px] font-medium text-orange-deep">
+            <Link href="/today" className="flex items-center gap-1 self-start text-[15px] text-muted">
               <ChevronLeft size={20} aria-hidden /> Today
             </Link>
             <h1 className="large-title">Where will you be seen?</h1>
@@ -184,7 +184,7 @@ export default function CustomizeView() {
           <header className="flex flex-col gap-1">
             <button
               onClick={() => setGroup(null)}
-              className="flex items-center gap-1 self-start text-[17px] font-medium text-orange-deep"
+              className="flex items-center gap-1 self-start text-[15px] text-muted"
             >
               <ChevronLeft size={20} aria-hidden /> {fromToday ? "Other occasions" : "Occasions"}
             </button>
@@ -202,7 +202,7 @@ export default function CustomizeView() {
                     type="button"
                     aria-pressed={answers[q.id] === i}
                     onClick={() => setAnswers((a) => ({ ...a, [q.id]: i }))}
-                    className="chip !h-11"
+                    className="chip"
                   >
                     {o.label}
                   </button>
@@ -222,7 +222,7 @@ export default function CustomizeView() {
       {showResults && occasion && (
         <>
           <header className="flex flex-col gap-1">
-            <button onClick={changeAnswers} className="flex items-center gap-1 self-start text-[17px] font-medium text-orange-deep">
+            <button onClick={changeAnswers} className="flex items-center gap-1 self-start text-[15px] text-muted">
               <ChevronLeft size={20} aria-hidden /> Change answers
             </button>
             <h1 className="large-title">{occasion.label}</h1>
@@ -258,7 +258,7 @@ export default function CustomizeView() {
 
                     <LookBento look={look} onOpen={setViewing} />
 
-                    <div className="card flex flex-col gap-2 p-4">
+                    <div className="flex flex-col gap-2">
                       <h3 className="headline">Why it works</h3>
                       <p className="subhead text-muted">{whyItWorks(look, occasion, ctx)}</p>
                       {look.tips.map((t) => (
@@ -297,7 +297,7 @@ export default function CustomizeView() {
                     ))}
                   </div>
                 )}
-                <button onClick={() => run(false)} className="flex items-center gap-2 text-[17px] font-medium text-orange-deep">
+                <button onClick={() => run(false)} className="flex items-center gap-2 text-[15px] text-muted">
                   <RefreshCw size={15} aria-hidden /> Show me others
                 </button>
               </div>
