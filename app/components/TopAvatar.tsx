@@ -9,7 +9,7 @@ export default function TopAvatar() {
         <Crown size={18} className="text-orange" strokeWidth={1.6} />
         CROWNED
       </div>
-      <Avatar showName />
+      <Avatar />
     </header>
   );
 }

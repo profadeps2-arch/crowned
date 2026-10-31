@@ -10,6 +10,7 @@ import { DEFAULT_PREFS, loadPrefs, type Prefs } from "@/lib/prefs";
 export function useWardrobe() {
   const router = useRouter();
   const [pieces, setPieces] = useState<Piece[]>([]);
+  const [uid, setUid] = useState("");
   const [name, setName] = useState("");
   const [prefs, setPrefs] = useState<Prefs>(DEFAULT_PREFS);
   const [loading, setLoading] = useState(true);
@@ -24,6 +25,7 @@ export function useWardrobe() {
         return;
       }
 
+      setUid(user.id);
       const [{ data: profile }, { data, error }, loaded] = await Promise.all([
         supabase.from("profiles").select("name").eq("id", user.id).maybeSingle(),
         supabase
@@ -56,5 +58,5 @@ export function useWardrobe() {
     })();
   }, [router]);
 
-  return { pieces, setPieces, name, prefs, loading, error };
+  return { pieces, setPieces, uid, name, prefs, loading, error };
 }

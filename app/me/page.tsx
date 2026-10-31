@@ -96,7 +96,7 @@ function Chips({
           onClick={() => onPick(o)}
           className={`rounded-full border px-4 py-2 text-sm ${
             value === o
-              ? "border-[#1F2A44] bg-[#1F2A44] text-[#FDFAF6]"
+              ? "border-orange bg-orange text-on-orange"
               : "border-[#E9E4DE] bg-white text-[#1F2A44]"
           }`}
         >
@@ -125,7 +125,7 @@ function MultiChips({
             aria-pressed={on}
             className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm ${
               on
-                ? "border-[#1F2A44] bg-[#1F2A44] text-[#FDFAF6]"
+                ? "border-orange bg-orange text-on-orange"
                 : "border-[#E9E4DE] bg-white text-[#1F2A44]"
             }`}
           >
@@ -417,18 +417,18 @@ export default function MePage() {
         </button>
         {open === "photo" && (
           <div className="flex w-full max-w-xs flex-col gap-2">
-            <label className="cursor-pointer rounded-full bg-[#1F2A44] py-3 text-sm font-semibold text-[#FDFAF6]">
+            <label className="cursor-pointer rounded-full bg-orange py-3 text-sm font-semibold text-on-orange">
               Take Photo
               <input type="file" accept="image/*" capture="user" className="hidden" onChange={changePhoto} />
             </label>
-            <label className="cursor-pointer rounded-full border border-[#1F2A44] py-3 text-sm font-semibold text-[#1F2A44]">
+            <label className="cursor-pointer rounded-full border border-line bg-card py-3 text-sm font-semibold text-navy">
               Choose from Library
               <input type="file" accept="image/*" className="hidden" onChange={changePhoto} />
             </label>
           </div>
         )}
         <div className="flex flex-col gap-1">
-          <h1 className="text-3xl">King {profile.name ?? ""}</h1>
+          <h1 className="text-3xl">{profile.name ?? ""}</h1>
           <span className="text-sm text-[#6E6A66]">{email}</span>
           <span className="text-xs text-[#6E6A66]">Member since {since}</span>
         </div>
@@ -449,7 +449,7 @@ export default function MePage() {
               <button
                 onClick={() => nameDraft.trim().length >= 2 && save({ name: nameDraft.trim() })}
                 disabled={busy || nameDraft.trim().length < 2}
-                className="rounded-full bg-[#1F2A44] px-4 text-sm font-semibold text-[#FDFAF6] disabled:opacity-40"
+                className="rounded-full bg-orange px-4 text-sm font-semibold text-on-orange disabled:opacity-40"
               >
                 Save
               </button>
@@ -483,7 +483,7 @@ export default function MePage() {
               <button
                 onClick={() => save({ height_cm: cm })}
                 disabled={busy}
-                className="ml-auto rounded-full bg-[#1F2A44] px-4 py-2 text-sm font-semibold text-[#FDFAF6] disabled:opacity-40"
+                className="ml-auto rounded-full bg-orange px-4 py-2 text-sm font-semibold text-on-orange disabled:opacity-40"
               >
                 Save
               </button>
@@ -585,7 +585,7 @@ export default function MePage() {
                 <button
                   onClick={findCity}
                   disabled={busy || cityDraft.trim().length < 2}
-                  className="rounded-full bg-[#1F2A44] px-4 text-sm font-semibold text-[#FDFAF6] disabled:opacity-40"
+                  className="rounded-full bg-orange px-4 text-sm font-semibold text-on-orange disabled:opacity-40"
                 >
                   Find
                 </button>

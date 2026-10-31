@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { normalizeStyle } from "@/lib/style-rules";
+import Photo from "../components/Photo";
+import Crown from "../components/Crown";
 import { buildName, titleCase, wordCount } from "@/lib/naming";
 import {
   buildTags,
@@ -358,7 +360,7 @@ function TagEditor({
       disabled={busy}
       className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs transition-colors ${
         open === key
-          ? "border-[#1F2A44] bg-[#1F2A44] text-[#FDFAF6]"
+          ? "border-orange bg-orange text-on-orange"
           : dashed
           ? "border-dashed border-[#FD914A] text-[#B8500F]"
           : "border-[#E9E4DE] bg-white text-[#1F2A44]"
@@ -376,7 +378,7 @@ function TagEditor({
       onClick={onClick}
       disabled={busy}
       className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs ${
-        active ? "border-[#1F2A44] bg-[#1F2A44] text-[#FDFAF6]" : "border-[#E9E4DE] bg-white text-[#1F2A44]"
+        active ? "border-orange bg-orange text-on-orange" : "border-[#E9E4DE] bg-white text-[#1F2A44]"
       }`}
     >
       {colour && <Dot colour={colour} />}
@@ -399,7 +401,7 @@ function TagEditor({
             onClick={startAdd}
             disabled={busy}
             className={`rounded-full border border-dashed px-3 py-1 text-xs ${
-              open === "add" ? "border-[#1F2A44] text-[#1F2A44]" : "border-[#C9BFAE] text-[#6E6A66]"
+              open === "add" ? "border-orange text-navy" : "border-[#C9BFAE] text-[#6E6A66]"
             }`}
           >
             + Add Tag
@@ -429,7 +431,7 @@ function TagEditor({
               <button
                 onClick={() => colourText.trim() && commitColour(colourText.trim())}
                 disabled={!colourText.trim() || busy}
-                className="rounded-full bg-[#1F2A44] px-4 text-sm font-semibold text-[#FDFAF6] disabled:opacity-40"
+                className="rounded-full bg-orange px-4 text-sm font-semibold text-on-orange disabled:opacity-40"
               >
                 {busy ? "Saving…" : "Save"}
               </button>
@@ -469,7 +471,7 @@ function TagEditor({
             <button
               onClick={() => sizePreview && commit(tags, sizePreview)}
               disabled={!sizePreview || busy}
-              className="flex-1 rounded-full bg-[#1F2A44] py-2 text-sm font-semibold text-[#FDFAF6] disabled:opacity-40"
+              className="flex-1 rounded-full bg-orange py-2 text-sm font-semibold text-on-orange disabled:opacity-40"
             >
               Save Size
             </button>
@@ -869,7 +871,7 @@ function Editor({
           </span>
           <span
             className={`relative h-7 w-12 shrink-0 rounded-full transition-colors ${
-              current.at_washman ? "bg-[#1F2A44]" : "bg-[#D9D1C3]"
+              current.at_washman ? "bg-orange" : "bg-[#D9D1C3]"
             }`}
           >
             <span
@@ -900,7 +902,7 @@ function Editor({
         <button
           onClick={update}
           disabled={saving}
-          className="rounded-full bg-[#1F2A44] py-4 font-semibold text-[#FDFAF6] transition-opacity disabled:opacity-60"
+          className="rounded-full bg-orange py-4 font-semibold text-on-orange transition-opacity disabled:opacity-60"
         >
           {saving ? "Updating…" : "Update"}
         </button>
@@ -922,14 +924,10 @@ function PieceCard({ item, onOpen }: { item: Item; onOpen: () => void }) {
       onClick={onOpen}
       className="fade-in relative flex w-full flex-col gap-1 text-left transition-transform active:scale-[0.98]"
     >
-      <div className="relative overflow-hidden rounded-xl">
-        {item.url && (
-          <img
-            src={item.url}
-            alt={item.description ?? displayName(item)}
-            className={`aspect-[3/4] w-full object-cover ${item.at_washman ? "opacity-40 grayscale" : ""}`}
-          />
-        )}
+      <div className="relative overflow-hidden rounded-2xl shadow-[0_1px_2px_rgba(31,42,68,0.06),0_10px_20px_-14px_rgba(31,42,68,0.3)]">
+        <div className={item.at_washman ? "opacity-40 grayscale" : ""}>
+          <Photo src={item.url} alt={item.description ?? displayName(item)} className="aspect-[3/4] w-full" />
+        </div>
         {item.needs_check && !item.at_washman && (
           <span className="absolute left-2 top-2 rounded-full bg-[#FD914A] px-2 py-1 text-xs font-semibold text-[#1F2A44]">
             Review
@@ -1302,7 +1300,7 @@ export default function WardrobePage() {
       )}
 
       <div className="flex items-baseline justify-between">
-        <h1 className="text-4xl">Wardrobe</h1>
+        <h1 className="text-3xl">Wardrobe</h1>
         <span className="text-sm text-[#6E6A66]">{total} {total === 1 ? "piece" : "pieces"}</span>
       </div>
 
@@ -1313,7 +1311,7 @@ export default function WardrobePage() {
             className="flex items-center justify-between rounded-2xl border border-[#E9E4DE] bg-[#FFFFFF] p-4"
           >
             <span className="text-sm">Your wardrobe is ready to style.</span>
-            <span className="text-sm font-semibold text-[#1F2A44]">See today&apos;s outfit ›</span>
+            <span className="shrink-0 whitespace-nowrap text-sm font-semibold text-[#1F2A44]">Open Today ›</span>
           </Link>
         ) : (
           <div className="rounded-2xl border border-[#E9E4DE] bg-[#FFFFFF] p-4 text-sm">
@@ -1337,7 +1335,7 @@ export default function WardrobePage() {
             onChange={addPhotos}
           />
         </label>
-        <label className="cursor-pointer rounded-full border border-[#1F2A44] py-3 text-center text-sm font-semibold text-[#1F2A44] transition-transform active:scale-[0.98]">
+        <label className="cursor-pointer rounded-full border border-line bg-card py-3 text-center text-sm font-semibold text-navy transition-transform active:scale-[0.98]">
           Choose from Library
           <input type="file" accept="image/*" multiple className="hidden" onChange={addPhotos} />
         </label>
@@ -1362,7 +1360,7 @@ export default function WardrobePage() {
             {pending.length === 0 && fresh.length > 0 && (
               <button
                 onClick={allGood}
-                className="rounded-full bg-[#1F2A44] px-4 py-2 text-sm font-semibold text-[#FDFAF6] transition-transform active:scale-95"
+                className="rounded-full bg-orange px-4 py-2 text-sm font-semibold text-on-orange transition-transform active:scale-95"
               >
                 All Good
               </button>
@@ -1423,7 +1421,7 @@ export default function WardrobePage() {
               onClick={() => openFilter(f.key)}
               className={`shrink-0 rounded-full border px-4 py-2 text-sm transition-colors ${
                 filter === f.key
-                  ? "border-[#1F2A44] bg-[#1F2A44] text-[#FDFAF6]"
+                  ? "border-orange bg-orange text-on-orange"
                   : "border-[#E9E4DE] bg-[#FFFFFF] text-[#1F2A44]"
               }`}
             >
@@ -1440,9 +1438,13 @@ export default function WardrobePage() {
           ))}
         </div>
       ) : total === 0 ? (
-        <p className="text-center text-[#6E6A66]">
-          Your wardrobe is empty. Start with the pieces you wear most.
-        </p>
+        <div className="card flex flex-col items-center gap-3 p-8 text-center">
+          <Crown size={40} className="text-orange" />
+          <h2 className="text-xl">Your wardrobe is empty</h2>
+          <p className="text-sm text-[#6E6A66]">
+            Start with the pieces you wear most.
+          </p>
+        </div>
       ) : (
         <div className="flex flex-col gap-8">
           {filter !== "all" && (

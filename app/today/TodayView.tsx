@@ -6,6 +6,7 @@ import { Heart, SlidersHorizontal, RefreshCw } from "lucide-react";
 import { OCCASIONS, buildLooks, missingFor, whyItWorks, type Look, type Occasion, type Piece, type StyleContext } from "@/lib/outfits";
 import { weatherContext } from "@/lib/weather";
 import { saveLook, wearLook } from "@/lib/looks-db";
+import { loadPick, savePick } from "@/lib/today-pick";
 import { useWardrobe } from "../components/useWardrobe";
 import { useWeather } from "../components/useWeather";
 import WeatherCard from "../components/WeatherCard";
@@ -29,7 +30,7 @@ function occasionsFor(d: Date): string[] {
 type Plan = { occasion: Occasion; look: Look };
 
 export default function TodayView() {
-  const { pieces, setPieces, name, prefs, loading, error } = useWardrobe();
+  const { pieces, setPieces, uid, name, prefs, loading, error } = useWardrobe();
   const { state: weather, retry } = useWeather({
     ready: !loading,
     saved: prefs.lat !== null && prefs.lon !== null ? { lat: prefs.lat, lon: prefs.lon, city: prefs.city } : null,
@@ -44,6 +45,7 @@ export default function TodayView() {
   const [worn, setWorn] = useState(false);
   const shown = useRef<Set<string>>(new Set());
   const [now] = useState(() => new Date());
+  const day = now.toLocaleDateString("en-CA"); // YYYY-MM-DD in his own time zone
 
   // Do not hold the outfit back for the weather forever.
   useEffect(() => {
@@ -59,8 +61,21 @@ export default function TodayView() {
   const settled = !loading && (weather.status !== "loading" || waited);
 
   const choose = useCallback(
-    (fresh: boolean) => {
+    (fresh: boolean, useKept = false) => {
       if (fresh) shown.current.clear();
+      // One outfit per day: reuse today's pick if it is still valid.
+      if (useKept) {
+        const kept = loadPick(uid, day, pieces);
+        const keptOcc = kept && OCCASIONS.find((o) => o.label === kept.occasion);
+        if (kept && keptOcc) {
+          shown.current.add(kept.look.core);
+          setPlan({ occasion: keptOcc, look: kept.look });
+          setSaved(false);
+          setProblem("");
+          setEmpty("");
+          return;
+        }
+      }
       for (const label of occasionsFor(now)) {
         const occ = OCCASIONS.find((o) => o.label === label);
         if (!occ) continue;
@@ -73,6 +88,7 @@ export default function TodayView() {
         const look = looks.find((l) => l.tier === "Classy") ?? looks[0];
         shown.current.add(look.core);
         setPlan({ occasion: occ, look });
+        savePick(uid, day, occ.label, look);
         setSaved(false);
         setProblem("");
         setEmpty("");
@@ -84,7 +100,7 @@ export default function TodayView() {
     },
     // ctx is rebuilt each render. Its values are what matter.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [pieces, now, ctx.hot, ctx.cool, ctx.rainy, prefs.styles, prefs.colours]
+    [pieces, now, uid, day, ctx.hot, ctx.cool, ctx.rainy, prefs.styles, prefs.colours]
   );
 
   // Pick once the wardrobe and the weather have both settled.
@@ -92,7 +108,7 @@ export default function TodayView() {
   useEffect(() => {
     if (loading || error || !settled || picked.current) return;
     picked.current = true;
-    choose(true);
+    choose(true, true);
   }, [loading, error, settled, choose]);
 
   async function love() {
