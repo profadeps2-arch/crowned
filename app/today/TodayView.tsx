@@ -160,7 +160,7 @@ export default function TodayView() {
   const thinking = loading || (!error && !settled) || (!plan && !empty && !error);
 
   return (
-    <main className="flex flex-col gap-6 px-5 pb-8 pt-4">
+    <main className="flex flex-col gap-8 px-6 pb-10 pt-4">
       <header className="flex flex-col gap-1">
         <span className="eyebrow">
           {now.toLocaleDateString([], { weekday: "long", day: "numeric", month: "long" })}
@@ -237,7 +237,7 @@ export default function TodayView() {
             <Breakdown look={plan.look} onOpen={setViewing} />
           </div>
 
-          <div className="card flex flex-col gap-2 p-5">
+          <div className="flex flex-col gap-2">
             <h3 className="headline">Why it works</h3>
             <p className="subhead text-muted">
               {whyItWorks(plan.look, plan.occasion, ctx)}
