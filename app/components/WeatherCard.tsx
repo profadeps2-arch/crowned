@@ -46,7 +46,7 @@ export default function WeatherCard({
     return (
       <div className="card flex items-center justify-between gap-4 p-3.5">
         <p className="text-sm text-muted">The weather is not available right now. Your outfit still works.</p>
-        <button onClick={onRetry} className="shrink-0 text-sm font-semibold text-navy">
+        <button onClick={onRetry} className="shrink-0 text-[15px] font-semibold text-orange-deep">
           Try again
         </button>
       </div>
@@ -76,7 +76,7 @@ export default function WeatherCard({
         </span>
       </div>
 
-      <dl className="flex items-center justify-between gap-2 rounded-xl bg-sand px-3 py-2 text-xs text-navy">
+      <dl className="flex items-center justify-between gap-2 rounded-xl bg-fill px-3 py-2 text-xs text-navy">
         <div className="flex items-center gap-1"><dt className="sr-only">Rain chance</dt><CloudRain size={13} aria-hidden /><dd className="font-semibold">{Math.round(w.rainChance)}%</dd></div>
         <div className="flex items-center gap-1"><dt className="sr-only">Humidity</dt><Droplets size={13} aria-hidden /><dd className="font-semibold">{Math.round(w.humidity)}%</dd></div>
         <div className="flex items-center gap-1"><dt className="sr-only">Wind</dt><Wind size={13} aria-hidden /><dd className="font-semibold">{Math.round(w.wind)} km/h</dd></div>

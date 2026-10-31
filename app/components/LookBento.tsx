@@ -16,7 +16,7 @@ function Tile({
     <button
       onClick={() => onOpen(piece)}
       aria-label={pieceName(piece)}
-      className={`rise block overflow-hidden rounded-2xl shadow-[0_1px_2px_rgba(31,42,68,0.06),0_12px_24px_-14px_rgba(31,42,68,0.35)] transition-transform active:scale-[0.98] ${className}`}
+      className={`rise block overflow-hidden rounded-[20px] shadow-[0_2px_10px_rgb(0_0_0/0.08)] transition-transform duration-300 active:scale-[0.98] ${className}`}
       style={{ "--d": `${delay * 90}ms` } as React.CSSProperties}
     >
       <Photo src={piece.url} alt="" className="h-full w-full" />
@@ -66,13 +66,13 @@ export function PieceViewer({ piece, onClose }: { piece: Piece | null; onClose: 
     <button
       onClick={onClose}
       aria-label="Close"
-      className="rise fixed inset-0 z-50 flex flex-col items-center justify-center gap-4 bg-navy/95 p-6"
+      className="rise fixed inset-0 z-50 flex flex-col items-center justify-center gap-4 bg-black/85 p-6 backdrop-blur-xl"
     >
       {piece.url && (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={piece.url} alt={pieceName(piece)} className="max-h-[75vh] w-full max-w-md rounded-2xl object-contain" />
+        <img src={piece.url} alt={pieceName(piece)} className="max-h-[75vh] w-full max-w-md rounded-[20px] object-contain" />
       )}
-      <span className="text-sm font-semibold text-cream">{pieceName(piece)}</span>
+      <span className="text-[15px] font-semibold text-white">{pieceName(piece)}</span>
     </button>
   );
 }
@@ -88,17 +88,17 @@ export function Breakdown({ look, onOpen }: { look: Look; onOpen: (p: Piece) => 
   ];
 
   return (
-    <ul className="flex flex-col gap-2">
+    <ul className="list">
       {rows.map(({ label, piece }) => (
-        <li key={piece.id}>
+        <li key={piece.id} className="block">
           <button
             onClick={() => onOpen(piece)}
-            className="flex w-full items-center gap-3 rounded-2xl border border-line bg-card p-2.5 text-left transition-transform active:scale-[0.99]"
+            className="flex w-full items-center gap-3 p-2.5 text-left transition-colors active:bg-fill"
           >
             <Photo src={piece.url} alt="" className="h-14 w-14 shrink-0 rounded-xl" />
             <span className="flex min-w-0 flex-col">
               <span className="eyebrow">{label}</span>
-              <span className="truncate text-[15px] font-medium text-navy">{pieceName(piece)}</span>
+              <span className="headline truncate !font-medium">{pieceName(piece)}</span>
             </span>
           </button>
         </li>

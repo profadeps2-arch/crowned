@@ -31,7 +31,7 @@ export default function StyleLoading() {
         <Crown size={88} base strokeWidth={0.8} className="text-orange" />
       </div>
       <div className="flex flex-col items-center gap-4">
-        <p key={step} className="rise text-lg font-medium text-night-text">{STEPS[step]}</p>
+        <p key={step} className="rise text-[19px] font-medium text-night-text">{STEPS[step]}</p>
         <div className="flex gap-2" aria-hidden>
           {STEPS.map((_, i) => (
             <span

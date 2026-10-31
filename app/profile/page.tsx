@@ -63,27 +63,27 @@ export default function ProfilePage() {
     <main className="flex min-h-dvh flex-col gap-8 px-6 pb-[calc(2rem+env(safe-area-inset-bottom))] pt-[calc(3rem+env(safe-area-inset-top))]">
       <div className="flex flex-col gap-3">
         <Crown size={32} className="text-orange" strokeWidth={1.5} />
-        <h1 className="text-4xl leading-tight">Let us get your fit right, King.</h1>
-        <p className="text-muted">This helps us style you properly. It takes 20 seconds.</p>
+        <h1 className="large-title">Let us get your fit right, King.</h1>
+        <p className="text-[17px] text-muted">This helps us style you properly. It takes 20 seconds.</p>
       </div>
 
       <label className="flex flex-col gap-2">
-        <span className="text-sm font-semibold">What should we call you?</span>
+        <span className="headline">What should we call you?</span>
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Your first name"
-          className="h-12 rounded-xl border border-line bg-card px-4 text-navy"
+          className="field"
         />
       </label>
 
       <div className="flex flex-col gap-2">
-        <span className="text-sm font-semibold">How tall are you?</span>
+        <span className="headline">How tall are you?</span>
         <div className="flex items-center gap-3">
           <select
             value={feet}
             onChange={(e) => setFeet(Number(e.target.value))}
-            className="h-12 rounded-xl border border-line bg-card px-4 text-navy"
+            className="field"
           >
             {[4, 5, 6, 7].map((f) => (
               <option key={f} value={f}>{f} ft</option>
@@ -92,7 +92,7 @@ export default function ProfilePage() {
           <select
             value={inches}
             onChange={(e) => setInches(Number(e.target.value))}
-            className="h-12 rounded-xl border border-line bg-card px-4 text-navy"
+            className="field"
           >
             {Array.from({ length: 12 }, (_, i) => i).map((i) => (
               <option key={i} value={i}>{i} in</option>
@@ -103,14 +103,14 @@ export default function ProfilePage() {
       </div>
 
       <div className="flex flex-col gap-2">
-        <span className="text-sm font-semibold">Your build</span>
+        <span className="headline">Your build</span>
         <div className="flex flex-wrap gap-2">
           {bodyTypes.map((type) => (
             <button
               key={type}
               onClick={() => setBodyType(type)}
               aria-pressed={bodyType === type}
-              className="chip"
+              className="chip !h-11"
             >
               {type}
             </button>
@@ -118,7 +118,7 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {error && <p className="text-sm text-[#C0392B]">{error}</p>}
+      {error && <p className="subhead text-danger">{error}</p>}
 
       <button
         onClick={handleSave}

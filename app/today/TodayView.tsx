@@ -141,7 +141,7 @@ export default function TodayView() {
         <span className="eyebrow">
           {now.toLocaleDateString([], { weekday: "long", day: "numeric", month: "long" })}
         </span>
-        <h1 className="text-3xl leading-tight">
+        <h1 className="large-title">
           {greeting(now.getHours())}
           {name ? `, ${name}` : ""}.
         </h1>
@@ -161,7 +161,7 @@ export default function TodayView() {
       )}
 
       {error && (
-        <div className="card p-5 text-sm text-navy">{error}</div>
+        <div className="card p-5 subhead text-navy">{error}</div>
       )}
 
       {thinking && !error && (
@@ -178,7 +178,7 @@ export default function TodayView() {
       {!thinking && !error && !plan && empty && (
         <div className="card flex flex-col items-center gap-4 p-8 text-center">
           <Crown size={40} className="text-orange" />
-          <h2 className="text-xl">{pieces.length === 0 ? "Your wardrobe is empty" : "We need a little more"}</h2>
+          <h2 className="title-2">{pieces.length === 0 ? "Your wardrobe is empty" : "We need a little more"}</h2>
           <p className="text-sm text-muted">
             {pieces.length === 0 ? "Add a few pieces and your first outfit appears here." : empty}
           </p>
@@ -193,11 +193,11 @@ export default function TodayView() {
           <div className="flex items-end justify-between gap-3">
             <div className="flex flex-col gap-1">
               <span className="eyebrow">Today&apos;s outfit recommendation</span>
-              <h2 className="text-2xl leading-tight">{plan.look.title}</h2>
+              <h2 className="title-2">{plan.look.title}</h2>
             </div>
             <button
               onClick={() => choose(false)}
-              className="flex shrink-0 items-center gap-1.5 pb-1 text-sm font-semibold text-navy"
+              className="flex shrink-0 items-center gap-1.5 pb-1 text-[15px] font-semibold text-orange-deep active:opacity-60"
             >
               <RefreshCw size={14} aria-hidden /> Another
             </button>
@@ -206,28 +206,28 @@ export default function TodayView() {
           <LookBento key={plan.look.key} look={plan.look} onOpen={setViewing} />
 
           <div className="flex flex-col gap-2">
-            <h3 className="text-base font-semibold">What you are wearing</h3>
+            <h3 className="headline px-1">What you are wearing</h3>
             <Breakdown look={plan.look} onOpen={setViewing} />
           </div>
 
           <div className="card flex flex-col gap-2 p-5">
-            <h3 className="text-base font-semibold">Why it works</h3>
-            <p className="text-sm leading-relaxed text-muted">
+            <h3 className="headline">Why it works</h3>
+            <p className="subhead text-muted">
               {whyItWorks(plan.look, plan.occasion, ctx)}
             </p>
             {plan.look.tips.map((t) => (
-              <p key={t} className="text-sm leading-relaxed text-muted">{t}</p>
+              <p key={t} className="subhead text-muted">{t}</p>
             ))}
           </div>
 
-          {problem && <p className="text-center text-sm text-[#C0392B]">{problem}</p>}
+          {problem && <p className="text-center text-sm text-danger">{problem}</p>}
 
           <div className="flex flex-col gap-3">
             <button onClick={love} className="btn btn-orange" aria-pressed={saved}>
               <Heart size={18} fill={saved ? "currentColor" : "none"} aria-hidden />
               {saved ? "Saved to Outfits" : "Love This Look"}
             </button>
-            <button onClick={wear} disabled={busy} className="text-sm font-semibold text-navy disabled:opacity-50">
+            <button onClick={wear} disabled={busy} className="btn btn-ghost">
               I am wearing this today
             </button>
           </div>
