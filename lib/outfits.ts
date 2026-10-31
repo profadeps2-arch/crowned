@@ -63,6 +63,10 @@ export const OCCASIONS: Occasion[] = [
   { label: "White wedding", primary: ["formal"], secondary: ["smart casual", "native"], need: "Add a shirt, trousers and formal shoes." },
   { label: "Interview", primary: ["formal", "smart casual"], secondary: [], need: "Add a shirt, trousers and formal shoes." },
   { label: "Hangout", primary: ["casual", "streetwear"], secondary: ["smart casual"], need: "Add a tee or polo, trousers and sneakers." },
+  { label: "School", primary: ["casual", "smart casual"], secondary: ["streetwear"], need: "Add a tee or polo, trousers or jeans, and clean sneakers." },
+  { label: "Gym", primary: ["casual", "streetwear"], secondary: [], need: "Add a tee or jersey, joggers or shorts, and trainers." },
+  { label: "Mosque", primary: ["native"], secondary: ["formal", "smart casual"], need: "Add a kaftan or native set, a cap if you wear one, and clean shoes." },
+  { label: "Funeral", primary: ["native", "formal"], secondary: ["smart casual"], need: "Add a plain native set or a shirt and trousers in dark colours, with smart shoes." },
   { label: "Travel", primary: ["casual", "streetwear"], secondary: ["smart casual"], need: "Add a tee, comfortable trousers and sneakers." },
 ];
 
