@@ -112,7 +112,10 @@ export default function OutfitsPage() {
   );
 
   // Recommended: one good look for a few occasions, built from what he owns.
-  const ctxKey = `${ctx.hot}|${ctx.cool}|${ctx.rainy}|${prefs.styles.join()}|${prefs.colours.join()}`;
+  // Keyed on which pieces he owns, not on when they were last worn, so wearing a
+  // look does not reshuffle the list under his thumb.
+  const wardrobeKey = pieces.map((p) => `${p.id}${p.at_washman ? "w" : ""}`).join();
+  const ctxKey = `${ctx.hot}|${ctx.cool}|${ctx.rainy}|${prefs.styles.join()}|${prefs.colours.join()}|${wardrobeKey}`;
   const settled = !loading && weather.status !== "loading";
   const { recs, recNote } = useMemo(() => {
     if (!settled || error) return { recs: null, recNote: "" };
@@ -129,7 +132,7 @@ export default function OutfitsPage() {
     return { recs: out, recNote: out.length === 0 ? missingFor(pieces, first, ctx) : "" };
     // ctx is rebuilt from the values in ctxKey.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [settled, error, pieces, ctxKey]);
+  }, [settled, error, ctxKey]);
 
   const savedKeys = useMemo(() => new Set(saved.map((r) => keyOf(r.item_ids ?? []))), [saved]);
 

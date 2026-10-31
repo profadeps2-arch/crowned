@@ -79,6 +79,23 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "No photo" }, { status: 400 });
   }
 
+  // A daily cap per user, so one account cannot run up the Gemini bill.
+  // If the tag_calls table is not set up yet, tagging keeps working without a cap.
+  const DAILY_LIMIT = 150;
+  const since = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
+  const { count, error: countError } = await supabase
+    .from("tag_calls")
+    .select("id", { count: "exact", head: true })
+    .gte("created_at", since);
+  if (countError) {
+    console.warn("Tagging cap not active:", countError.message);
+  } else {
+    if ((count ?? 0) >= DAILY_LIMIT) {
+      return NextResponse.json({ error: "Daily tagging limit reached" }, { status: 429 });
+    }
+    await supabase.from("tag_calls").insert({ kind: isCorrection ? "correction" : "photo" });
+  }
+
   const tagsSchema = { type: Type.ARRAY, items: { type: Type.STRING, enum: ALL_TAGS } };
 
   const schema = isCorrection

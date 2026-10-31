@@ -337,7 +337,12 @@ export function buildLooks(
     let best: Candidate | null = null;
     let bestScore = -Infinity;
 
-    const open = cands.filter((c) => !exclude.has(c.core) && !cores.has(c.core));
+    let open = cands.filter((c) => !exclude.has(c.core) && !cores.has(c.core));
+    // In rain, closed shoes win even for native wear, when he owns any.
+    if (ctx.rainy) {
+      const dry = open.filter((c) => !has(c.shoes, "palm", "sandal", "slide", "mule", "slipper"));
+      if (dry.length > 0) open = dry;
+    }
     const strict = open.filter((c) => c.strict);
     const pool = strict.length > 0 ? strict : open;
 

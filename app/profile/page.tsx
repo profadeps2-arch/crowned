@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import Crown from "../components/Crown";
 
 const bodyTypes = ["Slim", "Athletic", "Average", "Broad", "Big frame"];
 
@@ -59,10 +60,11 @@ export default function ProfilePage() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col gap-8 px-6 py-14">
-      <div className="flex flex-col gap-2">
+    <main className="flex min-h-dvh flex-col gap-8 px-6 pb-[calc(2rem+env(safe-area-inset-bottom))] pt-[calc(3rem+env(safe-area-inset-top))]">
+      <div className="flex flex-col gap-3">
+        <Crown size={32} className="text-orange" strokeWidth={1.5} />
         <h1 className="text-4xl leading-tight">Let us get your fit right, King.</h1>
-        <p className="text-[#6E6A66]">This helps us style you properly. Takes 20 seconds.</p>
+        <p className="text-muted">This helps us style you properly. It takes 20 seconds.</p>
       </div>
 
       <label className="flex flex-col gap-2">
@@ -71,7 +73,7 @@ export default function ProfilePage() {
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Your first name"
-          className="rounded-xl border border-[#E9E4DE] bg-[#FFFFFF] px-4 py-3"
+          className="h-12 rounded-xl border border-line bg-card px-4 text-navy"
         />
       </label>
 
@@ -81,7 +83,7 @@ export default function ProfilePage() {
           <select
             value={feet}
             onChange={(e) => setFeet(Number(e.target.value))}
-            className="rounded-xl border border-[#E9E4DE] bg-[#FFFFFF] px-4 py-3"
+            className="h-12 rounded-xl border border-line bg-card px-4 text-navy"
           >
             {[4, 5, 6, 7].map((f) => (
               <option key={f} value={f}>{f} ft</option>
@@ -90,13 +92,13 @@ export default function ProfilePage() {
           <select
             value={inches}
             onChange={(e) => setInches(Number(e.target.value))}
-            className="rounded-xl border border-[#E9E4DE] bg-[#FFFFFF] px-4 py-3"
+            className="h-12 rounded-xl border border-line bg-card px-4 text-navy"
           >
             {Array.from({ length: 12 }, (_, i) => i).map((i) => (
               <option key={i} value={i}>{i} in</option>
             ))}
           </select>
-          <span className="text-[#6E6A66]">= {cm} cm</span>
+          <span className="text-muted">= {cm} cm</span>
         </div>
       </div>
 
@@ -107,11 +109,8 @@ export default function ProfilePage() {
             <button
               key={type}
               onClick={() => setBodyType(type)}
-              className={`rounded-full border px-4 py-2 ${
-                bodyType === type
-                  ? "border-[#1F2A44] bg-[#1F2A44] text-[#FDFAF6]"
-                  : "border-[#E9E4DE] bg-[#FFFFFF]"
-              }`}
+              aria-pressed={bodyType === type}
+              className="chip"
             >
               {type}
             </button>
@@ -119,14 +118,14 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {error && <p className="text-sm text-red-700">{error}</p>}
+      {error && <p className="text-sm text-[#C0392B]">{error}</p>}
 
       <button
         onClick={handleSave}
         disabled={saving}
-        className="mt-auto rounded-full bg-[#1F2A44] py-4 font-semibold text-[#FDFAF6] disabled:opacity-50"
+        className="btn btn-orange mt-auto"
       >
-        {saving ? "Saving..." : "Save and style me"}
+        {saving ? "Saving" : "Save and style me"}
       </button>
     </main>
   );
