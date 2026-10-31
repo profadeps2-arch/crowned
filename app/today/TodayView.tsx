@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Heart, SlidersHorizontal, RefreshCw } from "lucide-react";
 import { OCCASIONS, buildLooks, missingFor, whyItWorks, type Look, type Occasion, type Piece, type StyleContext } from "@/lib/outfits";
 import { weatherContext } from "@/lib/weather";
+import { groupFor } from "@/lib/customize";
 import { saveLook, wearLook } from "@/lib/looks-db";
 import { loadPick, savePick } from "@/lib/today-pick";
 import { useWardrobe } from "../components/useWardrobe";
@@ -215,12 +216,15 @@ export default function TodayView() {
               <Heart size={18} fill={saved ? "currentColor" : "none"} aria-hidden />
               {saved ? "Saved to Outfits" : "Love This Look"}
             </button>
-            <Link href="/customize" className="btn btn-outline">
-              <SlidersHorizontal size={18} aria-hidden /> Customize My Outfit
+            <Link href={`/customize?group=${groupFor(plan.occasion.label)}`} className="btn btn-outline">
+              <SlidersHorizontal size={18} aria-hidden /> Customize Today&apos;s Outfit
             </Link>
             <button onClick={wear} disabled={busy} className="text-sm font-semibold text-navy disabled:opacity-50">
               I am wearing this today
             </button>
+            <Link href="/customize" className="text-center text-sm text-muted underline-offset-4 hover:underline">
+              Dressing for a different occasion?
+            </Link>
           </div>
         </section>
       )}

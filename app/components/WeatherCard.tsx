@@ -29,24 +29,22 @@ export default function WeatherCard({
   unit?: Unit;
 }) {
   const deg = (c: number) => Math.round(unit === "F" ? (c * 9) / 5 + 32 : c);
+
   if (state.status === "loading") {
     return (
-      <div className="card flex animate-pulse flex-col gap-4 p-5" aria-busy="true" aria-label="Loading the weather">
-        <div className="flex items-center gap-4">
-          <div className="h-12 w-12 rounded-full bg-sand" />
-          <div className="flex flex-col gap-2">
-            <div className="h-7 w-24 rounded bg-sand" />
-            <div className="h-4 w-32 rounded bg-sand" />
-          </div>
+      <div className="card flex animate-pulse items-center gap-3 p-3.5" aria-busy="true" aria-label="Loading the weather">
+        <div className="h-11 w-11 rounded-full bg-sand" />
+        <div className="flex flex-col gap-2">
+          <div className="h-5 w-32 rounded bg-sand" />
+          <div className="h-3 w-48 rounded bg-sand" />
         </div>
-        <div className="h-10 rounded-xl bg-sand" />
       </div>
     );
   }
 
   if (state.status === "error") {
     return (
-      <div className="card flex items-center justify-between gap-4 p-5">
+      <div className="card flex items-center justify-between gap-4 p-3.5">
         <p className="text-sm text-muted">The weather is not available right now. Your outfit still works.</p>
         <button onClick={onRetry} className="shrink-0 text-sm font-semibold text-navy">
           Try again
@@ -56,46 +54,41 @@ export default function WeatherCard({
   }
 
   const w = state.weather;
+  const advice = weatherLine(w);
   return (
-    <section className="card flex flex-col gap-4 p-5" aria-label="Current weather">
-      <div className="flex items-center gap-4">
-        <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-orange-soft text-orange-deep">
-          <SkyIcon sky={w.sky} day={w.isDay} />
+    <section className="card flex flex-col gap-2 p-3.5" aria-label="Current weather">
+      <div className="flex items-center gap-3">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-orange-soft text-orange-deep">
+          <SkyIcon sky={w.sky} day={w.isDay} size={24} />
         </span>
-        <div className="flex min-w-0 flex-col">
+        <div className="flex min-w-0 flex-1 flex-col">
           <div className="flex items-baseline gap-2">
-            <span className="text-4xl font-bold leading-none text-navy">{deg(w.temp)}°</span>
-            <span className="text-base font-medium text-navy">{w.label}</span>
+            <span className="text-2xl font-bold leading-none text-navy">{deg(w.temp)}°</span>
+            <span className="truncate text-sm font-medium text-navy">{w.label}</span>
           </div>
-          <span className="text-sm text-muted">
-            Feels like {deg(w.feels)}° · H {deg(w.high)}° L {deg(w.low)}°
+          <span className="text-xs text-muted">
+            Feels {deg(w.feels)}° · H {deg(w.high)}° L {deg(w.low)}°
           </span>
         </div>
+        <span className="flex shrink-0 items-center gap-1.5 self-start text-[11px] text-muted" title="Live">
+          <span className="h-1.5 w-1.5 rounded-full bg-orange" aria-hidden />
+          {time(w.fetchedAt)}
+        </span>
       </div>
 
-      <p className="text-sm text-navy">{weatherLine(w)}</p>
-
-      <dl className="grid grid-cols-3 gap-2 text-center">
-        <div className="rounded-xl bg-sand px-2 py-2.5">
-          <dt className="flex items-center justify-center gap-1 text-[11px] text-muted"><CloudRain size={12} aria-hidden /> Rain</dt>
-          <dd className="text-sm font-semibold text-navy">{Math.round(w.rainChance)}%</dd>
-        </div>
-        <div className="rounded-xl bg-sand px-2 py-2.5">
-          <dt className="flex items-center justify-center gap-1 text-[11px] text-muted"><Droplets size={12} aria-hidden /> Humidity</dt>
-          <dd className="text-sm font-semibold text-navy">{Math.round(w.humidity)}%</dd>
-        </div>
-        <div className="rounded-xl bg-sand px-2 py-2.5">
-          <dt className="flex items-center justify-center gap-1 text-[11px] text-muted"><Wind size={12} aria-hidden /> Wind</dt>
-          <dd className="text-sm font-semibold text-navy">{Math.round(w.wind)} km/h</dd>
-        </div>
+      <dl className="flex items-center justify-between gap-2 rounded-xl bg-sand px-3 py-2 text-xs text-navy">
+        <div className="flex items-center gap-1"><dt className="sr-only">Rain chance</dt><CloudRain size={13} aria-hidden /><dd className="font-semibold">{Math.round(w.rainChance)}%</dd></div>
+        <div className="flex items-center gap-1"><dt className="sr-only">Humidity</dt><Droplets size={13} aria-hidden /><dd className="font-semibold">{Math.round(w.humidity)}%</dd></div>
+        <div className="flex items-center gap-1"><dt className="sr-only">Wind</dt><Wind size={13} aria-hidden /><dd className="font-semibold">{Math.round(w.wind)} km/h</dd></div>
       </dl>
 
-      <p className="flex items-center gap-2 text-[11px] text-muted">
-        <span className="h-1.5 w-1.5 rounded-full bg-orange" aria-hidden />
-        Live · updated {time(w.fetchedAt)}
-        {state.place && ` · ${state.place}`}
-        {state.fallback && " · showing Lagos. Allow location, or set your city in Profile."}
-      </p>
+      {(advice || state.place || state.fallback) && (
+        <p className="text-xs text-muted">
+          {advice}
+          {state.place && `${advice ? " " : ""}${state.place}.`}
+          {state.fallback && `${advice ? " " : ""}Showing Lagos. Allow location, or set your city in Profile.`}
+        </p>
+      )}
     </section>
   );
 }
