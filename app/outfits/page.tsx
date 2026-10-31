@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { pop, success } from "@/lib/feedback";
 import Link from "next/link";
 import { Heart, RotateCcw, Shirt, Trash2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -146,6 +147,7 @@ export default function OutfitsPage() {
     const rows = (data ?? []) as SavedRow[];
     rows.sort((x, y) => (y.created_at ?? "").localeCompare(x.created_at ?? ""));
     setSaved(rows);
+    pop();
   }
 
   async function remove(kind: "saved" | "history", id: string | number | undefined, ids: (string | number)[] | null) {
@@ -179,6 +181,7 @@ export default function OutfitsPage() {
       ...rows,
     ]);
     setWorn(title);
+    success();
   }
 
   const awayNote = (all: (string | number)[] | null, have: Piece[]) => {

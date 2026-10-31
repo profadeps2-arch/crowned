@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { pop, success } from "@/lib/feedback";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Bookmark, ChevronLeft, ChevronRight, RefreshCw } from "lucide-react";
@@ -117,6 +118,7 @@ export default function CustomizeView() {
     const err = await saveLook(look, occasion.label);
     if (err) return setProblem(err);
     setSaved((s) => new Set(s).add(look.key));
+    pop();
   }
 
   async function wear(look: Look) {
@@ -129,6 +131,7 @@ export default function CustomizeView() {
     const today = new Date().toISOString().slice(0, 10);
     setPieces((list) => list.map((p) => (ids.has(p.id) ? { ...p, last_worn: today } : p)));
     setWorn(look);
+    success();
   }
 
   function changeAnswers() {

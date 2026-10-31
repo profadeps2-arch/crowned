@@ -1,13 +1,11 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Geist, Bricolage_Grotesque } from "next/font/google";
 import "./globals.css";
 import AppShell from "./components/AppShell";
 
-// Used where SF Pro is not available (Android, desktop). Apple devices use SF Pro.
-const sans = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-});
+// A bold, friendly face for titles and a clean sans for everything else.
+const sans = Geist({ subsets: ["latin"], variable: "--font-sans" });
+const display = Bricolage_Grotesque({ subsets: ["latin"], variable: "--font-display" });
 
 export const metadata: Metadata = {
   title: "Crowned | Your Personal Stylist",
@@ -16,8 +14,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#F2F2F7" },
-    { media: "(prefers-color-scheme: dark)", color: "#000000" },
+    { media: "(prefers-color-scheme: light)", color: "#FFF8F0" },
+    { media: "(prefers-color-scheme: dark)", color: "#120F0C" },
   ],
   colorScheme: "light dark",
   viewportFit: "cover",
@@ -25,7 +23,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={sans.variable}>
+    <html lang="en" className={`${sans.variable} ${display.variable}`}>
       <body>
         <AppShell>{children}</AppShell>
       </body>
