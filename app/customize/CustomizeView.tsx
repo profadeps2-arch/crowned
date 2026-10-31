@@ -97,7 +97,7 @@ export default function CustomizeView() {
     let best = 0;
     let gap = Infinity;
     kids.forEach((k, i) => {
-      const d = Math.abs(k.offsetLeft - el.scrollLeft - 20);
+      const d = Math.abs(k.offsetLeft - el.scrollLeft - 24);
       if (d < gap) {
         gap = d;
         best = i;
@@ -109,7 +109,7 @@ export default function CustomizeView() {
   function goTo(i: number) {
     const el = rail.current;
     const kid = el?.children[i] as HTMLElement | undefined;
-    if (el && kid) el.scrollTo({ left: kid.offsetLeft - 20, behavior: "smooth" });
+    if (el && kid) el.scrollTo({ left: kid.offsetLeft - 24, behavior: "smooth" });
   }
 
   async function save(look: Look) {
@@ -245,7 +245,7 @@ export default function CustomizeView() {
               <div
                 ref={rail}
                 onScroll={onRailScroll}
-                className="no-scrollbar relative -mx-6 flex snap-x snap-mandatory gap-4 overflow-x-auto px-6"
+                className="no-scrollbar relative -mx-6 flex scroll-pl-6 snap-x snap-mandatory gap-4 overflow-x-auto px-6"
               >
                 {looks.map((look, i) => (
                   <article
