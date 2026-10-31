@@ -47,8 +47,8 @@ function dayLabel(iso: string | null) {
 
 function Empty({ title, text, action }: { title: string; text: string; action?: { href: string; label: string } }) {
   return (
-    <div className="flex flex-col items-start gap-5 border-t border-line pt-8">
-      <Crown size={32} className="text-orange" />
+    <div className="card flex flex-col items-center gap-4 p-8 text-center">
+      <Crown size={40} className="text-orange" />
       <h2 className="title-2">{title}</h2>
       <p className="subhead text-muted">{text}</p>
       {action && (
@@ -212,7 +212,7 @@ export default function OutfitsPage() {
   );
 
   return (
-    <main className="flex flex-col gap-6 px-6 pb-8 pt-[calc(2rem+env(safe-area-inset-top))]">
+    <main className="flex flex-col gap-5 px-5 pb-8 pt-4">
       <h1 className="large-title">Outfits</h1>
 
       <div role="tablist" aria-label="Outfits" className="seg">
@@ -264,7 +264,7 @@ export default function OutfitsPage() {
                   </button>
                   <button
                     onClick={() => wear(look.title, occasion, look.tier, list)}
-                    className="btn btn-navy !h-11 flex-1 !text-sm"
+                    className="btn btn-orange !h-11 flex-1 !text-sm"
                   >
                     I wear this
                   </button>
@@ -315,14 +315,14 @@ export default function OutfitsPage() {
                       <button
                         onClick={() => wear(r.title ?? "Saved outfit", r.occasion ?? "Outfit", r.tier, ready)}
                         disabled={ready.length === 0}
-                        className="btn btn-navy !h-11 flex-1 !text-sm"
+                        className="btn btn-orange !h-11 flex-1 !text-sm"
                       >
                         <Shirt size={16} aria-hidden /> I wear this
                       </button>
                       <button
                         onClick={() => setConfirming(k)}
                         aria-label="Remove outfit"
-                        className="btn !h-11 !w-11 shrink-0 !px-0 border-line text-muted"
+                        className="btn !h-11 !w-11 shrink-0 !px-0 bg-fill text-danger"
                       >
                         <Trash2 size={17} aria-hidden />
                       </button>
@@ -377,7 +377,7 @@ export default function OutfitsPage() {
                       <button
                         onClick={() => setConfirming(k)}
                         aria-label="Remove from history"
-                        className="btn !h-11 !w-11 shrink-0 !px-0 border-line text-muted"
+                        className="btn !h-11 !w-11 shrink-0 !px-0 bg-fill text-danger"
                       >
                         <Trash2 size={17} aria-hidden />
                       </button>

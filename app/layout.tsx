@@ -1,11 +1,13 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Instrument_Serif } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import AppShell from "./components/AppShell";
 
-// Titles are set in a serif, everything else in a clean sans.
-const sans = Geist({ subsets: ["latin"], variable: "--font-sans" });
-const display = Instrument_Serif({ subsets: ["latin"], weight: "400", variable: "--font-display" });
+// Used where SF Pro is not available (Android, desktop). Apple devices use SF Pro.
+const sans = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+});
 
 export const metadata: Metadata = {
   title: "Crowned | Your Personal Stylist",
@@ -14,8 +16,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#F4F3F0" },
-    { media: "(prefers-color-scheme: dark)", color: "#0F1115" },
+    { media: "(prefers-color-scheme: light)", color: "#F2F2F7" },
+    { media: "(prefers-color-scheme: dark)", color: "#000000" },
   ],
   colorScheme: "light dark",
   viewportFit: "cover",
@@ -23,7 +25,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${sans.variable} ${display.variable}`}>
+    <html lang="en" className={sans.variable}>
       <body>
         <AppShell>{children}</AppShell>
       </body>

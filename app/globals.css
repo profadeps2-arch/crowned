@@ -1,54 +1,57 @@
 @import "tailwindcss";
 
 /* ------------------------------------------------------------------
-   Crowned: quiet luxury
-   Bone paper, deep ink, hairlines instead of boxes. Orange is spent in
-   two places only: the main button and the crown.
-   Every colour has a light and a dark value; the dark values apply
-   automatically when the phone is set to dark. "navy" is kept as the
-   class name for ink (primary text) so existing classes keep working.
+   Crowned design tokens (Apple-style: neutral surfaces, one accent)
+   Every colour below has a light and a dark value. The dark values are
+   applied automatically when the phone is set to dark, so any class that
+   uses a token (bg-card, text-navy, border-line, ...) follows the system.
+   "navy" is kept as the name for primary text so existing classes work.
 ------------------------------------------------------------------- */
 @theme {
-  --color-cream: #F4F3F0;   /* page */
-  --color-card: #FFFFFF;    /* the rare raised surface */
-  --color-sand: #EAE8E3;    /* photo wells, skeletons */
-  --color-fill: rgb(22 24 29 / 0.05);
-  --color-line: #E2E0DA;    /* hairlines */
+  /* Surfaces */
+  --color-cream: #F2F2F7;   /* page: grouped background */
+  --color-card: #FFFFFF;    /* raised surface on the page */
+  --color-sand: #EDEDF2;    /* photo frames, quiet wells */
+  --color-fill: rgb(118 118 128 / 0.12); /* chips, fields, segmented controls */
+  --color-line: #E3E3E8;    /* hairlines */
 
-  --color-navy: #16181D;    /* ink */
-  --color-muted: #6F6C66;
+  /* Text */
+  --color-navy: #1C1C1E;    /* primary label */
+  --color-muted: #6C6C70;   /* secondary label */
 
+  /* Crowned orange: the single accent. orange-deep is for small text. */
   --color-orange: #FD914A;
-  --color-orange-soft: #FBEADC;
-  --color-orange-deep: #B24E10;
-  --color-on-orange: #16181D;
+  --color-orange-soft: #FFEEE0;
+  --color-orange-deep: #B8500F;
+  --color-on-orange: #1C1C1E;
 
-  --color-danger: #B3261E;
+  --color-danger: #D70015;
 
-  /* Always-dark screens: splash, loading, ready */
-  --color-night: #0F1115;
-  --color-night-card: #171A20;
-  --color-night-line: #2A2E36;
-  --color-night-text: #EEEDE9;
-  --color-night-muted: #9A978F;
+  /* Screens that are always dark: splash, loading, ready */
+  --color-night: #000000;
+  --color-night-card: #1C1C1E;
+  --color-night-line: #38383A;
+  --color-night-text: #F5F5F7;
+  --color-night-muted: #98989F;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-cream: #0F1115;
-    --color-card: #171A20;
-    --color-sand: #1E2128;
-    --color-fill: rgb(255 255 255 / 0.06);
-    --color-line: #262A32;
+    --color-cream: #000000;
+    --color-card: #1C1C1E;
+    --color-sand: #2C2C2E;
+    --color-fill: rgb(118 118 128 / 0.24);
+    --color-line: #38383A;
 
-    --color-navy: #EEEDE9;
-    --color-muted: #9A978F;
+    --color-navy: #F5F5F7;
+    --color-muted: #9A9AA1;
 
     --color-orange: #FF9A57;
-    --color-orange-soft: #2E1E12;
+    --color-orange-soft: #3A2312;
     --color-orange-deep: #FFAA6E;
+    /* on-orange stays dark: dark text on the orange fill reads best in both modes */
 
-    --color-danger: #FF8A80;
+    --color-danger: #FF6B62;
   }
 }
 
@@ -64,9 +67,11 @@
   body {
     background: var(--color-cream);
     color: var(--color-navy);
-    font-family: var(--font-sans), system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    font-size: 16px;
-    line-height: 1.45;
+    /* SF Pro on Apple devices. Inter (loaded in layout) everywhere else. */
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
+      var(--font-inter), system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 17px;
+    line-height: 1.4;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overscroll-behavior-y: none;
@@ -79,8 +84,8 @@
   }
 
   h1, h2, h3, h4 {
-    font-weight: 600;
-    letter-spacing: -0.01em;
+    font-weight: 700;
+    letter-spacing: -0.022em;
   }
 
   button {
@@ -89,12 +94,12 @@
   }
 
   input, select, textarea {
-    font-size: 16px; /* 16px stops iOS zooming into the field */
+    font-size: 17px; /* 16px or more stops iOS zooming into the field */
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-navy);
-    outline-offset: 3px;
+    outline: 2px solid var(--color-orange);
+    outline-offset: 2px;
   }
 
   ::selection {
@@ -104,155 +109,142 @@
 }
 
 /* ------------------------------------------------------------------
-   Type
-   Titles are set in a serif. Everything you read or tap is sans.
+   Type scale (iOS text styles)
 ------------------------------------------------------------------- */
 @layer components {
-  .large-title, .title-1, .title-2 {
-    font-family: var(--font-display), Georgia, "Times New Roman", serif;
-    font-weight: 400;
-    letter-spacing: -0.012em;
-  }
-  .large-title { font-size: 46px; line-height: 1.0; }
-  .title-1     { font-size: 36px; line-height: 1.05; }
-  .title-2     { font-size: 27px; line-height: 1.1; }
-  .headline    { font-size: 16px; line-height: 1.3; font-weight: 600; }
-  .subhead     { font-size: 15px; line-height: 1.5; }
-  .footnote    { font-size: 13px; line-height: 1.4; }
+  .large-title { font-size: 34px; line-height: 1.12; font-weight: 700; letter-spacing: -0.03em; }
+  .title-1     { font-size: 28px; line-height: 1.15; font-weight: 700; letter-spacing: -0.025em; }
+  .title-2     { font-size: 22px; line-height: 1.2;  font-weight: 700; letter-spacing: -0.02em; }
+  .headline    { font-size: 17px; line-height: 1.3;  font-weight: 600; letter-spacing: -0.01em; }
+  .subhead     { font-size: 15px; line-height: 1.35; }
+  .footnote    { font-size: 13px; line-height: 1.35; }
 }
 
 /* ------------------------------------------------------------------
    Components
 ------------------------------------------------------------------- */
 @layer components {
+  /* Buttons: 50pt, continuous-feeling corners, dim on press */
   .btn {
     display: flex;
     width: 100%;
-    height: 54px;
+    height: 50px;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
     border-radius: 14px;
-    border: 1px solid transparent;
-    font-size: 16px;
-    font-weight: 500;
-    letter-spacing: 0.005em;
-    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+    border: 0;
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.2s ease, background 0.2s ease;
   }
-  .btn:active { transform: scale(0.985); }
+  .btn:active { transform: scale(0.98); opacity: 0.8; }
   .btn:disabled { opacity: 0.4; cursor: default; }
 
-  /* The one loud thing on a screen */
+  /* Filled: the accent */
   .btn-orange  { background: var(--color-orange); color: var(--color-on-orange); }
+  /* Filled: neutral, inverts in dark mode */
   .btn-navy    { background: var(--color-navy); color: var(--color-cream); }
-  .btn-outline { background: transparent; color: var(--color-navy); border-color: var(--color-line); }
-  .btn-ghost   { background: transparent; color: var(--color-muted); }
+  /* Tinted: accent text on a soft accent fill */
+  .btn-outline { background: var(--color-orange-soft); color: var(--color-orange-deep); }
+  /* Plain: text only */
+  .btn-ghost   { background: transparent; color: var(--color-orange-deep); }
 
-  /* Plain text action */
-  .link {
-    color: var(--color-navy);
-    font-size: 15px;
-    font-weight: 500;
-    text-underline-offset: 4px;
-    text-decoration: underline;
-    text-decoration-color: var(--color-line);
-    text-decoration-thickness: 1px;
-    transition: text-decoration-color 0.2s;
-  }
-  .link:hover { text-decoration-color: var(--color-navy); }
-
-  /* A raised surface, used rarely */
+  /* Grouped surface */
   .card {
     background: var(--color-card);
-    border: 1px solid var(--color-line);
-    border-radius: 16px;
+    border-radius: 20px;
   }
 
-  /* Rows divided by hairlines, no box */
-  .list { border-top: 1px solid var(--color-line); border-bottom: 1px solid var(--color-line); }
-  .list > * + * { border-top: 1px solid var(--color-line); }
+  /* Inset grouped list: rows separated by hairlines */
+  .list {
+    background: var(--color-card);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .list > * + * { border-top: 0.5px solid var(--color-line); }
 
-  /* Quiet supporting text */
+  /* Section label above a grouped list */
   .eyebrow {
     font-size: 13px;
     font-weight: 400;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
     color: var(--color-muted);
   }
 
-  /* Choices: hairline pill, ink when chosen */
+  /* Pills and filters */
   .chip {
     display: flex;
     flex: none;
-    height: 40px;
+    height: 36px;
     align-items: center;
     gap: 0.375rem;
-    padding: 0 18px;
+    padding: 0 16px;
     border-radius: 9999px;
-    border: 1px solid var(--color-line);
-    background: transparent;
+    border: 0;
+    background: var(--color-fill);
     color: var(--color-navy);
     font-size: 15px;
-    font-weight: 400;
-    transition: background 0.25s, color 0.25s, border-color 0.25s, transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    font-weight: 500;
+    transition: background 0.25s, color 0.25s, transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
   }
-  .chip:active { transform: scale(0.97); }
+  .chip:active { transform: scale(0.96); }
   .chip[aria-pressed="true"] {
-    background: var(--color-navy);
-    border-color: var(--color-navy);
-    color: var(--color-cream);
+    background: var(--color-orange);
+    color: var(--color-on-orange);
   }
 
+  /* Text field */
   .field {
-    height: 52px;
+    height: 48px;
     border-radius: 12px;
-    border: 1px solid var(--color-line);
-    background: transparent;
+    border: 0;
+    background: var(--color-fill);
     padding: 0 16px;
     color: var(--color-navy);
-    transition: border-color 0.2s;
   }
-  .field:focus { outline: none; border-color: var(--color-navy); }
   .field::placeholder { color: var(--color-muted); }
 
-  /* Tabs: text with a line under the chosen one. Wrap .seg-item in .seg. */
+  /* Segmented control. Wrap .seg-item buttons in .seg. */
   .seg {
     display: flex;
-    gap: 28px;
-    border-bottom: 1px solid var(--color-line);
+    gap: 2px;
+    padding: 2px;
+    border-radius: 10px;
+    background: var(--color-fill);
   }
   .seg-item {
-    position: relative;
-    flex: none;
-    height: 44px;
-    font-size: 15px;
-    color: var(--color-muted);
-    transition: color 0.25s;
-  }
-  .seg-item::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: -1px;
-    height: 2px;
-    background: var(--color-navy);
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    flex: 1;
+    height: 32px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-navy);
+    transition: background 0.25s, box-shadow 0.25s;
   }
   .seg-item[aria-pressed="true"],
-  .seg-item[aria-selected="true"] { color: var(--color-navy); font-weight: 500; }
-  .seg-item[aria-pressed="true"]::after,
-  .seg-item[aria-selected="true"]::after { transform: scaleX(1); }
-
-  /* Translucent bar (tab bar) */
-  .bar {
-    background: color-mix(in srgb, var(--color-cream) 84%, transparent);
-    -webkit-backdrop-filter: saturate(160%) blur(18px);
-    backdrop-filter: saturate(160%) blur(18px);
+  .seg-item[aria-selected="true"] {
+    background: var(--color-card);
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.12), 0 0 0 0.5px rgb(0 0 0 / 0.04);
   }
 
-  .bg-night-glow { background: radial-gradient(ellipse at 50% 42%, #1B1E26 0%, var(--color-night) 68%); }
+  @media (prefers-color-scheme: dark) {
+    .seg-item[aria-pressed="true"],
+    .seg-item[aria-selected="true"] { background: #636366; box-shadow: none; }
+  }
+
+  /* Translucent bars (top bar, tab bar, sheet headers) */
+  .bar {
+    background: color-mix(in srgb, var(--color-cream) 72%, transparent);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    backdrop-filter: saturate(180%) blur(20px);
+  }
+
+  /* Dark ground for the loading and splash screens */
+  .bg-night-glow { background: radial-gradient(ellipse at 50% 42%, #2A1B10 0%, var(--color-night) 68%); }
 
   .no-scrollbar { scrollbar-width: none; }
   .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -261,8 +253,7 @@
 /* ------------------------------------------------------------------
    Motion
    Delay any of these with an inline style: style={{ "--d": "0.4s" }}
-   Used for: the Today outfit arriving, swapping an outfit, sheets opening,
-   and the splash and loading screens. Nothing else moves on its own.
+   Apple-style easing: quick start, long soft settle.
 ------------------------------------------------------------------- */
 @keyframes crown-draw { to { stroke-dashoffset: 0; } }
 @keyframes word-spread {
@@ -271,16 +262,8 @@
 }
 @keyframes fade-to-full { to { opacity: 1; } }
 @keyframes rise {
-  from { opacity: 0; transform: translateY(12px); }
+  from { opacity: 0; transform: translateY(16px); }
   to   { opacity: 1; transform: none; }
-}
-@keyframes unveil {
-  from { opacity: 0; transform: scale(1.03); }
-  to   { opacity: 1; transform: none; }
-}
-@keyframes sheet-in {
-  from { transform: translateY(100%); }
-  to   { transform: none; }
 }
 @keyframes deal {
   from { opacity: 0; transform: translateY(32px) scale(0.97); }
@@ -300,6 +283,7 @@
 }
 
 @layer components {
+  /* The crown draws itself. Put on the <Crown draw /> svg. */
   .crown-draw path {
     stroke-dasharray: 1;
     stroke-dashoffset: 1;
@@ -308,7 +292,7 @@
 
   .word-spread {
     opacity: 0;
-    animation: word-spread 1.4s cubic-bezier(0.22, 1, 0.36, 1) var(--d, 0.9s) forwards;
+    animation: word-spread 1.4s cubic-bezier(0.32, 0.72, 0, 1) var(--d, 0.9s) forwards;
   }
 
   .fade-to-full {
@@ -316,30 +300,29 @@
     animation: fade-to-full 0.9s ease var(--d, 0s) forwards;
   }
 
-  .rise { animation: rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) var(--d, 0s) both; }
+  .rise {
+    animation: rise 0.7s cubic-bezier(0.32, 0.72, 0, 1) var(--d, 0s) both;
+  }
 
-  /* A photo settling into place as it appears */
-  .unveil { animation: unveil 0.9s cubic-bezier(0.22, 1, 0.36, 1) var(--d, 0s) both; }
-
-  /* A sheet sliding up from the bottom */
-  .sheet-in { animation: sheet-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
-
+  /* Looks dealing in like cards. */
   .deal {
     opacity: 0;
-    animation: deal 0.7s cubic-bezier(0.22, 1, 0.36, 1) var(--d, 0s) forwards;
+    animation: deal 0.7s cubic-bezier(0.32, 0.72, 0, 1) var(--d, 0s) forwards;
   }
   .deal.glow {
     animation:
-      deal 0.7s cubic-bezier(0.22, 1, 0.36, 1) var(--d, 0s) forwards,
+      deal 0.7s cubic-bezier(0.32, 0.72, 0, 1) var(--d, 0s) forwards,
       glow 2.8s ease-in-out calc(var(--d, 0s) + 0.9s) infinite;
   }
 
+  /* The crown landing on "Your outfit is ready". */
   .crown-fall {
     opacity: 0;
     filter: drop-shadow(0 6px 16px rgba(253, 145, 74, 0.5));
     animation: crown-fall 1s cubic-bezier(0.3, 1.4, 0.5, 1) var(--d, 0.35s) forwards;
   }
 
+  /* Light passing over the crown on the loading screen. Parent needs position: relative. */
   .sheen::after {
     content: "";
     position: absolute;
