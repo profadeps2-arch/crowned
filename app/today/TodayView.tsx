@@ -150,15 +150,12 @@ export default function TodayView() {
       <WeatherCard state={weather} onRetry={retry} unit={prefs.unit} />
 
       {plan && !thinking && !error && (
-        <div className="-mt-2 flex flex-col items-center gap-2">
+        <div className="-mt-2">
           <Link
             href={`/customize?group=${groupFor(plan.occasion.label)}`}
             className="btn btn-outline w-full"
           >
             <SlidersHorizontal size={18} aria-hidden /> Customize Today&apos;s Outfit
-          </Link>
-          <Link href="/customize" className="text-sm text-muted underline-offset-4 hover:underline">
-            Dressing for a different occasion?
           </Link>
         </div>
       )}
@@ -197,7 +194,6 @@ export default function TodayView() {
             <div className="flex flex-col gap-1">
               <span className="eyebrow">Today&apos;s outfit recommendation</span>
               <h2 className="text-2xl leading-tight">{plan.look.title}</h2>
-              <span className="text-sm text-muted">For {plan.occasion.label}</span>
             </div>
             <button
               onClick={() => choose(false)}
