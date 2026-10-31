@@ -295,7 +295,7 @@ export default function CustomizeView() {
                         key={l.key}
                         onClick={() => goTo(i)}
                         aria-label={`${l.tier} look`}
-                        className={`h-2 rounded-full transition-all ${i === index ? "w-6 bg-orange" : "w-2 bg-muted/30"}`}
+                        className={`h-2 rounded-full transition-all ${i === index ? "w-6 bg-navy" : "w-2 bg-muted/30"}`}
                       />
                     ))}
                   </div>

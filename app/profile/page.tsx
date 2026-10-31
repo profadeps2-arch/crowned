@@ -62,7 +62,7 @@ export default function ProfilePage() {
   return (
     <main className="flex min-h-dvh flex-col gap-8 px-6 pb-[calc(2rem+env(safe-area-inset-bottom))] pt-[calc(3rem+env(safe-area-inset-top))]">
       <div className="flex flex-col gap-3">
-        <Crown size={32} className="text-orange" strokeWidth={1.5} />
+        <Crown size={32} className="text-navy" strokeWidth={1.5} />
         <h1 className="large-title">Let us get your fit right, King.</h1>
         <p className="text-[17px] text-muted">This helps us style you properly. It takes 20 seconds.</p>
       </div>

@@ -77,7 +77,7 @@ export default function Avatar({
             name ? "opacity-100" : "opacity-0"
           }`}
         >
-          <Crown size={13} className="shrink-0 text-orange" strokeWidth={1.8} />
+          <Crown size={13} className="shrink-0 text-navy" strokeWidth={1.8} />
           <span className="max-w-32 truncate text-[15px] font-semibold tracking-[-0.01em] text-navy">
             King {name}
           </span>

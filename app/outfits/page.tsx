@@ -49,7 +49,7 @@ function dayLabel(iso: string | null) {
 function Empty({ title, text, action }: { title: string; text: string; action?: { href: string; label: string } }) {
   return (
     <div className="card flex flex-col items-center gap-4 p-8 text-center">
-      <Crown size={40} className="text-orange" />
+      <Crown size={40} className="text-navy" />
       <h2 className="title-2">{title}</h2>
       <p className="subhead text-muted">{text}</p>
       {action && (

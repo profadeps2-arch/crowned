@@ -267,7 +267,7 @@ function TagRow({
   return (
     <div className="flex flex-wrap gap-1">
       {askSize && (
-        <span className="rounded-full border border-dashed border-orange px-2 py-0.5 text-[11px] text-orange-deep">
+        <span className="rounded-full border border-dashed border-navy px-2 py-0.5 text-[11px] text-orange-deep">
           + Size
         </span>
       )}
@@ -360,9 +360,9 @@ function TagEditor({
       disabled={busy}
       className={`flex items-center gap-1.5 rounded-full border border-transparent px-3 py-1 text-[13px] transition-colors ${
         open === key
-          ? "bg-orange text-on-orange"
+          ? "bg-navy text-on-orange"
           : dashed
-          ? "border-dashed border-orange text-orange-deep"
+          ? "border-dashed border-navy text-orange-deep"
           : "bg-fill text-navy"
       }`}
     >
@@ -378,7 +378,7 @@ function TagEditor({
       onClick={onClick}
       disabled={busy}
       className={`flex items-center gap-1.5 rounded-full border border-transparent px-3 py-1 text-[13px] ${
-        active ? "bg-orange text-on-orange" : "bg-fill text-navy"
+        active ? "bg-navy text-on-orange" : "bg-fill text-navy"
       }`}
     >
       {colour && <Dot colour={colour} />}
@@ -401,7 +401,7 @@ function TagEditor({
             onClick={startAdd}
             disabled={busy}
             className={`rounded-full border border-dashed px-3 py-1 text-[13px] ${
-              open === "add" ? "border-orange text-navy" : "border-line text-muted"
+              open === "add" ? "border-navy text-navy" : "border-line text-muted"
             }`}
           >
             + Add Tag
@@ -871,7 +871,7 @@ function Editor({
           </span>
           <span
             className={`relative h-7 w-12 shrink-0 rounded-full transition-colors ${
-              current.at_washman ? "bg-orange" : "bg-fill"
+              current.at_washman ? "bg-navy" : "bg-fill"
             }`}
           >
             <span
@@ -929,7 +929,7 @@ function PieceCard({ item, onOpen }: { item: Item; onOpen: () => void }) {
           <Photo src={item.url} alt={item.description ?? displayName(item)} className="aspect-[3/4] w-full" />
         </div>
         {item.needs_check && !item.at_washman && (
-          <span className="absolute left-2 top-2 rounded-full bg-orange px-2 py-1 text-xs font-semibold text-navy">
+          <span className="absolute left-2 top-2 rounded-full bg-navy px-2 py-1 text-xs font-semibold text-white">
             Review
           </span>
         )}
@@ -1401,7 +1401,7 @@ export default function WardrobePage() {
       {review.length > 0 && filter !== "review" && (
         <button
           onClick={() => openFilter("review")}
-          className="flex items-center justify-between rounded-2xl bg-orange/15 p-4 text-left"
+          className="flex items-center justify-between rounded-2xl bg-fill p-4 text-left"
         >
           <span className="text-sm font-semibold text-navy">
             {review.length === 1 ? "1 piece needs a quick look" : `${review.length} pieces need a quick look`}
@@ -1421,7 +1421,7 @@ export default function WardrobePage() {
               onClick={() => openFilter(f.key)}
               className={`shrink-0 rounded-full border border-transparent px-4 py-2 text-[15px] transition-colors ${
                 filter === f.key
-                  ? "bg-orange text-on-orange"
+                  ? "bg-navy text-on-orange"
                   : "bg-fill text-navy"
               }`}
             >
@@ -1439,7 +1439,7 @@ export default function WardrobePage() {
         </div>
       ) : total === 0 ? (
         <div className="card flex flex-col items-center gap-3 p-8 text-center">
-          <Crown size={40} className="text-orange" />
+          <Crown size={40} className="text-navy" />
           <h2 className="text-xl">Your wardrobe is empty</h2>
           <p className="text-sm text-muted">
             Start with the pieces you wear most.

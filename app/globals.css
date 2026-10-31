@@ -1,64 +1,40 @@
 @import "tailwindcss";
 
 /* ------------------------------------------------------------------
-   Crowned design tokens: warm, tactile, one orange accent.
-   Every colour has a light and a dark value; the dark values apply
-   automatically when the phone is set to dark. "navy" is kept as the
-   class name for primary text so existing classes keep working.
+   Crowned design tokens: white, quiet, one ink colour.
+   Light only. Orange is kept for the crown on the brand screens.
+   "navy" is kept as the class name for primary text so existing
+   classes keep working.
 ------------------------------------------------------------------- */
 @theme {
-  --color-cream: #FFF8F0;   /* page */
+  --color-cream: #FFFFFF;   /* page */
   --color-card: #FFFFFF;    /* raised surface */
-  --color-sand: #F3E8DA;    /* photo frames, wells */
-  --color-fill: rgb(60 40 10 / 0.07);
-  --color-line: #EADFCF;
+  --color-sand: #F5F5F7;    /* photo frames, wells */
+  --color-fill: rgb(0 0 0 / 0.05);
+  --color-line: #E8E8ED;
 
-  --color-navy: #1E1610;    /* primary text */
-  --color-muted: #7B6F63;
+  --color-navy: #1D1D1F;    /* primary text and the main action */
+  --color-muted: #6E6E73;
 
-  --color-orange: #FD914A;
-  --color-orange-soft: #FFE9D6;
-  --color-orange-deep: #B8500F;
-  --color-on-orange: #2A1500;
+  --color-orange: #FD914A;       /* brand moments only */
+  --color-orange-soft: #F5F5F7;  /* quiet highlight */
+  --color-orange-deep: #1D1D1F;  /* text actions are ink */
+  --color-on-orange: #FFFFFF;
 
-  --color-danger: #C0392B;
+  --color-danger: #D70015;
 
-  /* Always-dark screens: splash, loading, ready */
-  --color-night: #120F0C;
-  --color-night-card: #1D1813;
-  --color-night-line: #2E261D;
-  --color-night-text: #FBF1E3;
-  --color-night-muted: #A89B8C;
+  /* Dark brand screens: splash, loading, ready */
+  --color-night: #0B0B0D;
+  --color-night-card: #1C1C1E;
+  --color-night-line: #2C2C2E;
+  --color-night-text: #F5F5F7;
+  --color-night-muted: #98989D;
 }
 
 :root {
-  /* Tactile edges: a lit top edge and a shaded bottom edge, so buttons look pressable */
-  --lift: inset 0 4px 6px rgb(255 255 255 / 0.55), inset 0 -4px 6px rgb(60 30 0 / 0.14);
-  --press: inset 0 3px 8px rgb(60 30 0 / 0.28);
-  --shadow-soft: 0 12px 30px rgb(90 60 0 / 0.10);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-cream: #120F0C;
-    --color-card: #1D1813;
-    --color-sand: #272019;
-    --color-fill: rgb(255 240 220 / 0.08);
-    --color-line: #2E261D;
-
-    --color-navy: #FBF1E3;
-    --color-muted: #A89B8C;
-
-    --color-orange: #FF9A57;
-    --color-orange-soft: #3A2412;
-    --color-orange-deep: #FFB27A;
-
-    --color-danger: #FF8A7A;
-
-    --lift: inset 0 4px 6px rgb(255 255 255 / 0.20), inset 0 -4px 6px rgb(0 0 0 / 0.35);
-    --press: inset 0 3px 8px rgb(0 0 0 / 0.45);
-    --shadow-soft: 0 12px 30px rgb(0 0 0 / 0.35);
-  }
+  --lift: none;
+  --press: none;
+  --shadow-soft: 0 8px 24px rgb(0 0 0 / 0.06);
 }
 
 /* ------------------------------------------------------------------
@@ -67,13 +43,13 @@
 @layer base {
   html {
     -webkit-text-size-adjust: 100%;
-    color-scheme: light dark;
+    color-scheme: light;
   }
 
   body {
     background: var(--color-cream);
     color: var(--color-navy);
-    font-family: var(--font-sans), system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", var(--font-sans), system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     font-size: 16px;
     line-height: 1.45;
     -webkit-font-smoothing: antialiased;
@@ -101,7 +77,7 @@
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-orange);
+    outline: 2px solid var(--color-navy);
     outline-offset: 3px;
   }
 
@@ -116,7 +92,7 @@
 ------------------------------------------------------------------- */
 @layer components {
   .large-title, .title-1, .title-2 {
-    font-family: var(--font-display), var(--font-sans), system-ui, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", var(--font-sans), system-ui, sans-serif;
     font-weight: 700;
   }
   .large-title { font-size: 38px; line-height: 1.04; letter-spacing: -0.035em; }
@@ -149,19 +125,16 @@
   .btn:active { transform: scale(0.97); }
   .btn:disabled { opacity: 0.4; cursor: default; }
 
-  /* The main action: glossy orange with a soft ring */
+  /* The main action: solid ink pill. One per screen. */
   .btn-orange {
-    background: linear-gradient(180deg, color-mix(in srgb, var(--color-orange) 82%, white) 0%, var(--color-orange) 100%);
-    color: var(--color-on-orange);
-    box-shadow: var(--lift), 0 0 0 3px color-mix(in srgb, var(--color-orange) 12%, transparent);
+    background: var(--color-navy);
+    color: #FFFFFF;
   }
-  .btn-orange:active {
-    box-shadow: var(--press), 0 0 0 3px color-mix(in srgb, var(--color-orange) 20%, transparent);
-  }
+  .btn-orange:active { opacity: 0.82; }
 
   .btn-navy {
     background: var(--color-navy);
-    color: var(--color-cream);
+    color: #FFFFFF;
   }
 
   /* Secondary: a raised surface */
@@ -213,7 +186,7 @@
   .chip:active { transform: scale(0.96); }
   .chip[aria-pressed="true"] {
     background: var(--color-navy);
-    color: var(--color-cream);
+    color: #FFFFFF;
     box-shadow: none;
   }
 
@@ -251,16 +224,16 @@
     background: var(--color-card);
     color: var(--color-navy);
     font-weight: 600;
-    box-shadow: 0 1px 3px rgb(60 30 0 / 0.12);
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.12);
   }
 
   .bar {
-    background: color-mix(in srgb, var(--color-cream) 78%, transparent);
+    background: color-mix(in srgb, var(--color-cream) 92%, transparent);
     -webkit-backdrop-filter: saturate(180%) blur(20px);
     backdrop-filter: saturate(180%) blur(20px);
   }
 
-  .bg-night-glow { background: radial-gradient(ellipse at 50% 42%, #2A1B10 0%, var(--color-night) 68%); }
+  .bg-night-glow { background: radial-gradient(ellipse at 50% 42%, #1C1C1E 0%, var(--color-night) 68%); }
 
   .no-scrollbar { scrollbar-width: none; }
   .no-scrollbar::-webkit-scrollbar { display: none; }

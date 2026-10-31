@@ -6,7 +6,7 @@ export default function TopAvatar() {
   return (
     <header className="bar sticky top-0 z-30 flex items-center justify-between px-5 pb-2 pt-[calc(0.5rem+env(safe-area-inset-top))]">
       <div className="flex items-center gap-2 text-[13px] font-semibold tracking-[0.2em] text-navy">
-        <Crown size={18} className="text-orange" strokeWidth={1.6} />
+        <Crown size={18} className="text-navy" strokeWidth={1.6} />
         CROWNED
       </div>
       <Avatar />

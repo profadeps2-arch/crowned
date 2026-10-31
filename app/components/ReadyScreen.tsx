@@ -25,7 +25,7 @@ export default function ReadyScreen({
         </h2>
         <p className="text-[17px] text-night-muted">{title}</p>
       </div>
-      <button onClick={onDone} className="btn btn-orange rise mt-4 w-full max-w-xs" style={{ "--d": "1.3s" } as React.CSSProperties}>
+      <button onClick={onDone} className="btn bg-night-text text-night rise mt-4 w-full max-w-xs" style={{ "--d": "1.3s" } as React.CSSProperties}>
         Done
       </button>
     </div>
