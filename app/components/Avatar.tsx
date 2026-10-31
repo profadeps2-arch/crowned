@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import Crown from "./Crown";
 
 function PersonOutline({ size }: { size: number }) {
   return (
@@ -19,25 +20,6 @@ function PersonOutline({ size }: { size: number }) {
     >
       <circle cx="12" cy="8" r="4" />
       <path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7" />
-    </svg>
-  );
-}
-
-function CrownMark() {
-  return (
-    <svg
-      width="13"
-      height="13"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="#B08D57"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-      className="shrink-0"
-    >
-      <path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5L3 8z" />
     </svg>
   );
 }
@@ -95,18 +77,19 @@ export default function Avatar({
             name ? "opacity-100" : "opacity-0"
           }`}
         >
-          <CrownMark />
-          <span className="max-w-[10rem] truncate text-[15px] font-medium tracking-[-0.01em] text-[#1F2A44]">
+          <Crown size={13} className="shrink-0 text-orange" strokeWidth={1.8} />
+          <span className="max-w-32 truncate text-[15px] font-semibold tracking-[-0.01em] text-navy">
             King {name}
           </span>
         </span>
       )}
 
       <span
-        className="flex shrink-0 items-center justify-center overflow-hidden rounded-full border border-black/10 bg-[#E9E1D2] text-[#5C5648]"
+        className="flex shrink-0 items-center justify-center overflow-hidden rounded-full border border-line bg-sand text-muted"
         style={{ width: size, height: size }}
       >
         {showPhoto ? (
+          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={photo}
             alt=""
@@ -116,8 +99,8 @@ export default function Avatar({
           />
         ) : initial ? (
           <span
-            className="flex h-full w-full items-center justify-center bg-[#1F2A44] font-medium text-[#F5F0E6]"
-            style={{ fontSize: size * 0.4 }}
+            className="flex h-full w-full items-center justify-center bg-navy font-semibold text-cream"
+            style={{ fontSize: size * 0.42 }}
           >
             {initial}
           </span>

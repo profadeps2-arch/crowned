@@ -1,18 +1,11 @@
-import type { Metadata } from "next";
-import { Cormorant_Garamond, Inter } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { DM_Sans } from "next/font/google";
 import "./globals.css";
-import BottomNav from "./components/BottomNav";
-import TopAvatar from "./components/TopAvatar";
+import AppShell from "./components/AppShell";
 
-const serif = Cormorant_Garamond({
+const sans = DM_Sans({
   subsets: ["latin"],
-  weight: ["500", "600", "700"],
-  variable: "--font-serif",
-});
-
-const sans = Inter({
-  subsets: ["latin"],
-  variable: "--font-sans",
+  variable: "--font-dm-sans",
 });
 
 export const metadata: Metadata = {
@@ -20,15 +13,17 @@ export const metadata: Metadata = {
   description: "Every man is a king. Dress like one.",
 };
 
+export const viewport: Viewport = {
+  themeColor: "#FDFAF6",
+  colorScheme: "light",
+  viewportFit: "cover",
+};
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body className={`${serif.variable} ${sans.variable}`}>
-        <div className="relative mx-auto min-h-screen max-w-md pb-24">
-          <TopAvatar />
-          {children}
-        </div>
-        <BottomNav />
+    <html lang="en" className={sans.variable}>
+      <body>
+        <AppShell>{children}</AppShell>
       </body>
     </html>
   );

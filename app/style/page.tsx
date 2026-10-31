@@ -15,7 +15,7 @@ function CrownMark({ size = 13 }: { size?: number }) {
       height={size}
       viewBox="0 0 24 24"
       fill="none"
-      stroke="#B08D57"
+      stroke="#FD914A"
       strokeWidth="1.6"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -56,7 +56,7 @@ function Tile({
     <button
       onClick={() => onOpen(piece)}
       aria-label={pieceName(piece)}
-      className={`tile-in relative overflow-hidden rounded-2xl bg-[#E9E1D2] shadow-[0_1px_2px_rgba(31,42,68,0.06),0_12px_24px_-14px_rgba(31,42,68,0.35)] transition-transform active:scale-[0.98] ${className}`}
+      className={`tile-in relative overflow-hidden rounded-2xl bg-[#F7ECE1] shadow-[0_1px_2px_rgba(31,42,68,0.06),0_12px_24px_-14px_rgba(31,42,68,0.35)] transition-transform active:scale-[0.98] ${className}`}
       style={{ animationDelay: `${delay * 90}ms` }}
     >
       {piece.url && (
@@ -273,8 +273,8 @@ export default function StylePage() {
                 aria-pressed={occasion === o.label}
                 className={`rounded-full border px-5 py-3 transition-colors ${
                   occasion === o.label
-                    ? "border-[#1F2A44] bg-[#1F2A44] text-[#F5F0E6]"
-                    : "border-[#E3DACB] bg-[#FBF8F2] text-[#1F2A44]"
+                    ? "border-[#1F2A44] bg-[#1F2A44] text-[#FDFAF6]"
+                    : "border-[#E9E4DE] bg-[#FFFFFF] text-[#1F2A44]"
                 }`}
               >
                 {o.label}
@@ -285,14 +285,14 @@ export default function StylePage() {
           <button
             onClick={() => styleMe()}
             disabled={!occasion || loading}
-            className="flex items-center justify-center gap-2 rounded-full bg-[#1F2A44] py-4 font-semibold text-[#F5F0E6] transition-all active:scale-[0.98] disabled:opacity-40"
+            className="flex items-center justify-center gap-2 rounded-full bg-[#1F2A44] py-4 font-semibold text-[#FDFAF6] transition-all active:scale-[0.98] disabled:opacity-40"
           >
             <CrownMark size={16} />
             Style Me
           </button>
 
           {message && (
-            <div className="fade-in flex flex-col gap-3 rounded-2xl border border-[#E3DACB] bg-[#FBF8F2] p-4">
+            <div className="fade-in flex flex-col gap-3 rounded-2xl border border-[#E9E4DE] bg-[#FFFFFF] p-4">
               <p className="text-sm text-[#1F2A44]">{message}</p>
               <Link href="/wardrobe" className="text-sm font-semibold text-[#1F2A44]">
                 Go to Wardrobe ›
@@ -307,7 +307,7 @@ export default function StylePage() {
               ‹ Occasions
             </button>
             <h1 className="text-4xl leading-tight">{occasion}</h1>
-            <p className="text-sm text-[#5C5648]">{COUNT_WORDS[looks.length]} from your wardrobe.</p>
+            <p className="text-sm text-[#6E6A66]">{COUNT_WORDS[looks.length]} from your wardrobe.</p>
           </div>
 
           <div
@@ -318,7 +318,7 @@ export default function StylePage() {
             {looks.map((look) => (
               <article key={look.key} className="flex w-full shrink-0 snap-center flex-col gap-5 px-6">
                 <div className="flex flex-col gap-1">
-                  <span className="text-xs font-semibold tracking-[0.22em] text-[#8A6A3A]">
+                  <span className="text-xs font-semibold tracking-[0.22em] text-[#B8500F]">
                     {look.tier.toUpperCase()}
                   </span>
                   <h2 className="text-2xl leading-tight">{look.title}</h2>
@@ -330,7 +330,7 @@ export default function StylePage() {
                   <div className="flex flex-col gap-1.5">
                     <span className="text-sm font-semibold text-[#1F2A44]">How to wear it</span>
                     {look.tips.map((t) => (
-                      <p key={t} className="text-sm leading-relaxed text-[#5C5648]">{t}</p>
+                      <p key={t} className="text-sm leading-relaxed text-[#6E6A66]">{t}</p>
                     ))}
                   </div>
                 )}
@@ -339,7 +339,7 @@ export default function StylePage() {
                   <button
                     onClick={() => wear(look)}
                     disabled={busy}
-                    className="flex-1 rounded-full bg-[#1F2A44] py-4 font-semibold text-[#F5F0E6] transition-transform active:scale-[0.98] disabled:opacity-60"
+                    className="flex-1 rounded-full bg-[#1F2A44] py-4 font-semibold text-[#FDFAF6] transition-transform active:scale-[0.98] disabled:opacity-60"
                   >
                     I Wear This
                   </button>
@@ -348,7 +348,7 @@ export default function StylePage() {
                     aria-label={saved.has(look.key) ? "Saved" : "Save look"}
                     className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-full border transition-colors ${
                       saved.has(look.key)
-                        ? "border-[#1F2A44] bg-[#1F2A44] text-[#F5F0E6]"
+                        ? "border-[#1F2A44] bg-[#1F2A44] text-[#FDFAF6]"
                         : "border-[#1F2A44]/25 text-[#1F2A44]"
                     }`}
                   >
@@ -403,7 +403,7 @@ export default function StylePage() {
               className="max-h-[75vh] w-full max-w-md rounded-2xl object-contain"
             />
           )}
-          <span className="text-sm font-semibold text-[#F5F0E6]">{pieceName(viewing)}</span>
+          <span className="text-sm font-semibold text-[#FDFAF6]">{pieceName(viewing)}</span>
         </button>
       )}
 
@@ -411,12 +411,12 @@ export default function StylePage() {
         <div className="moment fixed inset-0 z-50 flex flex-col items-center justify-center gap-5 bg-[#1F2A44] px-8 text-center">
           <div className="moment-text flex flex-col items-center gap-5">
             <CrownMark size={40} />
-            <h2 className="text-4xl leading-tight text-[#F5F0E6]">Your outfit is ready, Oba.</h2>
+            <h2 className="text-4xl leading-tight text-[#FDFAF6]">Your outfit is ready, Oba.</h2>
             <p className="text-sm text-[#C9C2B3]">{worn.title}</p>
           </div>
           <button
             onClick={finish}
-            className="moment-text mt-6 rounded-full bg-[#B08D57] px-12 py-4 font-semibold text-[#1F2A44] transition-transform active:scale-[0.98]"
+            className="moment-text mt-6 rounded-full bg-[#FD914A] px-12 py-4 font-semibold text-[#1F2A44] transition-transform active:scale-[0.98]"
           >
             Done
           </button>
