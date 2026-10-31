@@ -4,11 +4,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { House, Shirt, Sparkles, User } from "lucide-react";
 
-// The four tabs. Outfits still points at /saved until step 4 replaces it.
+// The four tabs.
 const tabs = [
   { href: "/today", match: ["/today", "/customize"], label: "Today", icon: House },
   { href: "/wardrobe", match: ["/wardrobe"], label: "Wardrobe", icon: Shirt },
-  { href: "/saved", match: ["/saved"], label: "Outfits", icon: Sparkles },
+  { href: "/outfits", match: ["/outfits", "/saved"], label: "Outfits", icon: Sparkles },
   { href: "/me", match: ["/me"], label: "Profile", icon: User },
 ];
 

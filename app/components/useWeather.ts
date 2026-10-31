@@ -5,7 +5,7 @@ import { LAGOS, fetchWeather, type Coords, type Weather } from "@/lib/weather";
 
 export type WeatherState =
   | { status: "loading" }
-  | { status: "ready"; weather: Weather; fallback: boolean }
+  | { status: "ready"; weather: Weather; fallback: boolean; place: string | null }
   | { status: "error" };
 
 const REFRESH_MS = 10 * 60 * 1000;
@@ -45,17 +45,37 @@ function locate(): Promise<Coords> {
  * Live weather for where he is. Falls back to Lagos if location is blocked,
  * and refreshes every ten minutes and when the app comes back to the front.
  */
-export function useWeather() {
+export function useWeather(opts: {
+  /** Wait until the saved location is known before asking the phone. */
+  ready: boolean;
+  /** A location he saved in Profile. Wins over the phone and over Lagos. */
+  saved?: { lat: number; lon: number; city: string | null } | null;
+}) {
+  const { ready, saved } = opts;
   const [state, setState] = useState<WeatherState>({ status: "loading" });
   const coords = useRef<Coords | null>(null);
   const last = useRef(0);
+  const place = useRef<string | null>(null);
+  const savedRef = useRef(saved);
+  useEffect(() => {
+    savedRef.current = saved;
+  }, [saved]);
 
   const load = useCallback(async () => {
     try {
-      if (!coords.current) coords.current = readCached() ?? (await locate());
+      if (!coords.current) {
+        const s = savedRef.current;
+        if (s) {
+          coords.current = { lat: s.lat, lon: s.lon, fallback: false };
+          place.current = s.city;
+        } else {
+          coords.current = readCached() ?? (await locate());
+          place.current = null;
+        }
+      }
       const weather = await fetchWeather(coords.current);
       last.current = Date.now();
-      setState({ status: "ready", weather, fallback: coords.current.fallback });
+      setState({ status: "ready", weather, fallback: coords.current.fallback, place: place.current });
     } catch (e) {
       console.error("Weather failed:", e);
       // Keep showing the last good reading if there is one.
@@ -64,6 +84,7 @@ export function useWeather() {
   }, []);
 
   useEffect(() => {
+    if (!ready) return;
     // The state starts as loading, so the first call has nothing to reset.
     load();
     const timer = setInterval(() => load(), REFRESH_MS);
@@ -75,7 +96,7 @@ export function useWeather() {
       clearInterval(timer);
       document.removeEventListener("visibilitychange", onShow);
     };
-  }, [load]);
+  }, [load, ready]);
 
   const retry = useCallback(() => {
     coords.current = null;

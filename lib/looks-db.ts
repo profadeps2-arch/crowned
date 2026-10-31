@@ -16,14 +16,31 @@ export async function saveLook(look: Look, occasion: string): Promise<string | n
   return null;
 }
 
-/** Marks the pieces as worn today. Returns an error message, or null on success. */
-export async function wearLook(look: Look): Promise<string | null> {
+/** Marks pieces as worn today and records it in History. Returns an error message, or null on success. */
+export async function wearItems(
+  ids: string[],
+  meta: { title: string; occasion: string; tier?: string | null }
+): Promise<string | null> {
+  const supabase = createClient();
   const today = new Date().toISOString().slice(0, 10);
-  const ids = [...piecesOf(look), ...(look.scent ? [look.scent] : [])].map((p) => p.id);
-  const { error } = await createClient().from("items").update({ last_worn: today }).in("id", ids);
+  const { error } = await supabase.from("items").update({ last_worn: today }).in("id", ids);
   if (error) {
     console.error("Wear update failed:", error);
     return "We could not save that. Please try again.";
   }
+  // History is a bonus. If its table is not set up yet, wearing still works.
+  const { error: hist } = await supabase.from("worn_looks").insert({
+    occasion: meta.occasion,
+    tier: meta.tier ?? null,
+    title: meta.title,
+    item_ids: ids,
+    worn_on: today,
+  });
+  if (hist) console.warn("History not recorded:", hist.message);
   return null;
+}
+
+export function wearLook(look: Look, occasion: string): Promise<string | null> {
+  const ids = [...piecesOf(look), ...(look.scent ? [look.scent] : [])].map((p) => p.id);
+  return wearItems(ids, { title: look.title, occasion, tier: look.tier });
 }

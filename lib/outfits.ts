@@ -45,6 +45,9 @@ export type StyleContext = {
   dressUp?: number;
   style?: "native" | "western";
   outer?: "yes" | "no";
+  /** His preferred looks tags and favourite colours. They only nudge the ranking. */
+  likes?: string[];
+  colours?: string[];
 };
 
 export const OCCASIONS: Occasion[] = [
@@ -218,6 +221,10 @@ function candidates(pieces: Piece[], occ: Occasion, ctx: StyleContext): Candidat
     if (ctx.outer === "yes") fitPenalty += outer ? 2 : -2;
     if (ctx.outer === "no" && outer) fitPenalty -= 4;
     fitPenalty += (ctx.dressUp ?? 0) * bodyFormal * 0.8;
+    for (const p of body) {
+      if (ctx.likes?.length && (p.looks ?? []).some((l) => ctx.likes!.includes(norm(l)))) fitPenalty += 0.7;
+      if (ctx.colours?.length && p.colour && ctx.colours.includes(p.colour)) fitPenalty += 0.8;
+    }
     const core = [...body, shoe];
     out.push({
       key: all.map((p) => p.id).sort().join("|"),
