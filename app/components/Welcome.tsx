@@ -2,31 +2,25 @@
 
 import { useEffect, useState } from "react";
 import Crown from "./Crown";
-import GoogleButton from "./GoogleButton";
+import AuthForm from "./AuthForm";
 import { useScreenTone } from "./useScreenTone";
-
-// Put one portrait photo here to fill the welcome screen. Without it, the
-// screen shows a night glow and the crown instead, and nothing breaks.
-const HERO_PHOTO = "/photos/welcome.jpg";
 
 const SPLASH_MS = 3600;
 
 export default function Welcome({ failed = false }: { failed?: boolean }) {
-  const [stage, setStage] = useState<"splash" | "welcome">("splash");
-  const [photoOk, setPhotoOk] = useState(true);
-
-  useScreenTone("dark");
+  const [stage, setStage] = useState<"splash" | "auth">("splash");
+  useScreenTone(stage === "splash" ? "dark" : "light");
 
   useEffect(() => {
     if (stage !== "splash") return;
-    const t = setTimeout(() => setStage("welcome"), SPLASH_MS);
+    const t = setTimeout(() => setStage("auth"), SPLASH_MS);
     return () => clearTimeout(t);
   }, [stage]);
 
   if (stage === "splash") {
     return (
       <button
-        onClick={() => setStage("welcome")}
+        onClick={() => setStage("auth")}
         aria-label="Enter Crowned"
         className="bg-night-glow relative flex min-h-dvh w-full flex-col items-center justify-center gap-6 text-night-text"
       >
@@ -53,70 +47,5 @@ export default function Welcome({ failed = false }: { failed?: boolean }) {
     );
   }
 
-  return (
-    <main className="bg-night-glow relative flex min-h-dvh flex-col overflow-hidden text-night-text">
-      {photoOk && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={HERO_PHOTO}
-          alt=""
-          onError={() => setPhotoOk(false)}
-          className="absolute inset-0 h-full w-full object-cover"
-        />
-      )}
-      <div
-        aria-hidden="true"
-        className="absolute inset-0"
-        style={{
-          background:
-            "linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.45) 40%, rgba(0,0,0,0.96) 82%)",
-        }}
-      />
-
-      {!photoOk && (
-        <div aria-hidden="true" className="absolute inset-x-0 top-[14%] flex justify-center">
-          <Crown size={120} base strokeWidth={0.6} className="text-orange/70" />
-        </div>
-      )}
-
-      <div className="relative z-10 mt-auto flex flex-col gap-4 px-6 pb-[calc(2rem+env(safe-area-inset-bottom))]">
-        <span className="rise text-[13px] font-semibold uppercase tracking-[0.16em] text-orange">
-          Crowned · Your personal stylist
-        </span>
-
-        <h1
-          className="rise text-[44px] font-bold leading-[1.04] tracking-[-0.035em] text-white"
-          style={{ "--d": "0.1s" } as React.CSSProperties}
-        >
-          Every man is a king.
-          <span className="block text-orange">Dress like one.</span>
-        </h1>
-
-        <p
-          className="rise max-w-xs text-[17px] leading-snug text-night-text"
-          style={{ "--d": "0.2s" } as React.CSSProperties}
-        >
-          Your outfit, sorted in 1 minute. For owambe, office, church and every
-          moment in between.
-        </p>
-
-        <div className="rise mt-2" style={{ "--d": "0.3s" } as React.CSSProperties}>
-          <GoogleButton />
-        </div>
-
-        {failed && (
-          <p role="alert" className="rise text-center text-[15px] text-[#FF8A80]">
-            We could not sign you in. Please try again.
-          </p>
-        )}
-
-        <p
-          className="rise text-center text-xs text-night-muted"
-          style={{ "--d": "0.4s" } as React.CSSProperties}
-        >
-          One quick screen, then we style you.
-        </p>
-      </div>
-    </main>
-  );
+  return <AuthForm failed={failed} />;
 }
