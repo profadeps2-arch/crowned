@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ChevronRight, Heart, SlidersHorizontal, RefreshCw } from "lucide-react";
-import { OCCASIONS, buildLooks, missingFor, whyItWorks, type Look, type Occasion, type Piece, type StyleContext } from "@/lib/outfits";
+import { OCCASIONS, buildLooks, missingFor, piecesOf, whyItWorks, type Look, type Occasion, type Piece, type StyleContext } from "@/lib/outfits";
 import { weatherContext } from "@/lib/weather";
 import { saveLook, wearLook } from "@/lib/looks-db";
 import { pop, success, swish } from "@/lib/feedback";
@@ -122,13 +122,20 @@ export default function TodayView() {
     [pieces, now, uid, day, ctx.hot, ctx.cool, ctx.rainy, prefs.styles, prefs.colours]
   );
 
-  // Pick once the wardrobe and the weather have both settled.
-  const picked = useRef(false);
+  // Pick once the wardrobe and the weather have both settled. Today can stay open in
+  // the background while pieces are added or sent to the washman, so pick again when
+  // the set of usable pieces changes and the current outfit no longer fits.
+  const pickedFor = useRef<string | null>(null);
   useEffect(() => {
-    if (loading || error || !settled || picked.current) return;
-    picked.current = true;
+    if (loading || error || !settled) return;
+    const sig = pieces.filter((p) => !p.at_washman).map((p) => p.id).sort().join(",");
+    if (pickedFor.current === sig) return;
+    const first = pickedFor.current === null;
+    const fits = !!plan && piecesOf(plan.look).every((pc) => pieces.some((p) => p.id === pc.id && !p.at_washman));
+    pickedFor.current = sig;
+    if (!first && fits) return;
     choose(true, true);
-  }, [loading, error, settled, choose]);
+  }, [loading, error, settled, choose, pieces, plan]);
 
   async function love() {
     if (!plan || saved) return;
