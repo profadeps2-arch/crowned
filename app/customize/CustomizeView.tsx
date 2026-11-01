@@ -63,7 +63,17 @@ function OccasionCard({
   );
 }
 
+/**
+ * Next keeps a page's state alive when you leave it. Keying on bfcacheId throws that state
+ * away on every fresh visit (tapping Customize), so it always starts at the occasion list.
+ * Browser back and forward still restore it.
+ */
 export default function CustomizeView() {
+  const { bfcacheId } = useRouter();
+  return <CustomizeFlow key={bfcacheId} />;
+}
+
+function CustomizeFlow() {
   const router = useRouter();
   const { pieces, setPieces, prefs, loading, error } = useWardrobe();
   const { state: weather } = useWeather({
