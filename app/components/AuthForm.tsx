@@ -6,6 +6,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import Crown from "./Crown";
 import GoogleButton from "./GoogleButton";
+import AppleButton from "./AppleButton";
 
 type Mode = "signup" | "login" | "forgot";
 
@@ -154,7 +155,10 @@ export default function AuthForm({ failed = false }: { failed?: boolean }) {
       {mode !== "forgot" && (
         <div className="flex flex-col gap-5">
           <p className="text-center text-[14px] text-muted">or continue with</p>
-          <GoogleButton />
+          <div className="flex flex-col gap-3">
+            <AppleButton />
+            <GoogleButton />
+          </div>
         </div>
       )}
 

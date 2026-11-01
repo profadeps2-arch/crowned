@@ -1,6 +1,6 @@
 "use client";
 
-import { Bookmark, ChevronLeft, ChevronRight, LogOut, Shirt } from "lucide-react";
+import { BarChart3, Bookmark, ChevronLeft, ChevronRight, LogOut, Shirt } from "lucide-react";
 import SoundRow from "../components/SoundToggle";
 import ThemeRow from "../components/ThemeRow";
 import { useEffect, useState, type ChangeEvent, type ReactNode } from "react";
@@ -426,6 +426,11 @@ export default function MePage() {
         <Link href="/wardrobe" className="flex min-h-[56px] items-center gap-3 px-4 text-navy transition-colors active:bg-fill">
           <Shirt size={20} strokeWidth={1.6} aria-hidden />
           <span className="flex-1">My wardrobe</span>
+          <ChevronRight size={18} className="text-muted/60" aria-hidden />
+        </Link>
+        <Link href="/stats" className="flex min-h-[56px] items-center gap-3 px-4 text-navy transition-colors active:bg-fill">
+          <BarChart3 size={20} strokeWidth={1.6} aria-hidden />
+          <span className="flex-1">Wardrobe stats</span>
           <ChevronRight size={18} className="text-muted/60" aria-hidden />
         </Link>
       </div>

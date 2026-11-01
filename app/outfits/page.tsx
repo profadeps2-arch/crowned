@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { pop, success } from "@/lib/feedback";
 import Link from "next/link";
-import { Heart, RotateCcw, Shirt, Trash2 } from "lucide-react";
+import { FolderPlus, Heart, RotateCcw, Shirt, Trash2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { OCCASIONS, buildLooks, missingFor, type Look, type Piece, type StyleContext } from "@/lib/outfits";
 import { weatherContext } from "@/lib/weather";
@@ -24,6 +24,7 @@ type SavedRow = {
   title: string | null;
   item_ids: (string | number)[] | null;
   created_at?: string | null;
+  collection?: string | null;
 };
 type HistoryRow = {
   id: string;
@@ -76,6 +77,32 @@ export default function OutfitsPage() {
   const [confirming, setConfirming] = useState<string | null>(null);
   const [viewing, setViewing] = useState<Piece | null>(null);
   const [worn, setWorn] = useState<string | null>(null);
+  const [collection, setCollection] = useState<string>("all");
+  const [filing, setFiling] = useState<string | null>(null);
+  const [newName, setNewName] = useState("");
+
+  const collections = useMemo(
+    () => [...new Set(saved.map((r) => r.collection).filter((c): c is string => !!c))].sort(),
+    [saved]
+  );
+  const shown = collection === "all" ? saved : saved.filter((r) => r.collection === collection);
+
+  async function fileInto(row: SavedRow, name: string | null) {
+    setFiling(null);
+    setNewName("");
+    if (row.id === undefined) return;
+    const clean = name?.trim().slice(0, 30) || null;
+    const { error: e } = await createClient().from("saved_looks").update({ collection: clean }).eq("id", row.id);
+    if (e) {
+      console.error("Collection update failed:", e);
+      setProblem("We could not update the collection. Run step-7.sql in Supabase, then try again.");
+      return;
+    }
+    setProblem("");
+    setSaved((rows) => rows.map((x) => (x.id === row.id ? { ...x, collection: clean } : x)));
+    if (clean) setCollection(clean);
+    else if (collection !== "all" && !saved.some((x) => x.id !== row.id && x.collection === collection)) setCollection("all");
+  }
 
   // Saved looks and History. Each is allowed to fail on its own.
   useEffect(() => {
@@ -293,15 +320,29 @@ export default function OutfitsPage() {
               action={{ href: "/today", label: "See today's outfit" }}
             />
           )}
+          {!listsLoading && saved.length > 0 && (
+            <div className="-mx-6 flex gap-2 overflow-x-auto px-6 pb-1">
+              {["all", ...collections].map((c) => (
+                <button
+                  key={c}
+                  onClick={() => setCollection(c)}
+                  aria-pressed={collection === c}
+                  className="chip shrink-0"
+                >
+                  {c === "all" ? "All" : c}
+                </button>
+              ))}
+            </div>
+          )}
           {!listsLoading &&
-            saved.map((r) => {
+            shown.map((r) => {
               const have = piecesFor(r.item_ids);
               const k = `s-${r.id ?? keyOf(r.item_ids ?? [])}`;
               const ready = have.filter((p) => !p.at_washman);
               return (
                 <OutfitCard
                   key={k}
-                  eyebrow={[r.occasion, r.tier].filter(Boolean).join(" · ") || "Saved"}
+                  eyebrow={[r.collection, r.occasion, r.tier].filter(Boolean).join(" · ") || "Saved"}
                   title={r.title ?? "Saved outfit"}
                   note={awayNote(r.item_ids, have)}
                   pieces={have}
@@ -313,6 +354,37 @@ export default function OutfitsPage() {
                       <button onClick={() => remove("saved", r.id, r.item_ids)} className="btn btn-navy !h-10 !px-5 !text-sm">Remove</button>
                       <button onClick={() => setConfirming(null)} className="btn btn-outline !h-10 !px-5 !text-sm">Keep</button>
                     </>
+                  ) : filing === k ? (
+                    <div className="flex w-full flex-col gap-2">
+                      <span className="text-sm text-navy">Add to a collection</span>
+                      <div className="flex flex-wrap gap-2">
+                        {collections.map((c) => (
+                          <button key={c} onClick={() => fileInto(r, c)} aria-pressed={r.collection === c} className="chip">
+                            {c}
+                          </button>
+                        ))}
+                        {r.collection && (
+                          <button onClick={() => fileInto(r, null)} className="chip">None</button>
+                        )}
+                      </div>
+                      <div className="flex gap-2">
+                        <input
+                          value={newName}
+                          onChange={(e) => setNewName(e.target.value)}
+                          placeholder="New collection name"
+                          maxLength={30}
+                          className="field min-w-0 flex-1 !h-10"
+                        />
+                        <button
+                          onClick={() => newName.trim() && fileInto(r, newName)}
+                          disabled={!newName.trim()}
+                          className="btn btn-navy !h-10 !w-auto !px-5 !text-sm"
+                        >
+                          Add
+                        </button>
+                      </div>
+                      <button onClick={() => setFiling(null)} className="self-start text-[13px] text-muted">Cancel</button>
+                    </div>
                   ) : (
                     <>
                       <button
@@ -321,6 +393,13 @@ export default function OutfitsPage() {
                         className="btn btn-orange !h-11 flex-1 !text-sm"
                       >
                         <Shirt size={16} aria-hidden /> I wear this
+                      </button>
+                      <button
+                        onClick={() => setFiling(k)}
+                        aria-label={r.collection ? `In ${r.collection}. Change collection` : "Add to a collection"}
+                        className="btn !h-11 !w-11 shrink-0 !px-0 bg-fill text-navy"
+                      >
+                        <FolderPlus size={17} aria-hidden />
                       </button>
                       <button
                         onClick={() => setConfirming(k)}

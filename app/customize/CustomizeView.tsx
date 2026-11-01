@@ -24,6 +24,45 @@ const ICONS: Record<string, LucideIcon> = {
 const COUNT_WORDS = ["", "One look", "Two looks", "Three looks"];
 const MIN_LOADING_MS = 2600;
 
+/**
+ * One occasion tile. If a photo exists at /occasions/<id>.jpg it fills the tile,
+ * otherwise the tile stays a quiet icon card. No code change needed to add photos.
+ */
+function OccasionCard({
+  group, Icon, disabled, onPick,
+}: {
+  group: Group;
+  Icon: typeof Shirt;
+  disabled: boolean;
+  onPick: () => void;
+}) {
+  const [photo, setPhoto] = useState(false);
+  return (
+    <button
+      onClick={onPick}
+      disabled={disabled}
+      className="relative flex min-h-[148px] flex-col justify-between overflow-hidden rounded-[22px] bg-sand p-4 text-left transition-transform active:scale-[0.97] disabled:opacity-50"
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={`/occasions/${group.id}.jpg`}
+        alt=""
+        onLoad={() => setPhoto(true)}
+        onError={() => setPhoto(false)}
+        className={photo ? "absolute inset-0 h-full w-full object-cover" : "hidden"}
+      />
+      {photo && <span className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/5" aria-hidden />}
+      <span className="relative flex h-10 w-10 items-center justify-center rounded-full bg-cream">
+        <Icon size={20} strokeWidth={1.6} className="text-navy" aria-hidden />
+      </span>
+      <span className="relative flex flex-col gap-0.5">
+        <span className={`text-[16px] font-semibold leading-tight ${photo ? "text-white" : "text-navy"}`}>{group.label}</span>
+        <span className={`text-[13px] leading-snug ${photo ? "text-white/80" : "text-muted"}`}>{group.blurb}</span>
+      </span>
+    </button>
+  );
+}
+
 export default function CustomizeView() {
   const router = useRouter();
   const params = useSearchParams();
@@ -168,26 +207,18 @@ export default function CustomizeView() {
 
           <div className="grid grid-cols-2 gap-3">
             {GROUPS.map((g) => {
-              const Icon = ICONS[g.id] ?? Shirt;
               return (
-                <button
+                <OccasionCard
                   key={g.id}
-                  onClick={() => {
+                  group={g}
+                  Icon={ICONS[g.id] ?? Shirt}
+                  disabled={loading}
+                  onPick={() => {
                     setGroup(g);
                     setAnswers({});
                     setPalette(0);
                   }}
-                  disabled={loading}
-                  className="flex min-h-[148px] flex-col justify-between rounded-[22px] bg-sand p-4 text-left transition-transform active:scale-[0.97] disabled:opacity-50"
-                >
-                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-cream">
-                    <Icon size={20} strokeWidth={1.6} className="text-navy" aria-hidden />
-                  </span>
-                  <span className="flex flex-col gap-0.5">
-                    <span className="text-[16px] font-semibold leading-tight text-navy">{g.label}</span>
-                    <span className="text-[13px] leading-snug text-muted">{g.blurb}</span>
-                  </span>
-                </button>
+                />
               );
             })}
           </div>
