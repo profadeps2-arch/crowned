@@ -1,26 +1,31 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Crown from "./Crown";
 import AuthForm from "./AuthForm";
+import Onboarding from "./Onboarding";
 import { useScreenTone } from "./useScreenTone";
 
-const SPLASH_MS = 3600;
-
 export default function Welcome({ failed = false }: { failed?: boolean }) {
-  const [stage, setStage] = useState<"splash" | "auth">("splash");
+  const [stage, setStage] = useState<"splash" | "onboard" | "auth">(failed ? "auth" : "splash");
   useScreenTone(stage === "splash" ? "dark" : "light");
 
-  useEffect(() => {
-    if (stage !== "splash") return;
-    const t = setTimeout(() => setStage("auth"), SPLASH_MS);
-    return () => clearTimeout(t);
-  }, [stage]);
+  // Someone who has seen the intro before goes straight to log in.
+  function enter() {
+    let seen = false;
+    try { seen = localStorage.getItem("crowned.intro") === "1"; } catch {}
+    setStage(seen ? "auth" : "onboard");
+  }
+
+  function finishIntro() {
+    try { localStorage.setItem("crowned.intro", "1"); } catch {}
+    setStage("auth");
+  }
 
   if (stage === "splash") {
     return (
       <button
-        onClick={() => setStage("auth")}
+        onClick={enter}
         aria-label="Enter Crowned"
         className="bg-night-glow relative flex min-h-dvh w-full flex-col items-center justify-center gap-6 text-night-text"
       >
@@ -38,14 +43,16 @@ export default function Welcome({ failed = false }: { failed?: boolean }) {
           Every man is a king.
         </span>
         <span
-          className="fade-to-full absolute bottom-[calc(2.25rem+env(safe-area-inset-bottom))] text-[11px] font-semibold uppercase tracking-[0.24em] text-night-muted"
-          style={{ "--d": "2.4s" } as React.CSSProperties}
+          className="fade-to-full absolute bottom-[calc(2rem+env(safe-area-inset-bottom))] flex h-14 w-[calc(100%-3rem)] max-w-xs items-center justify-center rounded-full bg-night-text text-[16px] font-semibold text-night"
+          style={{ "--d": "2.2s" } as React.CSSProperties}
         >
-          Tap to enter
+          Get started
         </span>
       </button>
     );
   }
+
+  if (stage === "onboard") return <Onboarding onDone={finishIntro} />;
 
   return <AuthForm failed={failed} />;
 }
