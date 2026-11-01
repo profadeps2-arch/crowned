@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { pop, success } from "@/lib/feedback";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Bookmark, ChevronLeft, ChevronRight, RefreshCw } from "lucide-react";
+import { Bookmark, Briefcase, ChevronLeft, Church, Coffee, Dumbbell, Flower2, Footprints, GraduationCap, Heart, Moon, PartyPopper, RefreshCw, Shirt, Gem, type LucideIcon } from "lucide-react";
 import { OCCASIONS, buildLooks, missingFor, whyItWorks, type Look, type Occasion, type StyleContext } from "@/lib/outfits";
 import { GROUPS, PALETTES, resolve, type Group } from "@/lib/customize";
 import { weatherContext } from "@/lib/weather";
@@ -15,6 +15,11 @@ import { LookBento, PieceViewer } from "../components/LookBento";
 import StyleLoading from "../components/StyleLoading";
 import ReadyScreen from "../components/ReadyScreen";
 import type { Piece } from "@/lib/outfits";
+
+const ICONS: Record<string, LucideIcon> = {
+  work: Briefcase, church: Church, mosque: Moon, school: GraduationCap, gym: Dumbbell, friday: Shirt,
+  owambe: PartyPopper, funeral: Flower2, date: Heart, everyday: Coffee, street: Footprints, special: Gem,
+};
 
 const COUNT_WORDS = ["", "One look", "Two looks", "Three looks"];
 const MIN_LOADING_MS = 2600;
@@ -157,29 +162,34 @@ export default function CustomizeView() {
             <Link href="/today" className="-ml-1 flex items-center gap-0.5 self-start text-[15px] font-medium text-muted active:opacity-60">
               <ChevronLeft size={18} aria-hidden /> Today
             </Link>
-            <h1 className="text-[28px] font-semibold leading-[1.1] tracking-[-0.025em] text-navy">Where to?</h1>
-            <p className="text-[15px] leading-snug text-muted">Pick the occasion. Two quick questions follow.</p>
+            <h1 className="text-[28px] font-semibold leading-[1.1] tracking-[-0.025em] text-navy">What are you dressing for today?</h1>
+            <p className="text-[15px] leading-snug text-muted">Choose the occasion so we can build the right look for you.</p>
           </header>
 
-          <div className="flex flex-col divide-y divide-line border-y border-line">
-            {GROUPS.map((g) => (
-              <button
-                key={g.id}
-                onClick={() => {
-                  setGroup(g);
-                  setAnswers({});
-                  setPalette(0);
-                }}
-                disabled={loading}
-                className="flex w-full items-center gap-3 py-[18px] text-left transition-opacity active:opacity-50 disabled:opacity-50"
-              >
-                <span className="flex min-w-0 flex-1 flex-col">
-                  <span className="text-[17px] font-medium leading-tight text-navy">{g.label}</span>
-                  <span className="mt-0.5 text-[14px] text-muted">{g.blurb}</span>
-                </span>
-                <ChevronRight size={16} className="shrink-0 text-muted/60" aria-hidden />
-              </button>
-            ))}
+          <div className="grid grid-cols-2 gap-3">
+            {GROUPS.map((g) => {
+              const Icon = ICONS[g.id] ?? Shirt;
+              return (
+                <button
+                  key={g.id}
+                  onClick={() => {
+                    setGroup(g);
+                    setAnswers({});
+                    setPalette(0);
+                  }}
+                  disabled={loading}
+                  className="flex min-h-[148px] flex-col justify-between rounded-[22px] bg-sand p-4 text-left transition-transform active:scale-[0.97] disabled:opacity-50"
+                >
+                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white">
+                    <Icon size={20} strokeWidth={1.6} className="text-navy" aria-hidden />
+                  </span>
+                  <span className="flex flex-col gap-0.5">
+                    <span className="text-[16px] font-semibold leading-tight text-navy">{g.label}</span>
+                    <span className="text-[13px] leading-snug text-muted">{g.blurb}</span>
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </>
       )}

@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft } from "lucide-react";
+import { Bookmark, ChevronLeft, ChevronRight, LogOut, Shirt } from "lucide-react";
 import SoundRow from "../components/SoundToggle";
 import { useEffect, useState, type ChangeEvent, type ReactNode } from "react";
 import Link from "next/link";
@@ -383,36 +383,50 @@ export default function MePage() {
         </button>
       </div>
 
-      <div className="flex flex-col items-center gap-3 text-center">
-        <div className="h-24 w-24 overflow-hidden rounded-full bg-navy">
-          {photo ? (
-            <img src={photo} alt="Your photo" className="h-full w-full object-cover" referrerPolicy="no-referrer" />
-          ) : (
-            <span className="flex h-full w-full items-center justify-center text-4xl font-semibold text-cream">
-              {initial}
-            </span>
-          )}
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center gap-4">
+          <div className="h-[72px] w-[72px] shrink-0 overflow-hidden rounded-full bg-navy">
+            {photo ? (
+              <img src={photo} alt="Your photo" className="h-full w-full object-cover" referrerPolicy="no-referrer" />
+            ) : (
+              <span className="flex h-full w-full items-center justify-center text-3xl font-semibold text-white">
+                {initial}
+              </span>
+            )}
+          </div>
+          <div className="flex min-w-0 flex-col">
+            <h1 className="truncate text-[22px] font-semibold leading-tight tracking-[-0.02em] text-navy">{profile.name ?? ""}</h1>
+            <span className="truncate text-[14px] text-muted">{email}</span>
+            <button onClick={() => toggle("photo")} className="mt-1 self-start text-[14px] font-medium text-navy">
+              {busy && open === null && message === "" ? "Updating" : "Change photo"}
+            </button>
+          </div>
         </div>
-        <button onClick={() => toggle("photo")} className="text-[15px] font-medium text-orange-deep">
-          {busy && open === null && message === "" ? "Updating…" : "Change Photo"}
-        </button>
         {open === "photo" && (
-          <div className="flex w-full max-w-xs flex-col gap-2">
-            <label className="btn btn-orange cursor-pointer !h-11 !text-[15px]">
-              Take Photo
+          <div className="flex w-full gap-2">
+            <label className="btn btn-orange flex-1 cursor-pointer !h-11 !text-[15px]">
+              Take photo
               <input type="file" accept="image/*" capture="user" className="hidden" onChange={changePhoto} />
             </label>
-            <label className="btn btn-outline cursor-pointer !h-11 !text-[15px]">
-              Choose from Library
+            <label className="btn btn-outline flex-1 cursor-pointer !h-11 !text-[15px]">
+              From library
               <input type="file" accept="image/*" className="hidden" onChange={changePhoto} />
             </label>
           </div>
         )}
-        <div className="flex flex-col gap-1">
-          <h1 className="title-1">{profile.name ?? ""}</h1>
-          <span className="subhead text-muted">{email}</span>
-          <span className="footnote text-muted">Member since {since}</span>
-        </div>
+      </div>
+
+      <div className="list">
+        <Link href="/outfits" className="flex min-h-[56px] items-center gap-3 px-4 text-navy transition-colors active:bg-fill">
+          <Bookmark size={20} strokeWidth={1.6} aria-hidden />
+          <span className="flex-1">Saved outfits</span>
+          <ChevronRight size={18} className="text-muted/60" aria-hidden />
+        </Link>
+        <Link href="/wardrobe" className="flex min-h-[56px] items-center gap-3 px-4 text-navy transition-colors active:bg-fill">
+          <Shirt size={20} strokeWidth={1.6} aria-hidden />
+          <span className="flex-1">My wardrobe</span>
+          <ChevronRight size={18} className="text-muted/60" aria-hidden />
+        </Link>
       </div>
 
       {message && <p className="fade-in text-center subhead text-navy">{message}</p>}
@@ -645,8 +659,9 @@ export default function MePage() {
       </Section>
 
       <Section title="Account">
-        <button onClick={signOut} className="flex min-h-[52px] w-full items-center px-4 text-left text-navy transition-colors active:bg-fill">
-          Sign Out
+        <button onClick={signOut} className="flex min-h-[56px] w-full items-center gap-3 px-4 text-left text-danger transition-colors active:bg-fill">
+          <LogOut size={20} strokeWidth={1.6} aria-hidden />
+          Log out
         </button>
       </Section>
     </main>

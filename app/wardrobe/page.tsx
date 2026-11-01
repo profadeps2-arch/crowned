@@ -818,16 +818,22 @@ function Editor({
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-cream">
-      <div className="mx-auto flex max-w-md flex-col gap-6 px-6 pb-16 pt-10">
-        <div className="flex items-center justify-between">
-          <h2 className="title-1">Edit Piece</h2>
-          <button onClick={onClose} className="text-[17px] font-semibold text-orange-deep">
-            Done
+      <div className="mx-auto flex max-w-md flex-col gap-7 px-6 pb-16 pt-6">
+        <div className="relative flex h-10 items-center justify-center">
+          <button
+            onClick={onClose}
+            aria-label="Back"
+            className="absolute left-0 flex h-10 w-10 items-center justify-center text-navy active:opacity-60"
+          >
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="m15 6-6 6 6 6" />
+            </svg>
           </button>
+          <h2 className="text-[17px] font-semibold text-navy">Edit item details</h2>
         </div>
 
         {current.url && (
-          <div className="relative overflow-hidden rounded-2xl">
+          <div className="relative mx-auto w-3/5 overflow-hidden rounded-[22px] bg-sand">
             <img
               src={current.url}
               alt={displayName(current)}
@@ -837,81 +843,82 @@ function Editor({
           </div>
         )}
 
-        <div className="flex flex-col gap-3 rounded-2xl bg-card p-4">
-          <span className="text-xs tracking-[0.2em] text-muted">IDENTIFIED AS</span>
-          <span key={`${current.name}-${current.colour}`} className="fade-in text-lg font-semibold">
+        <div className="flex flex-col gap-1">
+          <span key={`${current.name}-${current.colour}`} className="fade-in text-[22px] font-semibold tracking-[-0.02em] text-navy">
             {displayName(current)}
           </span>
+          {current.looks && current.looks.length > 0 && (
+            <span className="text-[14px] text-muted">Best for {current.looks.join(", ")}.</span>
+          )}
+          {current.description && <span className="text-[14px] text-muted">{current.description}</span>}
+        </div>
+
+        <div className="flex flex-col divide-y divide-line border-y border-line">
           <button
             onClick={() => setSheet(true)}
-            className="flex items-center gap-1.5 self-start text-sm text-muted"
+            className="flex items-center justify-between py-4 text-left active:opacity-60"
           >
-            In <span className="font-semibold text-navy">{sectionLabel(current.category)}</span>
-            <Pencil />
+            <span className="text-[15px] text-muted">Category</span>
+            <span className="flex items-center gap-1.5 text-[15px] font-medium text-navy">
+              {sectionLabel(current.category)}
+              <Pencil />
+            </span>
           </button>
-          <TagEditor item={current} onSave={saveTags} onSaveColour={saveColour} />
-          {current.description && <span className="text-sm text-muted">{current.description}</span>}
-          {current.looks && current.looks.length > 0 && (
-            <span className="text-sm text-muted">Best for {current.looks.join(", ")}.</span>
-          )}
-          {updated && <span className="fade-in text-sm font-semibold text-navy">Updated.</span>}
+          <div className="flex flex-col gap-3 py-4">
+            <span className="text-[15px] text-muted">Colour, size and tags</span>
+            <TagEditor item={current} onSave={saveTags} onSaveColour={saveColour} />
+          </div>
+          <button
+            role="switch"
+            aria-checked={current.at_washman}
+            onClick={toggleWashman}
+            className="flex items-center justify-between gap-4 py-4 text-left"
+          >
+            <span className="flex flex-col">
+              <span className="text-[15px] font-medium text-navy">At the washman</span>
+              <span className="text-[13px] text-muted">Crowned won&apos;t style this until it&apos;s back.</span>
+            </span>
+            <span
+              className={`relative h-7 w-12 shrink-0 rounded-full transition-colors ${
+                current.at_washman ? "bg-navy" : "bg-fill"
+              }`}
+            >
+              <span
+                className={`absolute top-0.5 h-6 w-6 rounded-full bg-white shadow transition-transform ${
+                  current.at_washman ? "translate-x-[22px]" : "translate-x-0.5"
+                }`}
+              />
+            </span>
+          </button>
         </div>
+
+        {updated && <span className="fade-in -mt-3 text-[14px] font-medium text-navy">Updated.</span>}
 
         {sheet && <SectionSheet item={current} onPick={moveTo} onClose={() => setSheet(false)} />}
 
-        <button
-          role="switch"
-          aria-checked={current.at_washman}
-          onClick={toggleWashman}
-          className="flex items-center justify-between gap-4 rounded-2xl bg-card p-4 text-left"
-        >
-          <span className="flex flex-col">
-            <span className="font-semibold">At the Washman</span>
-            <span className="text-sm text-muted">Crowned won&apos;t style this until it&apos;s back.</span>
-          </span>
-          <span
-            className={`relative h-7 w-12 shrink-0 rounded-full transition-colors ${
-              current.at_washman ? "bg-navy" : "bg-fill"
-            }`}
-          >
-            <span
-              className={`absolute top-0.5 h-6 w-6 rounded-full bg-white shadow transition-transform ${
-                current.at_washman ? "translate-x-[22px]" : "translate-x-0.5"
-              }`}
-            />
-          </span>
-        </button>
-
         <label className="flex flex-col gap-2">
-          <span className="text-lg font-semibold">Something not right?</span>
-          <span className="text-sm text-muted">
-            Describe the piece in your own words. Size, colour, sleeves, fabric, anything.
-          </span>
+          <span className="text-[15px] font-medium text-navy">Something not right?</span>
           <textarea
             value={note}
             onChange={(e) => setNote(e.target.value)}
             rows={3}
             disabled={saving}
             placeholder="Size large, long sleeve, round neck. Blue, not black."
-            className="field !h-12"
+            className="field !h-auto py-3"
           />
         </label>
 
-        {error && <p className="text-sm text-red-700">{error}</p>}
+        {error && <p className="text-[14px] text-danger">{error}</p>}
 
-        <button
-          onClick={update}
-          disabled={saving}
-          className="btn btn-orange"
-        >
-          {saving ? "Updating…" : "Update"}
+        <button onClick={update} disabled={saving} className="btn btn-orange">
+          {saving ? "Saving" : "Save item"}
         </button>
 
         <div className="flex flex-col items-center gap-1">
-          <button onClick={remove} disabled={saving} className="py-2 text-sm font-semibold text-red-700">
-            {confirmRemove ? "Remove" : "Remove from Wardrobe"}
+          <button onClick={remove} disabled={saving} className="py-2 text-[14px] font-medium text-danger">
+            {confirmRemove ? "Remove" : "Remove from wardrobe"}
           </button>
-          {confirmRemove && <span className="text-xs text-muted">This can&apos;t be undone.</span>}
+          {confirmRemove && <span className="text-[12px] text-muted">This can&apos;t be undone.</span>}
         </div>
       </div>
     </div>
@@ -922,27 +929,30 @@ function PieceCard({ item, onOpen }: { item: Item; onOpen: () => void }) {
   return (
     <button
       onClick={onOpen}
-      className="fade-in relative flex w-full flex-col gap-1 text-left transition-transform active:scale-[0.98]"
+      className="fade-in relative flex w-full min-w-0 flex-col gap-1.5 text-left transition-transform active:scale-[0.97]"
     >
-      <div className="relative overflow-hidden rounded-2xl shadow-[0_1px_2px_rgba(31,42,68,0.06),0_10px_20px_-14px_rgba(31,42,68,0.3)]">
+      <div className="relative overflow-hidden rounded-[18px] bg-sand">
         <div className={item.at_washman ? "opacity-40 grayscale" : ""}>
           <Photo src={item.url} alt={item.description ?? displayName(item)} className="aspect-[3/4] w-full" />
         </div>
         {item.needs_check && !item.at_washman && (
-          <span className="absolute left-2 top-2 rounded-full bg-navy px-2 py-1 text-xs font-semibold text-white">
+          <span className="absolute left-1.5 top-1.5 rounded-full bg-navy px-2 py-0.5 text-[10px] font-semibold text-white">
             Review
           </span>
         )}
         {item.at_washman && (
-          <span className="absolute bottom-2 left-2 rounded-full bg-navy px-2 py-1 text-xs font-semibold text-cream">
-            At the Washman
+          <span className="absolute bottom-1.5 left-1.5 rounded-full bg-navy px-2 py-0.5 text-[10px] font-semibold text-white">
+            At the washman
           </span>
         )}
       </div>
-      <span className={`text-sm font-semibold ${item.at_washman ? "text-muted" : ""}`}>
+      <span className={`truncate text-[13px] font-medium ${item.at_washman ? "text-muted" : "text-navy"}`}>
         {displayName(item)}
       </span>
-      <TagRow tags={item.tags ?? []} max={3} askSize={needsSize(item)} />
+      <span className="-mt-1 truncate text-[12px] text-muted">
+        {sectionLabel(item.category)}
+        {needsSize(item) ? " · Add size" : item.size ? ` · ${item.size}` : ""}
+      </span>
     </button>
   );
 }
@@ -956,6 +966,7 @@ export default function WardrobePage() {
   const [notice, setNotice] = useState("");
   const [editing, setEditing] = useState<Item | null>(null);
   const [filter, setFilter] = useState<string>("all");
+  const [query, setQuery] = useState("");
   const [sorting, setSorting] = useState<Item | null>(null);
   const tagRunning = useRef(false);
   const tried = useRef<Set<string>>(new Set());
@@ -1276,6 +1287,11 @@ export default function WardrobePage() {
       ? [{ key: "review", label: "Needs a Quick Look", pieces: review }]
       : sections.filter((s) => s.key === filter);
 
+  const q = query.trim().toLowerCase();
+  const flat = visible
+    .flatMap((s) => s.pieces)
+    .filter((it) => !q || [displayName(it), it.type, it.colour, it.category].some((v) => (v ?? "").toLowerCase().includes(q)));
+
   return (
     <main className="flex flex-col gap-6 px-6 pb-12 pt-6">
       <style>{`
@@ -1300,33 +1316,21 @@ export default function WardrobePage() {
       )}
 
       <div className="flex items-baseline justify-between">
-        <h1 className="large-title">Wardrobe</h1>
-        <span className="subhead text-muted">{total} {total === 1 ? "piece" : "pieces"}</span>
+        <h1 className="text-[28px] font-semibold leading-[1.1] tracking-[-0.025em] text-navy">My wardrobe</h1>
+        <span className="text-[15px] text-muted">{total} {total === 1 ? "piece" : "pieces"}</span>
       </div>
 
-      {!loading && (
-        status.ok ? (
-          <Link
-            href="/today"
-            className="flex items-center justify-between rounded-2xl bg-card p-4"
-          >
-            <span className="subhead">Your wardrobe is ready to style.</span>
-            <span className="shrink-0 whitespace-nowrap text-[15px] font-medium text-orange-deep">Open Today ›</span>
-          </Link>
-        ) : (
-          <div className="rounded-2xl bg-card p-4 text-sm">
-            Add {listJoin(status.missing)} to get your first outfit.
-          </div>
-        )
+      {!loading && !status.ok && (
+        <p className="text-[15px] leading-snug text-muted">Add {listJoin(status.missing)} to get your first outfit.</p>
       )}
 
-      <div className="flex flex-col gap-2">
-        <label className="btn btn-orange cursor-pointer">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <div className="flex gap-2">
+        <label className="btn btn-orange flex-1 cursor-pointer !h-12 !text-[15px]">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M4 8h3l2-3h6l2 3h3v11H4z" />
             <circle cx="12" cy="13" r="3.5" />
           </svg>
-          Take Photo
+          Take photo
           <input
             type="file"
             accept="image/*"
@@ -1335,22 +1339,19 @@ export default function WardrobePage() {
             onChange={addPhotos}
           />
         </label>
-        <label className="btn btn-outline cursor-pointer">
-          Choose from Library
+        <label className="btn btn-outline flex-1 cursor-pointer !h-12 !text-[15px]">
+          From library
           <input type="file" accept="image/*" multiple className="hidden" onChange={addPhotos} />
         </label>
-        <p className="text-center text-sm text-muted">
-          One piece per photo, on a plain background.
-        </p>
       </div>
 
       {notice && <p className="fade-in text-center text-sm text-muted">{notice}</p>}
 
       {(pending.length > 0 || fresh.length > 0) && (
-        <section className="fade-in flex flex-col gap-3 rounded-3xl bg-card py-4">
-          <div className="flex items-center justify-between px-4">
+        <section className="fade-in -mx-6 flex flex-col gap-3 bg-sand/60 py-5">
+          <div className="flex items-center justify-between px-6">
             <div className="flex flex-col">
-              <h2 className="title-2">
+              <h2 className="text-[17px] font-semibold text-navy">
                 Just Added <span className="text-base text-muted">{pending.length + fresh.length}</span>
               </h2>
               <span className="text-xs text-muted">
@@ -1367,7 +1368,7 @@ export default function WardrobePage() {
             )}
           </div>
 
-          <div className="no-scrollbar rail flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-px-4 px-4">
+          <div className="no-scrollbar rail flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-px-6 px-6">
             {pending.map((p) => (
               <div key={p.key} className="flex w-[42%] shrink-0 snap-start flex-col gap-2">
                 <div className="relative overflow-hidden rounded-xl">
@@ -1410,8 +1411,24 @@ export default function WardrobePage() {
         </button>
       )}
 
+      {!loading && total > 0 && (
+        <div className="relative">
+          <svg className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="7" />
+            <path d="m20 20-3.5-3.5" />
+          </svg>
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search your wardrobe"
+            className="field w-full !pl-11"
+          />
+        </div>
+      )}
+
       {!loading && sections.length > 0 && (
-        <div className="no-scrollbar sticky top-0 z-10 -mx-6 flex gap-2 overflow-x-auto bg-cream/90 px-6 py-2 backdrop-blur">
+        <div className="no-scrollbar -mx-6 flex gap-2 overflow-x-auto px-6">
           {[
             { key: "all", label: "All", count: items.length },
             ...sections.map((s) => ({ key: s.key, label: s.label, count: s.pieces.length })),
@@ -1419,13 +1436,13 @@ export default function WardrobePage() {
             <button
               key={f.key}
               onClick={() => openFilter(f.key)}
-              className={`shrink-0 rounded-full border border-transparent px-4 py-2 text-[15px] transition-colors ${
+              className={`shrink-0 rounded-full px-4 py-2 text-[14px] font-medium transition-colors ${
                 filter === f.key
-                  ? "bg-navy text-on-orange"
-                  : "bg-fill text-navy"
+                  ? "bg-navy text-white"
+                  : "text-navy shadow-[inset_0_0_0_1px_var(--color-line)]"
               }`}
             >
-              {f.label} <span className="opacity-60">{f.count}</span>
+              {f.label}
             </button>
           ))}
         </div>
@@ -1446,46 +1463,15 @@ export default function WardrobePage() {
           </p>
         </div>
       ) : (
-        <div className="flex flex-col gap-8">
-          {filter !== "all" && (
-            <button onClick={() => openFilter("all")} className="self-start text-sm font-semibold text-navy">
-              ‹ All pieces
-            </button>
-          )}
-          {visible.map((section) => (
-            <section key={section.key} className="flex flex-col gap-3">
-              <div className="flex items-baseline justify-between">
-                <h2 className="title-2">
-                  {section.label} <span className="text-base text-muted">{section.pieces.length}</span>
-                </h2>
-                {filter === "all" && section.pieces.length > 2 && (
-                  <button
-                    onClick={() => openFilter(section.key)}
-                    className="text-sm font-semibold text-navy"
-                  >
-                    See All ›
-                  </button>
-                )}
-              </div>
-
-              {filter === "all" ? (
-                <div className="no-scrollbar rail -mx-6 flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-px-6 px-6 pb-1">
-                  {section.pieces.map((item) => (
-                    <div key={item.id} className="w-[44%] shrink-0 snap-start">
-                      <PieceCard item={item} onOpen={() => setEditing(item)} />
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 gap-3">
-                  {section.pieces.map((item) => (
-                    <PieceCard key={item.id} item={item} onOpen={() => setEditing(item)} />
-                  ))}
-                </div>
-              )}
-            </section>
-          ))}
-        </div>
+        flat.length === 0 ? (
+          <p className="py-10 text-center text-[15px] text-muted">Nothing matches that. Try another word.</p>
+        ) : (
+          <div className="grid grid-cols-3 gap-x-3 gap-y-5">
+            {flat.map((item) => (
+              <PieceCard key={item.id} item={item} onOpen={() => setEditing(item)} />
+            ))}
+          </div>
+        )
       )}
     </main>
   );

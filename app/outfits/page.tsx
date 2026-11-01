@@ -215,8 +215,8 @@ export default function OutfitsPage() {
   );
 
   return (
-    <main className="flex flex-col gap-5 px-5 pb-8 pt-4">
-      <h1 className="large-title">Outfits</h1>
+    <main className="flex flex-col gap-6 px-6 pb-10 pt-3">
+      <h1 className="text-[28px] font-semibold leading-[1.1] tracking-[-0.025em] text-navy">Outfit recommendations</h1>
 
       <div role="tablist" aria-label="Outfits" className="seg">
         {tabs.map((t) => (
