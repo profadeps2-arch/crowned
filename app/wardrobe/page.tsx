@@ -936,12 +936,12 @@ function PieceCard({ item, onOpen }: { item: Item; onOpen: () => void }) {
           <Photo src={item.url} alt={item.description ?? displayName(item)} className="aspect-[3/4] w-full" />
         </div>
         {item.needs_check && !item.at_washman && (
-          <span className="absolute left-1.5 top-1.5 rounded-full bg-navy px-2 py-0.5 text-[10px] font-semibold text-white">
+          <span className="absolute left-1.5 top-1.5 rounded-full bg-navy px-2 py-0.5 text-[10px] font-semibold text-cream">
             Review
           </span>
         )}
         {item.at_washman && (
-          <span className="absolute bottom-1.5 left-1.5 rounded-full bg-navy px-2 py-0.5 text-[10px] font-semibold text-white">
+          <span className="absolute bottom-1.5 left-1.5 rounded-full bg-navy px-2 py-0.5 text-[10px] font-semibold text-cream">
             At the washman
           </span>
         )}
@@ -1438,7 +1438,7 @@ export default function WardrobePage() {
               onClick={() => openFilter(f.key)}
               className={`shrink-0 rounded-full px-4 py-2 text-[14px] font-medium transition-colors ${
                 filter === f.key
-                  ? "bg-navy text-white"
+                  ? "bg-navy text-cream"
                   : "text-navy shadow-[inset_0_0_0_1px_var(--color-line)]"
               }`}
             >

@@ -180,7 +180,7 @@ export default function CustomizeView() {
                   disabled={loading}
                   className="flex min-h-[148px] flex-col justify-between rounded-[22px] bg-sand p-4 text-left transition-transform active:scale-[0.97] disabled:opacity-50"
                 >
-                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-cream">
                     <Icon size={20} strokeWidth={1.6} className="text-navy" aria-hidden />
                   </span>
                   <span className="flex flex-col gap-0.5">
