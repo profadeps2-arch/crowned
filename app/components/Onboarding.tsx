@@ -1,60 +1,51 @@
 "use client";
 
 import { useState } from "react";
-import { Camera, Image as ImageIcon, PenLine, Shirt } from "lucide-react";
+import { Camera, Image as ImageIcon, PenLine } from "lucide-react";
 
 type Props = { onDone: () => void };
 
-const SWATCH = { shirt: "#EDE6DA", trousers: "#222222", loafers: "#6B4A2F", polo: "#27344F", chinos: "#CDB798", watch: "#9AA9A8" };
-
-/** A small look made of colour tiles, standing in for his own photos. */
-function MiniLook({ tiles }: { tiles: string[] }) {
+function Photo({ src, pos = "50% 20%" }: { src: string; pos?: string }) {
   return (
-    <div className="flex gap-2">
-      {tiles.map((c) => (
-        <span key={c} className="aspect-[3/4] flex-1 rounded-2xl shadow-[0_2px_10px_rgb(0_0_0/0.08)]" style={{ background: c }} />
-      ))}
-    </div>
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={src} alt="" className="absolute inset-0 h-full w-full object-cover" style={{ objectPosition: pos }} />
   );
+}
+
+function Frame({ children }: { children: React.ReactNode }) {
+  return <div className="relative min-h-0 w-full flex-1 overflow-hidden rounded-[28px] bg-sand">{children}</div>;
 }
 
 function SlideOne() {
   return (
-    <div className="flex w-full max-w-[290px] flex-col gap-2">
-      <div className="flex gap-2">
-        <span className="rise aspect-[3/4] flex-1 rounded-[22px] shadow-[0_2px_10px_rgb(0_0_0/0.08)]" style={{ background: SWATCH.shirt }} />
-        <span className="rise aspect-[3/4] flex-1 rounded-[22px] shadow-[0_2px_10px_rgb(0_0_0/0.08)]" style={{ background: SWATCH.trousers, "--d": "80ms" } as React.CSSProperties} />
-      </div>
-      <div className="flex gap-2">
-        <span className="rise h-24 flex-1 rounded-[22px] shadow-[0_2px_10px_rgb(0_0_0/0.08)]" style={{ background: SWATCH.loafers, "--d": "160ms" } as React.CSSProperties} />
-        <span className="rise h-24 w-24 rounded-[22px] shadow-[0_2px_10px_rgb(0_0_0/0.08)]" style={{ background: SWATCH.watch, "--d": "240ms" } as React.CSSProperties} />
-      </div>
-    </div>
+    <Frame>
+      <Photo src="/photos/look-earth.jpg" pos="50% 30%" />
+    </Frame>
   );
 }
 
 function SlideTwo() {
   return (
-    <div className="flex w-full max-w-[290px] flex-col gap-4">
-      <div className="relative flex aspect-square items-center justify-center rounded-[28px] bg-sand">
+    <div className="flex h-full w-full flex-col gap-3">
+      <Frame>
+        <Photo src="/photos/look-native.jpg" pos="50% 25%" />
         {[
           "left-5 top-5 border-l-2 border-t-2 rounded-tl-xl",
           "right-5 top-5 border-r-2 border-t-2 rounded-tr-xl",
           "left-5 bottom-5 border-b-2 border-l-2 rounded-bl-xl",
           "right-5 bottom-5 border-b-2 border-r-2 rounded-br-xl",
         ].map((c) => (
-          <span key={c} className={`absolute h-7 w-7 border-navy ${c}`} aria-hidden />
+          <span key={c} className={`absolute h-8 w-8 border-white/90 ${c}`} aria-hidden />
         ))}
-        <Shirt size={96} strokeWidth={1} className="text-navy" aria-hidden />
-      </div>
+      </Frame>
       <div className="grid grid-cols-3 gap-2">
         {[
           { label: "Camera", Icon: Camera },
           { label: "Gallery", Icon: ImageIcon },
           { label: "Manual", Icon: PenLine },
         ].map(({ label, Icon }) => (
-          <div key={label} className="flex flex-col items-center gap-1.5 rounded-2xl py-3 shadow-[inset_0_0_0_1px_var(--color-line)]">
-            <Icon size={20} strokeWidth={1.6} className="text-navy" aria-hidden />
+          <div key={label} className="flex flex-col items-center gap-1 rounded-2xl py-2.5 shadow-[inset_0_0_0_1px_var(--color-line)]">
+            <Icon size={18} strokeWidth={1.6} className="text-navy" aria-hidden />
             <span className="text-[12px] font-medium text-muted">{label}</span>
           </div>
         ))}
@@ -65,25 +56,21 @@ function SlideTwo() {
 
 function SlideThree() {
   return (
-    <div className="flex w-full max-w-[290px] flex-col gap-4">
-      <div className="flex flex-wrap gap-2">
-        {["Office", "Church", "Owambe", "Date night", "Gym"].map((o, i) => (
+    <Frame>
+      <Photo src="/photos/look-white.jpg" pos="50% 15%" />
+      <div className="absolute left-3 top-1/2 flex -translate-y-1/2 flex-col gap-2">
+        {["Church", "Mosque", "Office", "Owambe"].map((o, i) => (
           <span
             key={o}
-            className={`rounded-full px-4 py-2 text-[14px] font-medium ${i === 0 ? "bg-navy text-white" : "text-navy shadow-[inset_0_0_0_1px_var(--color-line)]"}`}
+            className={`rounded-full px-4 py-2 text-[13px] font-medium backdrop-blur-md ${
+              i === 1 ? "bg-navy text-white" : "bg-white/85 text-navy"
+            }`}
           >
             {o}
           </span>
         ))}
       </div>
-      <div className="flex flex-col gap-3 rounded-[24px] p-4 shadow-[0_0_0_1px_var(--color-line)]">
-        <MiniLook tiles={[SWATCH.polo, SWATCH.trousers, SWATCH.loafers]} />
-        <div className="flex flex-col gap-0.5">
-          <span className="text-[12px] text-muted">Office</span>
-          <span className="text-[17px] font-semibold tracking-tight text-navy">Navy Polo, Black Trousers</span>
-        </div>
-      </div>
-    </div>
+    </Frame>
   );
 }
 
@@ -106,7 +93,7 @@ export default function Onboarding({ onDone }: Props) {
         >
           {SLIDES.map((s, n) => (
             <section key={s.title} className="flex h-full w-full shrink-0 flex-col gap-6" aria-hidden={n !== i}>
-              <div className="flex flex-1 items-center justify-center">{n === i && s.art}</div>
+              <div className="flex min-h-0 flex-1">{s.art}</div>
               <div className="flex flex-col gap-3">
                 <h1 className="text-[28px] font-semibold leading-[1.1] tracking-[-0.025em] text-navy">{s.title}</h1>
                 <p className="text-[15px] leading-snug text-muted">{s.body}</p>
