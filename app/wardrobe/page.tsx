@@ -774,7 +774,22 @@ function Editor({
   async function update() {
     const words = note.trim();
     if (!words) {
-      setError("Describe what to change.");
+      // Nothing to change: keep the item as it is and close.
+      if (current.needs_check) {
+        setSaving(true);
+        const { error } = await createClient()
+          .from("items")
+          .update({ needs_check: false })
+          .eq("id", current.id);
+        setSaving(false);
+        if (error) {
+          console.error("Confirm failed:", error);
+          setError("Couldn't save. Try again.");
+          return;
+        }
+        onChanged();
+      }
+      onClose();
       return;
     }
     setError("");
