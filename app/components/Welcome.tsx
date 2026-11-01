@@ -12,15 +12,11 @@ export default function Welcome({ failed = false }: { failed?: boolean }) {
   const [stage, setStage] = useState<"splash" | "onboard" | "auth">(failed ? "auth" : "splash");
   useScreenTone(stage === "splash" ? "dark" : "light");
 
-  // Someone who has seen the intro before goes straight to log in.
   function enter() {
-    let seen = false;
-    try { seen = localStorage.getItem("crowned.intro") === "1"; } catch {}
-    setStage(seen ? "auth" : "onboard");
+    setStage("onboard");
   }
 
   function finishIntro() {
-    try { localStorage.setItem("crowned.intro", "1"); } catch {}
     setStage("auth");
   }
 
