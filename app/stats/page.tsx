@@ -45,6 +45,7 @@ function Block({ title, children }: { title: string; children: React.ReactNode }
 export default function StatsPage() {
   const router = useRouter();
   const { pieces, loading, error } = useWardrobe();
+  const [now, setNow] = useState(0);
   const [wornRows, setWornRows] = useState<{ item_ids: string[] | null; worn_on: string | null }[]>([]);
 
   useEffect(() => {
@@ -52,6 +53,7 @@ export default function StatsPage() {
       .from("worn_looks")
       .select("item_ids, worn_on")
       .then(({ data, error: e }) => {
+        setNow(Date.now());
         if (e) console.warn("History not available:", e.message);
         else setWornRows((data ?? []) as { item_ids: string[] | null; worn_on: string | null }[]);
       });
@@ -80,14 +82,13 @@ export default function StatsPage() {
       .sort((a, b) => b.n - a.n)
       .slice(0, 5);
 
-    // Dates are only read once real data is in, never while the page is prerendered.
-    const live = pieces.length > 0;
-    const now = live ? Date.now() : 0;
+    // The clock is read after the history loads, never while rendering.
+    const live = now > 0 && pieces.length > 0;
     const idle = pieces
-      .filter((p) => !p.last_worn || now - new Date(p.last_worn).getTime() > 30 * DAY)
+      .filter((p) => !p.last_worn || (live && now - new Date(p.last_worn).getTime() > 30 * DAY))
       .sort((a, b) => (a.last_worn ?? "").localeCompare(b.last_worn ?? ""));
 
-    const month = live ? new Date().toISOString().slice(0, 7) : "";
+    const month = live ? new Date(now).toISOString().slice(0, 7) : "";
     const wornThisMonth = live ? wornRows.filter((r) => r.worn_on?.startsWith(month)).length : 0;
 
     return {
@@ -99,7 +100,7 @@ export default function StatsPage() {
       idle,
       wornThisMonth,
     };
-  }, [pieces, wornRows]);
+  }, [pieces, wornRows, now]);
 
   const money = (n: number) => `₦${Math.round(n).toLocaleString("en-NG")}`;
   const name = (p: { name: string | null; colour: string | null; type: string | null }) =>
