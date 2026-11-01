@@ -1,7 +1,6 @@
 import { Suspense } from "react";
 import CustomizeView from "./CustomizeView";
 
-// Reads the occasion Today passes in the address, so it renders at request time.
 export default function CustomizePage() {
   return (
     <Suspense

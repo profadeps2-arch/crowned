@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { pop, success } from "@/lib/feedback";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Bookmark, Briefcase, ChevronLeft, Church, Coffee, Dumbbell, Flower2, Footprints, GraduationCap, Heart, Moon, PartyPopper, RefreshCw, Shirt, Gem, type LucideIcon } from "lucide-react";
 import { OCCASIONS, buildLooks, missingFor, whyItWorks, type Look, type Occasion, type StyleContext } from "@/lib/outfits";
 import { GROUPS, PALETTES, resolve, type Group } from "@/lib/customize";
@@ -65,17 +65,14 @@ function OccasionCard({
 
 export default function CustomizeView() {
   const router = useRouter();
-  const params = useSearchParams();
-  const presetId = params.get("group");
   const { pieces, setPieces, prefs, loading, error } = useWardrobe();
   const { state: weather } = useWeather({
     ready: !loading,
     saved: prefs.lat !== null && prefs.lon !== null ? { lat: prefs.lat, lon: prefs.lon, city: prefs.city } : null,
   });
 
-  // Today sends him here with his occasion already chosen.
-  const [group, setGroup] = useState<Group | null>(() => GROUPS.find((g) => g.id === presetId) ?? null);
-  const fromToday = !!presetId && group?.id === presetId;
+  // Always starts from scratch: no occasion is picked for him.
+  const [group, setGroup] = useState<Group | null>(null);
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [palette, setPalette] = useState(0);
   const [styling, setStyling] = useState(false);
@@ -233,10 +230,10 @@ export default function CustomizeView() {
               onClick={() => setGroup(null)}
               className="-ml-1 flex items-center gap-0.5 self-start text-[15px] font-medium text-muted active:opacity-60"
             >
-              <ChevronLeft size={18} aria-hidden /> {fromToday ? "Other occasions" : "Occasions"}
+              <ChevronLeft size={18} aria-hidden /> Occasions
             </button>
             <span className="eyebrow !text-[13px]">{group.label}</span>
-            <h1 className="text-[28px] font-semibold leading-[1.1] tracking-[-0.025em] text-navy">{fromToday ? "Customize today's outfit" : "A little more detail"}</h1>
+            <h1 className="text-[28px] font-semibold leading-[1.1] tracking-[-0.025em] text-navy">A little more detail</h1>
           </header>
 
           {group.questions.map((q) => (
