@@ -24,15 +24,15 @@ export default function OutfitCard({
   const more = pieces.length - shown.length;
 
   return (
-    <article className="card flex flex-col gap-3 p-3">
+    <article className="card flex flex-col gap-4 p-4">
       {shown.length > 0 ? (
-        <div className="grid grid-cols-4 gap-2">
+        <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${Math.min(Math.max(shown.length, 2), 4)}, minmax(0, 1fr))` }}>
           {shown.map((p, i) => (
             <button
               key={p.id}
               onClick={() => onOpen(p)}
               aria-label={pieceName(p)}
-              className="block overflow-hidden rounded-xl active:scale-[0.97]"
+              className="block overflow-hidden rounded-2xl active:scale-[0.97]"
             >
               <Photo src={p.url} alt="" className="aspect-[3/4] w-full">
                 {more > 0 && i === shown.length - 1 && (
@@ -50,13 +50,17 @@ export default function OutfitCard({
         </p>
       )}
 
-      <div className="flex flex-col gap-0.5 px-1">
-        <span className="eyebrow">{eyebrow}</span>
-        <h3 className="headline text-navy">{title}</h3>
-        {note && <p className="footnote text-muted">{note}</p>}
+      <div className="flex flex-col gap-2">
+        <div className="flex flex-wrap gap-1.5">
+          {eyebrow.split(" · ").map((c) => (
+            <span key={c} className="rounded-full bg-fill px-2.5 py-1 text-[12px] font-medium text-muted">{c}</span>
+          ))}
+        </div>
+        <h3 className="text-[17px] font-semibold leading-tight tracking-[-0.01em] text-navy">{title}</h3>
+        {note && <p className="text-[13px] text-muted">{note}</p>}
       </div>
 
-      {children && <div className="flex items-center gap-2 px-1 pb-1">{children}</div>}
+      {children && <div className="flex items-center gap-2">{children}</div>}
     </article>
   );
 }
