@@ -37,6 +37,27 @@
   --shadow-soft: 0 8px 24px rgb(0 0 0 / 0.06);
 }
 
+/* Dark theme. The app sets data-theme on <html> from the saved choice. */
+html[data-theme="dark"] {
+  --color-cream: #000000;
+  --color-card: #1C1C1E;
+  --color-sand: #1C1C1E;
+  --color-fill: rgb(255 255 255 / 0.1);
+  --color-line: #2C2C2E;
+
+  --color-navy: #F5F5F7;
+  --color-muted: #98989D;
+
+  --color-orange-soft: #2C2C2E;
+  --color-orange-deep: #F5F5F7;
+  --color-on-orange: #000000;
+
+  --color-danger: #FF453A;
+
+  --shadow-soft: 0 8px 24px rgb(0 0 0 / 0.5);
+  color-scheme: dark;
+}
+
 /* ------------------------------------------------------------------
    Base
 ------------------------------------------------------------------- */
@@ -128,13 +149,13 @@
   /* The main action: solid ink pill. One per screen. */
   .btn-orange {
     background: var(--color-navy);
-    color: #FFFFFF;
+    color: var(--color-cream);
   }
   .btn-orange:active { opacity: 0.82; }
 
   .btn-navy {
     background: var(--color-navy);
-    color: #FFFFFF;
+    color: var(--color-cream);
   }
 
   /* Secondary: a raised surface */
@@ -186,7 +207,7 @@
   .chip:active { transform: scale(0.96); }
   .chip[aria-pressed="true"] {
     background: var(--color-navy);
-    color: #FFFFFF;
+    color: var(--color-cream);
     box-shadow: none;
   }
 

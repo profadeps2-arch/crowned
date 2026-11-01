@@ -2,6 +2,7 @@
 
 import { Bookmark, ChevronLeft, ChevronRight, LogOut, Shirt } from "lucide-react";
 import SoundRow from "../components/SoundToggle";
+import ThemeRow from "../components/ThemeRow";
 import { useEffect, useState, type ChangeEvent, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -389,7 +390,7 @@ export default function MePage() {
             {photo ? (
               <img src={photo} alt="Your photo" className="h-full w-full object-cover" referrerPolicy="no-referrer" />
             ) : (
-              <span className="flex h-full w-full items-center justify-center text-3xl font-semibold text-white">
+              <span className="flex h-full w-full items-center justify-center text-3xl font-semibold text-cream">
                 {initial}
               </span>
             )}
@@ -655,6 +656,7 @@ export default function MePage() {
       </Section>
 
       <Section title="App">
+        <ThemeRow />
         <SoundRow />
       </Section>
 
