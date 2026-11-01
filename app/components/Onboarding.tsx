@@ -17,13 +17,10 @@ function Frame({ children }: { children: React.ReactNode }) {
 }
 
 function SlideOne() {
-  // This photo is small, so it is shown whole at its own shape rather than stretched to fill.
   return (
-    <div className="flex w-full items-center justify-center">
-      <div className="relative aspect-[235/246] w-full overflow-hidden rounded-[28px] bg-sand">
-        <Photo src="/photos/flatlay-polo.jpg" pos="50% 50%" />
-      </div>
-    </div>
+    <Frame>
+      <Photo src="/photos/flatlay-knit.jpg" pos="50% 50%" />
+    </Frame>
   );
 }
 
