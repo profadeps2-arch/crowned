@@ -5,7 +5,6 @@ import Link from "next/link";
 import { ChevronRight, Heart, SlidersHorizontal, RefreshCw } from "lucide-react";
 import { OCCASIONS, buildLooks, missingFor, whyItWorks, type Look, type Occasion, type Piece, type StyleContext } from "@/lib/outfits";
 import { weatherContext } from "@/lib/weather";
-import { groupFor } from "@/lib/customize";
 import { saveLook, wearLook } from "@/lib/looks-db";
 import { pop, success, swish } from "@/lib/feedback";
 import { loadPick, savePick } from "@/lib/today-pick";
@@ -176,7 +175,7 @@ export default function TodayView() {
       {plan && !thinking && !error && (
         <div className="-mt-2">
           <Link
-            href={`/customize?group=${groupFor(plan.occasion.label)}`}
+            href="/customize"
             className="btn btn-outline w-full"
           >
             <SlidersHorizontal size={18} aria-hidden /> Customize Today&apos;s Outfit
