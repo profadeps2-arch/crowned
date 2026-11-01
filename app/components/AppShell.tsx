@@ -7,7 +7,7 @@ import TopAvatar from "./TopAvatar";
 import BottomNav from "./BottomNav";
 
 // Routes that carry no top bar, and routes that carry no bottom nav.
-const NO_TOP = ["/", "/profile", "/me", "/reset-password"];
+const NO_TOP = ["/", "/profile", "/me", "/stats", "/reset-password"];
 const NO_NAV = ["/", "/profile", "/reset-password"];
 
 export default function AppShell({ children }: { children: React.ReactNode }) {

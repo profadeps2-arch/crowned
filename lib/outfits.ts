@@ -11,6 +11,9 @@ export type Piece = {
   tags: string[] | null;
   at_washman: boolean;
   last_worn: string | null;
+  brand?: string | null;
+  price?: number | null;
+  bought_on?: string | null;
   url?: string;
 };
 

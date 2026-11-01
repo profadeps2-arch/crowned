@@ -30,7 +30,7 @@ export function useWardrobe() {
         supabase.from("profiles").select("name").eq("id", user.id).maybeSingle(),
         supabase
           .from("items")
-          .select("id, photo_path, name, category, type, colour, looks, tags, at_washman, last_worn")
+          .select("*")
           .order("created_at", { ascending: false }),
         loadPrefs(supabase, user.id),
       ]);

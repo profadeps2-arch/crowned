@@ -17,6 +17,7 @@ import {
   TAG_GROUPS,
   TAG_LABELS,
 } from "@/lib/tags";
+import { describeHex } from "@/lib/colours";
 
 const COLOUR_SWATCHES: [string, string][] = [
   ["Black", "#151515"], ["White", "#FFFFFF"], ["Cream", "#F3E9D2"], ["Beige", "#D9C7A7"],
@@ -103,6 +104,10 @@ type Item = {
   at_washman: boolean;
   confirmed: boolean;
   category_locked: boolean;
+  brand?: string | null;
+  price?: number | null;
+  bought_on?: string | null;
+  notes?: string | null;
   url?: string;
 };
 
@@ -300,6 +305,7 @@ function TagEditor({
   const [colourText, setColourText] = useState("");
   const [busy, setBusy] = useState(false);
   const [hint, setHint] = useState("");
+  const [picked, setPicked] = useState("");
 
   const tags = (item.tags ?? []).filter((t) => !t.startsWith("Size "));
   const sized = SIZED.includes(item.category ?? "");
@@ -328,6 +334,12 @@ function TagEditor({
       setOpen(null);
       setColourText("");
     }
+  }
+
+  async function commitHex(hex: string) {
+    const { name, family } = describeHex(hex);
+    setPicked("");
+    await commitColour(name, family);
   }
 
   function replace(oldTag: string | null, newTag: string) {
@@ -414,11 +426,47 @@ function TagEditor({
       {open === "colour" && (
         <div className="fade-in flex flex-col gap-3 rounded-xl bg-card p-3">
           <span className="text-xs text-muted">Colour</span>
-          <div className="flex flex-wrap gap-2">
-            {COLOURS.map((c) =>
-              option(c, c === item.colour && !item.colour_label, () => commitColour(c, c), c)
-            )}
+          <div className="grid grid-cols-6 gap-x-2 gap-y-3">
+            {COLOUR_SWATCHES.map(([c, bg]) => {
+              const active = c === item.colour && !item.colour_label;
+              return (
+                <button
+                  key={c}
+                  onClick={() => commitColour(c, c)}
+                  disabled={busy}
+                  aria-label={c}
+                  aria-pressed={active}
+                  className="flex flex-col items-center gap-1 active:opacity-60"
+                >
+                  <span
+                    className={`h-9 w-9 rounded-full border ${active ? "ring-2 ring-navy ring-offset-2 ring-offset-card" : ""} border-line`}
+                    style={{ background: bg }}
+                  />
+                  <span className="max-w-full truncate text-[10px] text-muted">{c}</span>
+                </button>
+              );
+            })}
           </div>
+          <label className="flex items-center justify-between gap-3 border-t border-line pt-3">
+            <span className="flex flex-col">
+              <span className="text-[14px] font-medium text-navy">Pick any shade</span>
+              <span className="text-xs text-muted">Choose it from the colour wheel. We&apos;ll name it.</span>
+            </span>
+            <input
+              type="color"
+              defaultValue="#6B4423"
+              disabled={busy}
+              onChange={(e) => setPicked(e.target.value)}
+              onBlur={() => picked && commitHex(picked)}
+              aria-label="Pick a custom colour"
+              className="h-10 w-14 cursor-pointer rounded-lg border border-line bg-transparent p-0.5"
+            />
+          </label>
+          {picked && (
+            <button onClick={() => commitHex(picked)} disabled={busy} className="btn btn-orange !h-11 !text-[15px]">
+              Use {describeHex(picked).name}
+            </button>
+          )}
           <div className="flex flex-col gap-2 border-t border-line pt-3">
             <span className="text-xs text-muted">Can&apos;t find it? Write it your way.</span>
             <div className="flex gap-2">
@@ -594,6 +642,40 @@ function Editor({
   const [error, setError] = useState("");
   const [updated, setUpdated] = useState(false);
   const [sheet, setSheet] = useState(false);
+  const [brand, setBrand] = useState(item.brand ?? "");
+  const [price, setPrice] = useState(item.price != null ? String(item.price) : "");
+  const [boughtOn, setBoughtOn] = useState(item.bought_on ?? "");
+  const [notes, setNotes] = useState(item.notes ?? "");
+  const [detailsSaved, setDetailsSaved] = useState(false);
+
+  async function saveDetails() {
+    const priceNum = price.trim() === "" ? null : Number(price.replace(/[^0-9.]/g, ""));
+    const changes = {
+      brand: brand.trim() || null,
+      price: priceNum !== null && Number.isFinite(priceNum) ? priceNum : null,
+      bought_on: boughtOn || null,
+      notes: notes.trim() || null,
+    };
+    if (
+      changes.brand === (current.brand ?? null) &&
+      changes.price === (current.price ?? null) &&
+      changes.bought_on === (current.bought_on ?? null) &&
+      changes.notes === (current.notes ?? null)
+    ) {
+      return;
+    }
+    const { error } = await createClient().from("items").update(changes).eq("id", current.id);
+    if (error) {
+      console.error("Details update failed:", error);
+      setError("Couldn't save those details. Run step-7.sql in Supabase, then try again.");
+      return;
+    }
+    setError("");
+    setCurrent((c) => ({ ...c, ...changes }));
+    setDetailsSaved(true);
+    onChanged();
+    setTimeout(() => setDetailsSaved(false), 1800);
+  }
 
   async function moveTo(category: string) {
     setSheet(false);
@@ -647,7 +729,7 @@ function Editor({
       return false;
     }
 
-    const typed = family ? null : titleCase(text);
+    const typed = titleCase(text);
     const label = typed && typed.toLowerCase() !== fam.toLowerCase() ? typed : null;
     const shown = label ?? fam;
 
@@ -867,6 +949,51 @@ function Editor({
           <div className="flex flex-col gap-3 py-4">
             <span className="text-[15px] text-muted">Colour, size and tags</span>
             <TagEditor item={current} onSave={saveTags} onSaveColour={saveColour} />
+          </div>
+          <div className="flex flex-col gap-3 py-4">
+            <span className="flex items-center justify-between text-[15px] text-muted">
+              More details
+              {detailsSaved && <span className="fade-in text-[13px] font-medium text-navy">Saved</span>}
+            </span>
+            <div className="grid grid-cols-2 gap-2">
+              <input
+                value={brand}
+                onChange={(e) => setBrand(e.target.value)}
+                onBlur={saveDetails}
+                placeholder="Brand"
+                aria-label="Brand"
+                className="field !h-11"
+              />
+              <input
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                onBlur={saveDetails}
+                inputMode="decimal"
+                placeholder="Price paid (₦)"
+                aria-label="Price paid"
+                className="field !h-11"
+              />
+            </div>
+            <label className="flex items-center justify-between gap-3">
+              <span className="text-[14px] text-muted">Bought on</span>
+              <input
+                type="date"
+                value={boughtOn}
+                max={new Date().toISOString().slice(0, 10)}
+                onChange={(e) => setBoughtOn(e.target.value)}
+                onBlur={saveDetails}
+                className="field !h-11 !w-auto"
+              />
+            </label>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              onBlur={saveDetails}
+              rows={2}
+              placeholder="Notes: tailor, gift from Uncle, runs small…"
+              aria-label="Notes"
+              className="field !h-auto py-3"
+            />
           </div>
           <button
             role="switch"
@@ -1101,9 +1228,7 @@ export default function WardrobePage() {
 
     const { data, error } = await supabase
       .from("items")
-      .select(
-        "id, photo_path, photo_hash, name, category, type, colour, colour_label, accent_colour, details, tags, size, description, looks, needs_check, at_washman, confirmed, category_locked"
-      )
+      .select("*")
       .order("created_at", { ascending: false });
 
     if (error) {
